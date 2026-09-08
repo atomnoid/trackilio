@@ -194,8 +194,7 @@ export default async function DiscoverPage({ searchParams }: DiscoverPageProps) 
             ))}
           </div>
         ) : (
-        /* Empty State */
-        <div className="rounded-3xl bg-white border border-[#E6DFD5] p-12 text-center space-y-4 shadow-2xs max-w-lg mx-auto">
+          <div className="rounded-3xl bg-white border border-[#E6DFD5] p-12 text-center space-y-4 shadow-2xs max-w-lg mx-auto">
           <div className="h-14 w-14 rounded-2xl bg-[#F3ECE1] text-[#2C2A29] flex items-center justify-center mx-auto">
             <Compass className="h-7 w-7 stroke-[2]" />
           </div>
@@ -204,7 +203,7 @@ export default async function DiscoverPage({ searchParams }: DiscoverPageProps) 
               No adventures found here yet
             </h3>
             <p className="text-[#78726D] text-xs font-medium">
-              We couldn't find any public Trackilio Lists matching your search. Be the first creator to share spots in this destination!
+              We couldn&apos;t find any public Trackilio Lists matching your search. Be the first creator to share spots in this destination!
             </p>
           </div>
           <Link
