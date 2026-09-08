@@ -39,56 +39,76 @@ export async function getPublicWanderLists(params?: {
   limit?: number;
   offset?: number;
 }): Promise<WanderList[]> {
-  const supabase = await createClient();
-  let q = (supabase as any)
-    .from('wander_lists')
-    .select('*, owner:profiles(*)')
-    .eq('is_public', true)
-    .order('created_at', { ascending: false });
+  try {
+    const supabase = await createClient();
+    let q = (supabase as any)
+      .from('wander_lists')
+      .select('*, owner:profiles(*)')
+      .eq('is_public', true)
+      .order('created_at', { ascending: false });
 
-  if (params?.destination) {
-    q = q.ilike('destination', `%${params.destination}%`);
-  }
-  if (params?.query) {
-    q = q.or(`title.ilike.%${params.query}%,description.ilike.%${params.query}%`);
-  }
-  if (params?.limit) {
-    q = q.limit(params.limit);
-  }
+    if (params?.destination) {
+      q = q.ilike('destination', `%${params.destination}%`);
+    }
+    if (params?.query) {
+      q = q.or(`title.ilike.%${params.query}%,description.ilike.%${params.query}%`);
+    }
+    if (params?.limit) {
+      q = q.limit(params.limit);
+    }
 
-  const { data, error } = await q;
-  if (error) {
-    console.error('Error fetching public WanderLists:', error);
+    const { data, error } = await q;
+    if (error) {
+      const detail = error.message || error.details || error.hint || (typeof error === 'object' && Object.keys(error).length > 0 ? JSON.stringify(error) : null);
+      if (detail) {
+        console.warn('Unable to fetch public WanderLists from Supabase:', detail);
+      }
+      return [];
+    }
+    return (data ?? []) as WanderList[];
+  } catch (err: any) {
+    console.warn('Error connecting to Supabase for WanderLists:', err?.message || err);
     return [];
   }
-  return (data ?? []) as WanderList[];
 }
 
 export async function getWanderListBySlug(slug: string): Promise<WanderList | null> {
-  const supabase = await createClient();
-  const { data, error } = await (supabase as any)
-    .from('wander_lists')
-    .select('*, owner:profiles(*)')
-    .eq('slug', slug)
-    .maybeSingle();
+  try {
+    const supabase = await createClient();
+    const { data, error } = await (supabase as any)
+      .from('wander_lists')
+      .select('*, owner:profiles(*)')
+      .eq('slug', slug)
+      .maybeSingle();
 
-  if (error || !data) return null;
-  return data as WanderList;
+    if (error || !data) return null;
+    return data as WanderList;
+  } catch {
+    return null;
+  }
 }
 
 export async function getUserWanderLists(userId: string): Promise<WanderList[]> {
-  const supabase = await createClient();
-  const { data, error } = await (supabase as any)
-    .from('wander_lists')
-    .select('*, owner:profiles(*)')
-    .eq('owner_id', userId)
-    .order('updated_at', { ascending: false });
+  try {
+    const supabase = await createClient();
+    const { data, error } = await (supabase as any)
+      .from('wander_lists')
+      .select('*, owner:profiles(*)')
+      .eq('owner_id', userId)
+      .order('updated_at', { ascending: false });
 
-  if (error) {
-    console.error('Error fetching user WanderLists:', error);
+    if (error) {
+      const detail = error.message || error.details || error.hint;
+      if (detail) {
+        console.warn('Unable to fetch user WanderLists:', detail);
+      }
+      return [];
+    }
+    return (data ?? []) as WanderList[];
+  } catch (err: any) {
+    console.warn('Error fetching user WanderLists:', err?.message || err);
     return [];
   }
-  return (data ?? []) as WanderList[];
 }
 
 export async function createWanderList(params: {

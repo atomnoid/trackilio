@@ -1,17 +1,104 @@
 @import "tailwindcss";
 
 @theme {
-  --color-cream: #FAF8F5;
-  --color-charcoal: #1C1917;
-  --color-terracotta: #C25E00;
-  --color-olive: #3F5E4D;
-  --color-sand: #F5F2EC;
+  --color-violet-50: #F5F3FF;
+  --color-violet-100: #EDE9FE;
+  --color-violet-200: #DDD6FE;
+  --color-violet-500: #8B5CF6;
+  --color-violet-600: #7C3AED;
+  --color-violet-700: #6D28D9;
+  
+  --color-electric-500: #3B82F6;
+  --color-electric-600: #2563EB;
+  
+  --color-coral-500: #F43F5E;
+  --color-coral-600: #E11D48;
+  
+  --color-sun-400: #FACC15;
+  --color-sun-500: #F59E0B;
+  
+  --color-mint-500: #10B981;
+  --color-mint-600: #059669;
+
+  --color-app-bg: #F8F7FF;
+  --color-app-card: #FFFFFF;
+  --color-app-text: #0F172A;
+  --color-app-muted: #64748B;
+
   --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
-  --font-serif: var(--font-newsreader), Georgia, serif;
+  --font-display: var(--font-outfit), var(--font-inter), system-ui, sans-serif;
+}
+
+:root {
+  --bg-gradient: linear-gradient(135deg, #F8F7FF 0%, #EFF6FF 50%, #FAF5FF 100%);
 }
 
 body {
-  background-color: #FAF8F5;
-  color: #1C1917;
+  background-color: #F8F7FF;
+  color: #0F172A;
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* Custom Animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(1deg); }
+}
+
+@keyframes float-reverse {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(8px) rotate(-1.5deg); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.05); }
+}
+
+@keyframes dash-route {
+  to {
+    stroke-dashoffset: -40;
+  }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.animate-float-reverse {
+  animation: float-reverse 5s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+.animate-dash-route {
+  stroke-dasharray: 8 6;
+  animation: dash-route 2s linear infinite;
+}
+
+/* Tactile Card Effects */
+.card-tactile {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.card-tactile:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px -10px rgba(124, 58, 237, 0.15);
+}
+
+/* Smooth Tap Active Feedback */
+.active-press:active {
+  transform: scale(0.96);
+}
+
+/* Custom Scrollbar for pills */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

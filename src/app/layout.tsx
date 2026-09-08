@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
-import { Inter, Newsreader } from 'next/font/google';
+import { Inter, Outfit } from 'next/font/google';
 import './globals.css';
 import { Navbar } from '@/components/layout/Navbar';
+import { BottomNav } from '@/components/layout/BottomNav';
 import { Footer } from '@/components/layout/Footer';
 
 const inter = Inter({
@@ -10,9 +11,9 @@ const inter = Inter({
   display: 'swap',
 });
 
-const newsreader = Newsreader({
+const outfit = Outfit({
   subsets: ['latin'],
-  variable: '--font-serif',
+  variable: '--font-outfit',
   display: 'swap',
 });
 
@@ -21,25 +22,25 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: 'MyWanderLists | Discover Places Worth Remembering',
-    template: '%s | MyWanderLists',
+    default: 'Trackilio | Collect Places. Plan Trips. Go Explore.',
+    template: '%s | Trackilio',
   },
   description:
-    'Create, discover, and collaboratively build user-generated travel lists. Curated spots, hidden gems, and travel bucket lists.',
+    'Discover, create, and share interactive travel lists. Save places, map routes, and collaborate on your next trip with Trackilio.',
   openGraph: {
-    title: 'MyWanderLists | Discover Places Worth Remembering',
+    title: 'Trackilio | Collect Places. Plan Trips. Go Explore.',
     description:
-      'Create, discover, and collaboratively build user-generated travel lists.',
+      'Discover, create, and share interactive travel lists. Save places, map routes, and collaborate on your next trip with Trackilio.',
     url: siteUrl,
-    siteName: 'MyWanderLists',
+    siteName: 'Trackilio',
     locale: 'en_US',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'MyWanderLists | Discover Places Worth Remembering',
+    title: 'Trackilio | Collect Places. Plan Trips. Go Explore.',
     description:
-      'Create, discover, and collaboratively build user-generated travel lists.',
+      'Discover, create, and share interactive travel lists. Save places, map routes, and collaborate on your next trip with Trackilio.',
   },
   robots: {
     index: true,
@@ -53,11 +54,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${newsreader.variable}`}>
-      <body className="flex min-h-screen flex-col bg-cream text-charcoal font-sans">
+    <html lang="en" className={`${inter.variable} ${outfit.variable}`}>
+      <body className="flex min-h-screen flex-col bg-[#F8F7FF] text-[#0F172A] font-sans pb-16 md:pb-0">
         <Navbar />
         <main className="flex-1">{children}</main>
         <Footer />
+        <BottomNav />
       </body>
     </html>
   );
