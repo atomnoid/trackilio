@@ -2,12 +2,23 @@
 
 import React, { useState } from 'react';
 import { ListPlace, VoteType } from '@/types/database';
-import { MapPin, ExternalLink, ArrowBigUp, ArrowBigDown, MessageSquare, Flame, Compass, Send } from 'lucide-react';
+import {
+  MapPin,
+  ExternalLink,
+  ArrowBigUp,
+  ArrowBigDown,
+  MessageSquare,
+  Flame,
+  Compass,
+  Send,
+  Trash2,
+} from 'lucide-react';
 
 interface CommentShape {
   id: string;
   content: string;
   created_at: string;
+  user_id?: string;
   profile?: { display_name?: string } | null;
 }
 
@@ -23,18 +34,25 @@ export function PlaceCard({ listPlace, currentUserId }: PlaceCardProps) {
   const [userVote, setUserVote] = useState<VoteType | null>(
     listPlace.user_vote_type ?? (listPlace.user_has_voted ? 'up' : null)
   );
-  const [comments, setComments] = useState<CommentShape[]>((listPlace.comments ?? []) as CommentShape[]);
+  const [comments, setComments] = useState<CommentShape[]>(
+    (listPlace.comments ?? []) as CommentShape[]
+  );
   const [newComment, setNewComment] = useState('');
   const [showComments, setShowComments] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deletingCommentId, setDeletingCommentId] = useState<string | null>(null);
   const [animateVote, setAnimateVote] = useState<'up' | 'down' | null>(null);
+  const [voteError, setVoteError] = useState<string | null>(null);
+  const [commentError, setCommentError] = useState<string | null>(null);
 
   const handleVote = async (targetType: VoteType) => {
     if (!currentUserId) {
-      alert('Please log in to vote on places.');
+      setVoteError('Please log in to vote on places.');
+      setTimeout(() => setVoteError(null), 3000);
       return;
     }
 
+    setVoteError(null);
     const prevVote = userVote;
     const prevCount = votesCount;
 
@@ -50,7 +68,7 @@ export function PlaceCard({ listPlace, currentUserId }: PlaceCardProps) {
       nextVote = targetType;
       nextCount = targetType === 'up' ? prevCount + 1 : prevCount - 1;
     } else {
-      // Switch vote (up -> down or down -> up)
+      // Switch vote (up → down or down → up)
       nextVote = targetType;
       nextCount = targetType === 'up' ? prevCount + 2 : prevCount - 2;
     }
@@ -70,35 +88,77 @@ export function PlaceCard({ listPlace, currentUserId }: PlaceCardProps) {
       if (!res.ok) {
         setUserVote(prevVote);
         setVotesCount(prevCount);
+        setVoteError('Vote failed. Please try again.');
+        setTimeout(() => setVoteError(null), 3000);
       }
     } catch {
       setUserVote(prevVote);
       setVotesCount(prevCount);
+      setVoteError('Network error. Please try again.');
+      setTimeout(() => setVoteError(null), 3000);
     }
   };
 
   const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentUserId) {
-      alert('Please log in to leave a comment.');
+      setCommentError('Please log in to leave a comment.');
+      setTimeout(() => setCommentError(null), 3000);
       return;
     }
     if (!newComment.trim()) return;
 
     setIsSubmitting(true);
-    const res = await fetch('/api/comments', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ listPlaceId: listPlace.id, content: newComment }),
-    });
-    const data = await res.json();
-    setIsSubmitting(false);
+    setCommentError(null);
 
-    if (res.ok && data.comment) {
-      setComments((prev) => [...prev, data.comment]);
-      setNewComment('');
-    } else {
-      alert(data.error || 'Failed to post comment');
+    try {
+      const res = await fetch('/api/comments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ listPlaceId: listPlace.id, content: newComment }),
+      });
+      const data = await res.json();
+
+      if (res.ok && data.comment) {
+        setComments((prev) => [...prev, data.comment]);
+        setNewComment('');
+      } else {
+        setCommentError(data.error || 'Failed to post comment. Please try again.');
+      }
+    } catch {
+      setCommentError('Network error. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    if (deletingCommentId) return; // Prevent duplicate delete
+
+    const prevComments = comments;
+    // Optimistic remove
+    setDeletingCommentId(commentId);
+    setComments((prev) => prev.filter((c) => c.id !== commentId));
+
+    try {
+      const res = await fetch('/api/comments', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ commentId }),
+      });
+
+      if (!res.ok) {
+        // Rollback
+        setComments(prevComments);
+        setCommentError('Could not delete comment. Please try again.');
+        setTimeout(() => setCommentError(null), 3000);
+      }
+    } catch {
+      setComments(prevComments);
+      setCommentError('Network error. Please try again.');
+      setTimeout(() => setCommentError(null), 3000);
+    } finally {
+      setDeletingCommentId(null);
     }
   };
 
@@ -170,6 +230,13 @@ export function PlaceCard({ listPlace, currentUserId }: PlaceCardProps) {
         </p>
       )}
 
+      {/* Vote error message */}
+      {voteError && (
+        <p className="text-[11px] text-[#E0533C] font-bold bg-[#FDF3F1] border border-[#F0D5D5] rounded-lg px-3 py-1.5">
+          {voteError}
+        </p>
+      )}
+
       {/* Action Footer */}
       <div className="pt-3 border-t border-[#E8E3D8] flex items-center justify-between gap-4 text-xs">
         <div className="inline-flex items-center rounded-xl bg-[#F5F1E8] border border-[#E6DFD5] p-0.5 shadow-2xs">
@@ -230,19 +297,49 @@ export function PlaceCard({ listPlace, currentUserId }: PlaceCardProps) {
       {showComments && (
         <div className="pt-3 border-t border-[#E8E3D8] space-y-2.5">
           {comments.length > 0 ? (
-            comments.map((c) => (
-              <div key={c.id} className="bg-[#FAF8F3] p-3 rounded-xl text-xs space-y-0.5 border border-[#E8E3D8]">
-                <div className="flex items-center justify-between font-bold text-[#18181B]">
-                  <span>{c.profile?.display_name || 'Traveler'}</span>
-                  <span className="text-[10px] text-[#71717A] font-normal">
-                    {new Date(c.created_at).toLocaleDateString()}
-                  </span>
+            comments.map((c) => {
+              const isOwn = currentUserId && c.user_id === currentUserId;
+              return (
+                <div
+                  key={c.id}
+                  className={`bg-[#FAF8F3] p-3 rounded-xl text-xs space-y-0.5 border border-[#E8E3D8] transition-opacity ${
+                    deletingCommentId === c.id ? 'opacity-40' : ''
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center justify-between flex-1 font-bold text-[#18181B]">
+                      <span>{c.profile?.display_name || 'Traveler'}</span>
+                      <span className="text-[10px] text-[#71717A] font-normal">
+                        {new Date(c.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                    {isOwn && (
+                      <button
+                        onClick={() => handleDeleteComment(c.id)}
+                        disabled={deletingCommentId === c.id}
+                        title="Delete your comment"
+                        aria-label="Delete comment"
+                        className="shrink-0 p-1 rounded-md text-[#C09090] hover:text-[#E0533C] hover:bg-[#FDF3F1] disabled:opacity-40 transition-colors"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    )}
+                  </div>
+                  <p className="text-[#3F3F46] font-medium">{c.content}</p>
                 </div>
-                <p className="text-[#3F3F46] font-medium">{c.content}</p>
-              </div>
-            ))
+              );
+            })
           ) : (
-            <p className="text-[11px] text-[#71717A] text-center py-1 font-medium">No comments yet. Leave a recommendation!</p>
+            <p className="text-[11px] text-[#71717A] text-center py-1 font-medium">
+              No comments yet. Leave a recommendation!
+            </p>
+          )}
+
+          {/* Comment error */}
+          {commentError && (
+            <p className="text-[11px] text-[#E0533C] font-bold bg-[#FDF3F1] border border-[#F0D5D5] rounded-lg px-3 py-1.5">
+              {commentError}
+            </p>
           )}
 
           {currentUserId && (

@@ -23,8 +23,8 @@ export function WanderListJsonLd({ list, places }: JsonLdProps) {
       {
         '@type': 'ListItem',
         position: 2,
-        name: 'Explore',
-        item: `${siteUrl}/explore`,
+        name: 'Discover',
+        item: `${siteUrl}/discover`,
       },
       {
         '@type': 'ListItem',

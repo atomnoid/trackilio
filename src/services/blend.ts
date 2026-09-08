@@ -1,4 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
+import { getBlendInterpretation, calculateRawBlendScore } from '@/lib/blend.utils';
+export { getBlendInterpretation } from '@/lib/blend.utils';
 import { BlendSession, Profile, WanderList, ListPlace } from '@/types/database';
 
 export interface BlendResult {
@@ -11,14 +13,7 @@ export interface BlendResult {
   userB: Profile;
 }
 
-export function getBlendInterpretation(score: number): string {
-  if (score >= 96) return 'Okay, who copied whom? 🤨';
-  if (score >= 81) return 'Basically the same traveler 😂';
-  if (score >= 61) return 'Travel Twins 😎';
-  if (score >= 41) return 'Pretty Compatible ✈️';
-  if (score >= 21) return 'Some Overlap 👀';
-  return 'Different Worlds 🌎';
-}
+
 
 export async function calculateAndCreateBlend(
   userAIdentifier: string,
@@ -123,12 +118,12 @@ export async function calculateAndCreateBlend(
     });
     const sharedCategories = Array.from(sharedCatsSet);
 
-    // Calculate score (0-100)
-    let score = 25; // Base baseline interest score
-    score += Math.min(sharedPlaces.length * 15, 40);
-    score += Math.min(sharedDestinations.length * 10, 20);
-    score += Math.min(sharedCategories.length * 5, 15);
-    score = Math.min(Math.max(score, 10), 99); // Normalize score between 10 and 99
+    // Calculate score (0-100) using shared pure function
+    const score = calculateRawBlendScore({
+      sharedPlacesCount: sharedPlaces.length,
+      sharedDestinationsCount: sharedDestinations.length,
+      sharedCategoriesCount: sharedCategories.length,
+    });
 
     // Save blend session
     const { data: newSession, error: blendErr } = await (supabase as any)

@@ -30,6 +30,9 @@ export async function generateMetadata({ params }: BlendResultPageProps): Promis
   return {
     title: `${nameA} & ${nameB} — ${result.score}% Travel Match | Trackilio`,
     description: `${nameA} and ${nameB} are ${result.score}% travel compatible on Trackilio. ${result.label}. Check your Blend!`,
+    alternates: {
+      canonical: `${siteUrl}/blend/${id}`,
+    },
     openGraph: {
       title: `${nameA} & ${nameB} got ${result.score}% on Trackilio Blend!`,
       description: `"${result.label}" — See how your travel tastes compare.`,

@@ -4,7 +4,8 @@ import Link from 'next/link';
 import { getPublicProfileByUsernameOrId } from '@/services/profiles';
 import { WanderListCard } from '@/components/lists/WanderListCard';
 import { DailyFactCard } from '@/components/daily-fact/DailyFactCard';
-import { MapPin, Globe, Layers, Blend, ArrowRight, User } from 'lucide-react';
+import { ProfileJsonLd } from '@/components/seo/ProfileJsonLd';
+import { MapPin, Globe, Layers, ArrowRight, User } from 'lucide-react';
 
 export const revalidate = 60;
 
@@ -64,6 +65,12 @@ export default async function PublicProfilePage({ params }: ProfilePageProps) {
 
   return (
     <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-10 space-y-10">
+      {/* Structured Data */}
+      <ProfileJsonLd
+        profile={profile}
+        publicListsCount={profile.public_lists_count ?? 0}
+        username={profile.username ?? username}
+      />
       {/* Profile Header */}
       <section className="rounded-3xl bg-white border border-[#E6DFD5] p-8 sm:p-10 shadow-sm">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">

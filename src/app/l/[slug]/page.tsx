@@ -2,11 +2,13 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getWanderListBySlug } from '@/services/lists';
 import { getPlacesForList } from '@/services/places';
+import { getListMembers } from '@/services/members';
 import { createClient } from '@/lib/supabase/server';
 import { PlaceCard } from '@/components/places/PlaceCard';
 import { PlaceForm } from '@/components/places/PlaceForm';
 import { ShareButton } from '@/components/ui/ShareButton';
 import { WanderListJsonLd } from '@/components/seo/WanderListJsonLd';
+import { MembersPanel } from '@/components/lists/MembersPanel';
 import { MapPin, Globe, Lock, Calendar } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import { ListCover } from '@/components/lists/ListCover';
@@ -74,7 +76,10 @@ export default async function PublicWanderListPage({ params }: WanderListPagePro
     notFound();
   }
 
-  const places = await getPlacesForList(list.id, user?.id);
+  const [places, members] = await Promise.all([
+    getPlacesForList(list.id, user?.id),
+    isOwner ? getListMembers(list.id) : Promise.resolve([]),
+  ]);
 
   return (
     <div className="pb-24 space-y-12">
@@ -174,15 +179,31 @@ export default async function PublicWanderListPage({ params }: WanderListPagePro
           {/* Sidebar */}
           <div className="lg:col-span-5 space-y-6">
             {isOwner ? (
-              <div className="sticky top-24">
+              <div className="sticky top-24 space-y-6">
                 <PlaceForm listId={list.id} currentUserId={user?.id} />
+                <MembersPanel
+                  listId={list.id}
+                  ownerId={list.owner_id}
+                  initialMembers={members as any}
+                  currentUserId={user!.id}
+                />
               </div>
             ) : (
-              <div className="rounded-3xl bg-[#F5F1E8] border border-[#E2DAC8] p-6 space-y-2.5">
-                <h3 className="font-sans text-base font-bold text-[#18181B]">About this list</h3>
-                <p className="text-xs text-[#71717A] leading-relaxed font-medium">
-                  This list was created by {list.owner?.display_name || 'a traveler'} for {list.destination || 'exploring places'}. Upvote your favorite spots or add a recommendation comment!
-                </p>
+              <div className="space-y-4">
+                <div className="rounded-3xl bg-[#F5F1E8] border border-[#E2DAC8] p-6 space-y-2.5">
+                  <h3 className="font-sans text-base font-bold text-[#18181B]">About this list</h3>
+                  <p className="text-xs text-[#71717A] leading-relaxed font-medium">
+                    This list was created by {list.owner?.display_name || 'a traveler'} for {list.destination || 'exploring places'}. Upvote your favorite spots or add a recommendation comment!
+                  </p>
+                </div>
+                {user && (
+                  <MembersPanel
+                    listId={list.id}
+                    ownerId={list.owner_id}
+                    initialMembers={members as any}
+                    currentUserId={user.id}
+                  />
+                )}
               </div>
             )}
           </div>

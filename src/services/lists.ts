@@ -42,6 +42,9 @@ export async function getPublicWanderLists(params?: {
 }): Promise<WanderList[]> {
   try {
     const supabase = await createClient();
+    const limit = params?.limit ?? 24;
+    const offset = params?.offset ?? 0;
+
     let q = (supabase as any)
       .from('wander_lists')
       .select('*, owner:profiles(*)')
@@ -54,23 +57,78 @@ export async function getPublicWanderLists(params?: {
       q = q.or(`title.ilike.%${params.query}%,description.ilike.%${params.query}%`);
     }
 
-    if (params?.sort === 'trending') {
+    if (params?.sort === 'popular') {
+      // Popular: rank by net engagement (upvotes - downvotes + comments).
+      // Fetch a larger window then sort client-side using batch aggregate queries.
+      q = q.order('created_at', { ascending: false }).limit(200);
+      const { data, error } = await q;
+      if (error) {
+        console.warn('Unable to fetch popular WanderLists:', error.message || error);
+        return [];
+      }
+
+      const lists = (data ?? []) as WanderList[];
+      if (lists.length === 0) return [];
+
+      // Batch-fetch engagement for all candidate list IDs
+      const listIds = lists.map((l: WanderList) => l.id);
+
+      const [voteResult, commentResult] = await Promise.all([
+        (supabase as any)
+          .from('list_places')
+          .select('list_id, votes(vote_type)')
+          .in('list_id', listIds),
+        (supabase as any)
+          .from('list_places')
+          .select('list_id, comments(id)')
+          .in('list_id', listIds),
+      ]);
+
+      // Build engagement score map: listId -> engagement_score
+      const engagementMap = new Map<string, number>();
+
+      (voteResult.data ?? []).forEach((lp: any) => {
+        const votes: any[] = lp.votes || [];
+        const net =
+          votes.filter((v: any) => v.vote_type !== 'down').length -
+          votes.filter((v: any) => v.vote_type === 'down').length;
+        engagementMap.set(lp.list_id, (engagementMap.get(lp.list_id) ?? 0) + net);
+      });
+
+      (commentResult.data ?? []).forEach((lp: any) => {
+        const count = (lp.comments || []).length;
+        engagementMap.set(lp.list_id, (engagementMap.get(lp.list_id) ?? 0) + count);
+      });
+
+      // Sort descending by engagement, then slice for pagination
+      return [...lists]
+        .sort(
+          (a: WanderList, b: WanderList) =>
+            (engagementMap.get(b.id) ?? 0) - (engagementMap.get(a.id) ?? 0)
+        )
+        .slice(offset, offset + limit);
+    } else if (params?.sort === 'trending') {
+      // Trending: most-recently updated lists (actively maintained content)
       q = q.order('updated_at', { ascending: false });
     } else {
       // 'recent' or default
       q = q.order('created_at', { ascending: false });
     }
 
-    if (params?.limit) {
-      q = q.limit(params.limit);
-    }
-    if (params?.offset) {
-      q = q.range(params.offset, params.offset + (params.limit || 24) - 1);
+    q = q.limit(limit);
+    if (offset > 0) {
+      q = q.range(offset, offset + limit - 1);
     }
 
     const { data, error } = await q;
     if (error) {
-      const detail = error.message || error.details || error.hint || (typeof error === 'object' && Object.keys(error).length > 0 ? JSON.stringify(error) : null);
+      const detail =
+        error.message ||
+        error.details ||
+        error.hint ||
+        (typeof error === 'object' && Object.keys(error).length > 0
+          ? JSON.stringify(error)
+          : null);
       if (detail) {
         console.warn('Unable to fetch public WanderLists from Supabase:', detail);
       }
@@ -157,6 +215,33 @@ export async function createWanderList(params: {
   });
 
   return { slug: data.slug };
+}
+
+export async function updateWanderList(
+  listId: string,
+  updates: {
+    title?: string;
+    description?: string;
+    destination?: string;
+    isPublic?: boolean;
+    coverImage?: string;
+  }
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient();
+  const payload: Record<string, unknown> = { updated_at: new Date().toISOString() };
+  if (updates.title !== undefined) payload.title = updates.title;
+  if (updates.description !== undefined) payload.description = updates.description || null;
+  if (updates.destination !== undefined) payload.destination = updates.destination || null;
+  if (updates.isPublic !== undefined) payload.is_public = updates.isPublic;
+  if (updates.coverImage !== undefined) payload.cover_image = updates.coverImage || null;
+
+  const { error } = await (supabase as any)
+    .from('wander_lists')
+    .update(payload)
+    .eq('id', listId);
+
+  if (error) return { success: false, error: error.message };
+  return { success: true };
 }
 
 export async function deleteWanderList(
