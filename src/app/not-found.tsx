@@ -3,25 +3,25 @@ import Link from 'next/link';
 
 export default function NotFound() {
   return (
-    <div className="mx-auto max-w-md px-4 py-24 text-center space-y-6">
-      <div className="h-20 w-20 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center mx-auto shadow-lg shadow-violet-500/20">
-        <Compass className="h-10 w-10 stroke-[2] animate-spin-slow" />
+    <div className="mx-auto max-w-md px-4 py-24 text-center space-y-5">
+      <div className="h-16 w-16 rounded-2xl bg-[#F3EFE6] text-[#18181B] flex items-center justify-center mx-auto shadow-2xs">
+        <Compass className="h-8 w-8 stroke-[2]" />
       </div>
-      <div className="space-y-2">
-        <h1 className="font-display text-3xl font-black text-slate-900">
+      <div className="space-y-1.5">
+        <h1 className="font-sans text-2xl font-black text-[#18181B]">
           This destination seems to have wandered off.
         </h1>
-        <p className="text-sm text-slate-600 font-medium">
+        <p className="text-xs text-[#71717A] font-medium">
           The Trackilio List you are looking for does not exist or may be set to private.
         </p>
       </div>
 
-      <div className="pt-4 flex flex-col sm:flex-row justify-center gap-3">
+      <div className="pt-2 flex justify-center">
         <Link
-          href="/explore"
-          className="inline-flex items-center justify-center gap-2 rounded-full bg-violet-600 text-white font-extrabold px-7 py-3 text-sm shadow-lg shadow-violet-500/30 hover:bg-violet-700 active-press transition-colors"
+          href="/discover"
+          className="inline-flex items-center gap-2 rounded-xl bg-[#18181B] hover:bg-[#C8422C] text-white font-bold px-6 py-3 text-xs shadow-2xs active-press transition-colors"
         >
-          Explore Public Lists <ArrowRight className="h-4 w-4" />
+          Discover Public Lists <ArrowRight className="h-3.5 w-3.5" />
         </Link>
       </div>
     </div>

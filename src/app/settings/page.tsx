@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getProfile, updateProfile } from '@/services/profiles';
 
 export const metadata: Metadata = {
-  title: 'Account Settings',
+  title: 'Account Settings | Trackilio',
   robots: { index: false, follow: false },
 };
 
@@ -36,39 +36,39 @@ export default async function SettingsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-xl px-4 py-12 space-y-8">
-      <div className="space-y-2">
-        <h1 className="font-editorial text-3xl font-bold text-stone-900">Account Settings</h1>
-        <p className="text-sm text-stone-600">Update your profile details and preferences</p>
+    <div className="mx-auto max-w-xl px-4 py-12 space-y-6">
+      <div className="space-y-1">
+        <h1 className="font-sans text-3xl font-black text-[#18181B]">Account Settings</h1>
+        <p className="text-xs text-[#71717A] font-medium">Update your display name and profile details</p>
       </div>
 
-      <form action={handleUpdateProfile} className="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm space-y-4">
-        <div>
-          <label className="block text-xs font-semibold text-stone-700 mb-1">Display Name</label>
+      <form action={handleUpdateProfile} className="bg-white border border-[#E8E3D8] rounded-3xl p-6 sm:p-8 shadow-xs space-y-4">
+        <div className="space-y-1">
+          <label className="block text-xs font-bold text-[#18181B]">Display Name</label>
           <input
             type="text"
             name="displayName"
             defaultValue={profile?.display_name || ''}
             required
-            className="w-full rounded-xl border border-stone-200 px-4 py-2.5 text-sm text-stone-900 focus:outline-none focus:ring-1 focus:ring-amber-500"
+            className="w-full rounded-xl border border-[#E8E3D8] bg-[#FAF8F3] px-4 py-3 text-xs font-medium text-[#18181B] focus:outline-none focus:ring-1 focus:ring-[#18181B] focus:bg-white transition-all"
           />
         </div>
 
-        <div>
-          <label className="block text-xs font-semibold text-stone-700 mb-1">Email (Read Only)</label>
+        <div className="space-y-1">
+          <label className="block text-xs font-bold text-[#18181B]">Email Address (Read Only)</label>
           <input
             type="email"
             value={user.email || ''}
             disabled
-            className="w-full rounded-xl border border-stone-200 px-4 py-2.5 text-sm text-stone-400 bg-stone-50 cursor-not-allowed"
+            className="w-full rounded-xl border border-[#E8E3D8] px-4 py-3 text-xs text-[#71717A] bg-[#FAF8F3] cursor-not-allowed font-medium"
           />
         </div>
 
         <button
           type="submit"
-          className="w-full rounded-xl bg-stone-900 text-white font-semibold py-2.5 text-sm hover:bg-stone-800 transition-colors shadow-sm"
+          className="w-full rounded-xl bg-[#18181B] hover:bg-[#C8422C] text-white font-bold py-3 text-xs shadow-2xs active-press transition-all"
         >
-          Save Changes
+          Save Profile Changes
         </button>
       </form>
     </div>

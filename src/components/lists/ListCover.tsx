@@ -7,7 +7,7 @@ interface ListCoverProps {
   className?: string;
 }
 
-// Deterministic hashing helper
+// Deterministic hash helper
 function hashString(str: string): number {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
@@ -17,13 +17,13 @@ function hashString(str: string): number {
   return Math.abs(hash);
 }
 
-// Color palettes for vector list covers
-const COVER_PALETTES = [
-  { bg: 'from-violet-600 via-purple-600 to-indigo-700', accent1: '#FACC15', accent2: '#F43F5E', shape: '#8B5CF6' },
-  { bg: 'from-blue-600 via-indigo-600 to-purple-600', accent1: '#10B981', accent2: '#F59E0B', shape: '#3B82F6' },
-  { bg: 'from-rose-500 via-pink-600 to-purple-700', accent1: '#FACC15', accent2: '#38BDF8', shape: '#EC4899' },
-  { bg: 'from-emerald-600 via-teal-600 to-cyan-700', accent1: '#F59E0B', accent2: '#A855F7', shape: '#14B8A6' },
-  { bg: 'from-amber-500 via-orange-600 to-rose-600', accent1: '#38BDF8', accent2: '#10B981', accent2Hex: '#10B981', shape: '#F97316' },
+// Warm Editorial Palettes (No Neon Gradients)
+const WARM_PALETTES = [
+  { bg: 'bg-[#F4EFE6]', accent: '#E0533C', text: '#18181B', border: '#E2DAC8', pattern: '#D5C9B3' },
+  { bg: 'bg-[#EBF2EA]', accent: '#2E7D32', text: '#18181B', border: '#D0E2CF', pattern: '#BED5BC' },
+  { bg: 'bg-[#EFF6FB]', accent: '#0369A1', text: '#18181B', border: '#D2E5F5', pattern: '#B8D6EF' },
+  { bg: 'bg-[#FDF6E2]', accent: '#B45309', text: '#18181B', border: '#F3E5BE', pattern: '#E5D3A2' },
+  { bg: 'bg-[#F9EFEF]', accent: '#991B1B', text: '#18181B', border: '#F0D5D5', pattern: '#E2BCBC' },
 ];
 
 export function ListCover({
@@ -33,10 +33,9 @@ export function ListCover({
   className = '',
 }: ListCoverProps) {
   const seed = hashString(`${title}-${destination}`);
-  const paletteIndex = seed % COVER_PALETTES.length;
-  const palette = COVER_PALETTES[paletteIndex];
+  const paletteIndex = seed % WARM_PALETTES.length;
+  const palette = WARM_PALETTES[paletteIndex];
 
-  // Derived display details
   const displayDest = destination || title || 'Explore';
   const initials = displayDest
     .split(' ')
@@ -46,119 +45,104 @@ export function ListCover({
     .join('')
     .toUpperCase();
 
-  // Pattern variants
-  const patternType = seed % 3; // 0: Route Map, 1: Geometric Sunset, 2: Compass & Pins
-
   const heightClass =
     variant === 'hero' ? 'h-64 sm:h-80' : variant === 'compact' ? 'h-28' : 'h-44';
 
+  const patternType = seed % 3;
+
   return (
     <div
-      className={`relative w-full overflow-hidden bg-gradient-to-br ${palette.bg} ${heightClass} ${className} flex items-center justify-center select-none`}
+      className={`relative w-full overflow-hidden ${palette.bg} ${heightClass} ${className} flex items-center justify-center select-none border-b border-[#E8E3D8]`}
     >
-      {/* Background Grid Accent */}
+      {/* Editorial Grid / Dot Linework */}
       <div
-        className="absolute inset-0 opacity-15"
+        className="absolute inset-0 opacity-20 pointer-events-none"
         style={{
-          backgroundImage: `radial-gradient(circle, #FFFFFF 1.5px, transparent 1.5px)`,
-          backgroundSize: '16px 16px',
+          backgroundImage: `radial-gradient(circle, ${palette.text} 1px, transparent 1px)`,
+          backgroundSize: '20px 20px',
         }}
       />
 
-      {/* SVG Decorative Composition */}
+      {/* SVG Vector Drawing */}
       <svg
-        className="absolute inset-0 w-full h-full"
+        className="absolute inset-0 w-full h-full pointer-events-none"
         viewBox="0 0 400 200"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         preserveAspectRatio="xMidYMid slice"
       >
-        {/* Pattern 0: Animated/Static Route Path */}
         {patternType === 0 && (
           <>
             <path
-              d="M-20 160 Q 100 40, 200 120 T 420 60"
-              stroke="white"
-              strokeWidth="4"
-              strokeDasharray="8 6"
-              strokeOpacity="0.4"
+              d="M-20 150 C 100 40, 200 160, 420 70"
+              stroke={palette.accent}
+              strokeWidth="2.5"
+              strokeDasharray="6 5"
+              strokeOpacity="0.7"
             />
-            {/* Location Pin 1 */}
-            <g transform="translate(100, 60)">
-              <circle cx="0" cy="0" r="14" fill={palette.accent1} fillOpacity="0.9" />
-              <circle cx="0" cy="0" r="6" fill="#ffffff" />
+            <g transform="translate(140, 80)">
+              <circle cx="0" cy="0" r="10" fill={palette.accent} />
+              <circle cx="0" cy="0" r="4" fill="#FFFFFF" />
             </g>
-            {/* Location Pin 2 */}
-            <g transform="translate(280, 110)">
-              <circle cx="0" cy="0" r="18" fill={palette.accent2} fillOpacity="0.9" />
-              <circle cx="0" cy="0" r="7" fill="#ffffff" />
+            <g transform="translate(300, 110)">
+              <circle cx="0" cy="0" r="12" fill={palette.text} fillOpacity="0.8" />
+              <circle cx="0" cy="0" r="4" fill="#FFFFFF" />
             </g>
           </>
         )}
 
-        {/* Pattern 1: Sun & Topographic Wave Curves */}
         {patternType === 1 && (
           <>
-            <circle cx="320" cy="50" r="45" fill={palette.accent1} fillOpacity="0.8" />
+            <circle cx="340" cy="50" r="40" fill={palette.pattern} fillOpacity="0.5" />
             <path
-              d="M-50 180 C 80 120, 160 210, 450 130 L 450 220 L -50 220 Z"
-              fill="white"
-              fillOpacity="0.12"
+              d="M -20 140 Q 120 180, 200 130 T 420 160"
+              stroke={palette.accent}
+              strokeWidth="2"
             />
-            <path
-              d="M-50 150 C 120 200, 260 100, 450 170"
-              stroke={palette.accent2}
-              strokeWidth="3"
-              strokeOpacity="0.6"
+            <rect
+              x="40"
+              y="60"
+              width="80"
+              height="60"
+              rx="8"
+              fill={palette.text}
+              fillOpacity="0.06"
+              stroke={palette.border}
             />
           </>
         )}
 
-        {/* Pattern 2: Abstract Compass & Floating Cards */}
         {patternType === 2 && (
           <>
             <circle
               cx="80"
-              cy="140"
-              r="70"
-              stroke="white"
-              strokeWidth="2"
-              strokeOpacity="0.25"
+              cy="100"
+              r="60"
+              stroke={palette.accent}
+              strokeWidth="1.5"
               strokeDasharray="4 4"
+              strokeOpacity="0.4"
             />
-            <polygon points="80,95 90,140 80,135 70,140" fill={palette.accent1} />
-            <polygon points="80,185 90,140 80,145 70,140" fill="white" fillOpacity="0.7" />
-            <rect
-              x="240"
-              y="30"
-              width="120"
-              height="80"
-              rx="12"
-              fill="white"
-              fillOpacity="0.15"
-              transform="rotate(6 300 70)"
-            />
+            <polygon points="80,50 88,100 80,94 72,100" fill={palette.accent} />
+            <polygon points="80,150 88,100 80,106 72,100" fill={palette.text} fillOpacity="0.4" />
           </>
         )}
       </svg>
 
-      {/* Foreground Badge + Destination Initials */}
+      {/* Destination Badge Initials Stamp */}
       <div className="relative z-10 flex flex-col items-center justify-center text-center p-4">
-        <div className="h-14 w-14 rounded-2xl bg-white/20 backdrop-blur-md border border-white/40 flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform duration-300">
-          <span className="font-display text-2xl font-black text-white tracking-widest">
+        <div className="h-13 w-13 rounded-2xl bg-white border border-[#E8E3D8] flex items-center justify-center shadow-sm">
+          <span className="font-sans text-xl font-black text-[#18181B] tracking-wider">
             {initials}
           </span>
         </div>
 
         {destination && (
-          <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-white/90 backdrop-blur-md px-3 py-1 text-xs font-bold text-slate-900 shadow-md">
+          <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-white/90 border border-[#E8E3D8] px-3 py-1 text-xs font-bold text-[#18181B] shadow-2xs">
             📍 {destination}
           </span>
         )}
       </div>
-
-      {/* Decorative Subtle Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent" />
     </div>
   );
 }

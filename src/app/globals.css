@@ -1,100 +1,73 @@
 @import "tailwindcss";
 
 @theme {
-  --color-violet-50: #F5F3FF;
-  --color-violet-100: #EDE9FE;
-  --color-violet-200: #DDD6FE;
-  --color-violet-500: #8B5CF6;
-  --color-violet-600: #7C3AED;
-  --color-violet-700: #6D28D9;
+  --color-warm-bg: #FAF8F3;
+  --color-warm-card: #FFFFFF;
+  --color-warm-subtle: #F3EFE6;
+  --color-warm-border: #E8E3D8;
   
-  --color-electric-500: #3B82F6;
-  --color-electric-600: #2563EB;
+  --color-ink-900: #18181B;
+  --color-ink-700: #3F3F46;
+  --color-ink-500: #71717A;
+  --color-ink-400: #A1A1AA;
   
-  --color-coral-500: #F43F5E;
-  --color-coral-600: #E11D48;
+  --color-terracotta-500: #E0533C;
+  --color-terracotta-600: #C8422C;
+  --color-terracotta-50: #FDF3F1;
   
-  --color-sun-400: #FACC15;
-  --color-sun-500: #F59E0B;
+  --color-sage-100: #E8F5E9;
+  --color-sage-700: #2E7D32;
   
-  --color-mint-500: #10B981;
-  --color-mint-600: #059669;
+  --color-butter-100: #FEF9C3;
+  --color-butter-800: #854D0E;
 
-  --color-app-bg: #F8F7FF;
-  --color-app-card: #FFFFFF;
-  --color-app-text: #0F172A;
-  --color-app-muted: #64748B;
+  --color-dusty-100: #E0F2FE;
+  --color-dusty-700: #0369A1;
 
-  --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
-  --font-display: var(--font-outfit), var(--font-inter), system-ui, sans-serif;
-}
-
-:root {
-  --bg-gradient: linear-gradient(135deg, #F8F7FF 0%, #EFF6FF 50%, #FAF5FF 100%);
+  --font-sans: var(--font-sans), system-ui, -apple-system, sans-serif;
+  --font-serif: var(--font-serif), Georgia, serif;
 }
 
 body {
-  background-color: #F8F7FF;
-  color: #0F172A;
+  background-color: #FAF8F3;
+  color: #18181B;
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
 
-/* Custom Animations */
-@keyframes float {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-8px) rotate(1deg); }
+/* Tactile Warm Editorial Card Elevate */
+.editorial-card {
+  background-color: #FFFFFF;
+  border: 1px solid #E8E3D8;
+  border-radius: 1.25rem;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@keyframes float-reverse {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(8px) rotate(-1.5deg); }
+.editorial-card:hover {
+  transform: translateY(-3px);
+  border-color: #D6CFBF;
+  box-shadow: 0 16px 32px -12px rgba(24, 24, 27, 0.08);
 }
 
-@keyframes pulse-glow {
-  0%, 100% { opacity: 0.4; transform: scale(1); }
-  50% { opacity: 0.8; transform: scale(1.05); }
+/* Micro interaction press */
+.active-press:active {
+  transform: scale(0.97);
 }
 
-@keyframes dash-route {
+/* Route SVG Path Drawing Animation */
+@keyframes route-draw {
   to {
-    stroke-dashoffset: -40;
+    stroke-dashoffset: -36;
   }
 }
 
-.animate-float {
-  animation: float 4s ease-in-out infinite;
+.animate-route-draw {
+  stroke-dasharray: 6 5;
+  animation: route-draw 3s linear infinite;
 }
 
-.animate-float-reverse {
-  animation: float-reverse 5s ease-in-out infinite;
-}
-
-.animate-pulse-glow {
-  animation: pulse-glow 3s ease-in-out infinite;
-}
-
-.animate-dash-route {
-  stroke-dasharray: 8 6;
-  animation: dash-route 2s linear infinite;
-}
-
-/* Tactile Card Effects */
-.card-tactile {
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.card-tactile:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 30px -10px rgba(124, 58, 237, 0.15);
-}
-
-/* Smooth Tap Active Feedback */
-.active-press:active {
-  transform: scale(0.96);
-}
-
-/* Custom Scrollbar for pills */
+/* Hide scrollbar utility */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Sparkles, ArrowRight, Compass, Plus, MapPin, Heart, Shield, Users } from 'lucide-react';
+import { ArrowRight, Compass, Plus, MapPin } from 'lucide-react';
 import { getPublicWanderLists } from '@/services/lists';
 import { WanderListCard } from '@/components/lists/WanderListCard';
 import { HeroMap } from '@/components/illustrations/HeroMap';
@@ -60,49 +60,49 @@ export default async function HomePage() {
   return (
     <div className="space-y-24 pb-24 overflow-x-hidden">
       {/* Hero Section */}
-      <section className="relative pt-6 sm:pt-14 pb-16 bg-gradient-to-b from-violet-100/60 via-[#F8F7FF] to-[#F8F7FF] overflow-hidden">
+      <section className="relative pt-8 sm:pt-16 pb-12 overflow-hidden">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            {/* Left Column: Headline & Action */}
+            {/* Left Headline Column */}
             <div className="lg:col-span-7 space-y-6 text-left">
-              <div className="inline-flex items-center gap-2 rounded-full bg-violet-100 border border-violet-200 px-4 py-1.5 text-xs font-bold text-violet-800 shadow-sm">
-                <Sparkles className="h-4 w-4 text-violet-600 animate-pulse" />
+              <span className="inline-flex items-center gap-2 rounded-full bg-[#F3EFE6] border border-[#E2DAC8] px-3.5 py-1 text-xs font-bold text-[#18181B]">
+                <span className="h-2 w-2 rounded-full bg-[#E0533C]" />
                 Collaborative Travel Lists & Spot Discovery
-              </div>
+              </span>
 
-              <h1 className="font-display text-4xl sm:text-6xl font-black tracking-tight text-slate-900 leading-[1.1]">
+              <h1 className="font-sans text-4xl sm:text-6xl font-black tracking-tight text-[#18181B] leading-[1.1]">
                 Collect places. <br />
                 Plan trips. <br />
-                <span className="bg-gradient-to-r from-violet-600 via-purple-600 to-rose-500 bg-clip-text text-transparent">
+                <span className="font-serif italic text-[#E0533C] font-normal">
                   Go explore.
                 </span>
               </h1>
 
-              <p className="text-base sm:text-lg text-slate-600 max-w-xl leading-relaxed font-normal">
-                Trackilio helps you organize cafes, hidden spots, and travel itineraries into beautifully shareable lists. Collaborate with friends and discover travel guides worldwide.
+              <p className="text-base sm:text-lg text-[#71717A] max-w-xl leading-relaxed font-normal">
+                Trackilio helps you organize cafes, hidden spots, and travel itineraries into shareable, curated lists. Collaborate with friends and discover user-generated travel guides worldwide.
               </p>
 
               {/* CTAs */}
               <div className="flex flex-wrap items-center gap-4 pt-2">
                 <Link
                   href="/create"
-                  className="inline-flex items-center gap-2.5 rounded-full bg-gradient-to-r from-violet-600 to-purple-600 px-7 py-4 text-sm font-bold text-white shadow-xl shadow-violet-500/30 hover:shadow-2xl hover:shadow-violet-500/40 hover:scale-[1.03] active-press transition-all"
+                  className="inline-flex items-center gap-2 rounded-xl bg-[#18181B] hover:bg-[#C8422C] px-7 py-4 text-sm font-bold text-white shadow-sm active-press transition-all"
                 >
-                  <Plus className="h-5 w-5 stroke-[3]" />
+                  <Plus className="h-4.5 w-4.5 stroke-[2.5]" />
                   Create your first list
                 </Link>
 
                 <Link
-                  href="/explore"
-                  className="inline-flex items-center gap-2 rounded-full bg-white border-2 border-slate-200 px-7 py-4 text-sm font-bold text-slate-800 shadow-sm hover:border-violet-300 hover:bg-violet-50/50 active-press transition-all"
+                  href="/discover"
+                  className="inline-flex items-center gap-2 rounded-xl bg-white border border-[#E8E3D8] hover:border-[#18181B] px-7 py-4 text-sm font-bold text-[#18181B] shadow-2xs active-press transition-all"
                 >
-                  <Compass className="h-5 w-5 text-violet-600" />
-                  Explore public lists
+                  <Compass className="h-4.5 w-4.5 text-[#E0533C]" />
+                  Discover public lists
                 </Link>
               </div>
             </div>
 
-            {/* Right Column: Interactive Map Illustration Centerpiece */}
+            {/* Right Column: HeroMap Interactive Travel Centerpiece */}
             <div className="lg:col-span-5 relative">
               <HeroMap />
             </div>
@@ -112,55 +112,55 @@ export default async function HomePage() {
 
       {/* Storytelling Grid: Collect, Organize, Plan, Share */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-12">
-        <div className="text-center max-w-2xl mx-auto space-y-3">
-          <span className="text-xs font-bold tracking-widest uppercase text-violet-600 bg-violet-100 px-3 py-1 rounded-full">
+        <div className="text-center max-w-2xl mx-auto space-y-2">
+          <span className="text-xs font-extrabold tracking-widest uppercase text-[#E0533C]">
             How Trackilio Works
           </span>
-          <h2 className="font-display text-3xl sm:text-4xl font-extrabold text-slate-900">
-            Designed for travel discovery & trip planning
+          <h2 className="font-sans text-3xl sm:text-4xl font-black text-[#18181B]">
+            Built for travel discovery & trip planning
           </h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Feature 1 */}
-          <div className="space-y-4">
+          <div className="space-y-3.5">
             <CollectIllustration />
             <div className="space-y-1">
-              <h3 className="font-display text-lg font-bold text-slate-900">1. Collect Places</h3>
-              <p className="text-xs text-slate-600 leading-relaxed font-medium">
-                Save cafes, viewpoints, hotels, and local favorites with ratings and Google Maps links.
+              <h3 className="font-sans text-base font-bold text-[#18181B]">1. Collect Places</h3>
+              <p className="text-xs text-[#71717A] leading-relaxed font-medium">
+                Save cafes, viewpoints, hotels, and local favorites with notes and Google Maps links.
               </p>
             </div>
           </div>
 
           {/* Feature 2 */}
-          <div className="space-y-4">
+          <div className="space-y-3.5">
             <OrganizeIllustration />
             <div className="space-y-1">
-              <h3 className="font-display text-lg font-bold text-slate-900">2. Organize Priorities</h3>
-              <p className="text-xs text-slate-600 leading-relaxed font-medium">
+              <h3 className="font-sans text-base font-bold text-[#18181B]">2. Organize Priorities</h3>
+              <p className="text-xs text-[#71717A] leading-relaxed font-medium">
                 Sort locations into Must Visit, Want to Visit, or Maybe so you hit top spots first.
               </p>
             </div>
           </div>
 
           {/* Feature 3 */}
-          <div className="space-y-4">
+          <div className="space-y-3.5">
             <PlanIllustration />
             <div className="space-y-1">
-              <h3 className="font-display text-lg font-bold text-slate-900">3. Map Route Paths</h3>
-              <p className="text-xs text-slate-600 leading-relaxed font-medium">
+              <h3 className="font-sans text-base font-bold text-[#18181B]">3. Map Route Paths</h3>
+              <p className="text-xs text-[#71717A] leading-relaxed font-medium">
                 Visualize multi-stop itineraries from start to finish without getting lost.
               </p>
             </div>
           </div>
 
           {/* Feature 4 */}
-          <div className="space-y-4">
+          <div className="space-y-3.5">
             <ShareIllustration />
             <div className="space-y-1">
-              <h3 className="font-display text-lg font-bold text-slate-900">4. Plan & Share</h3>
-              <p className="text-xs text-slate-600 leading-relaxed font-medium">
+              <h3 className="font-sans text-base font-bold text-[#18181B]">4. Plan & Share</h3>
+              <p className="text-xs text-[#71717A] leading-relaxed font-medium">
                 Invite friends as collaborators or publish public lists to help other travelers explore.
               </p>
             </div>
@@ -168,22 +168,22 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Featured Trackilio Lists Section */}
+      {/* Featured Community Trackilio Lists */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-8">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200/80 pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[#E8E3D8] pb-4">
           <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-violet-600">
-              Community Favorites
+            <span className="text-xs font-extrabold uppercase tracking-wider text-[#E0533C]">
+              Community Travel Guides
             </span>
-            <h2 className="font-display text-3xl font-extrabold text-slate-900">
+            <h2 className="font-sans text-3xl font-black text-[#18181B]">
               Featured Trackilio Lists
             </h2>
           </div>
           <Link
-            href="/explore"
-            className="text-sm font-bold text-violet-600 hover:text-violet-700 flex items-center gap-1 group"
+            href="/discover"
+            className="text-xs font-extrabold text-[#E0533C] hover:text-[#18181B] flex items-center gap-1 group transition-colors"
           >
-            Explore all lists <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+            Explore all lists <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
 
@@ -194,37 +194,37 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Popular Vector Destination Collections */}
+      {/* Destination Collections */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="rounded-3xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 p-8 sm:p-12 text-white space-y-8 shadow-2xl">
+        <div className="rounded-3xl bg-[#18181B] text-white p-8 sm:p-12 space-y-8 shadow-sm">
           <div className="text-center max-w-xl mx-auto space-y-2">
-            <h2 className="font-display text-3xl font-black text-white">
-              Explore Top Destinations
+            <h2 className="font-sans text-3xl font-black text-white">
+              Explore Popular Destinations
             </h2>
-            <p className="text-slate-300 text-sm">
-              Discover crowd-sourced recommendations by destination.
+            <p className="text-[#A1A1AA] text-xs font-medium">
+              Browse crowd-sourced travel lists by country and city.
             </p>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {[
-              { name: 'Japan', emoji: '⛩️', bg: 'from-purple-600 to-rose-600' },
-              { name: 'France', emoji: '🥐', bg: 'from-blue-600 to-indigo-600' },
-              { name: 'India', emoji: '🕌', bg: 'from-amber-500 to-orange-600' },
-              { name: 'Indonesia', emoji: '🌴', bg: 'from-emerald-600 to-teal-600' },
+              { name: 'Japan', emoji: '⛩️', badge: 'Japan Guides' },
+              { name: 'France', emoji: '🥐', badge: 'Paris & Bistros' },
+              { name: 'India', emoji: '🕌', badge: 'Cafes & Culture' },
+              { name: 'Indonesia', emoji: '🌴', badge: 'Bali Waterfalls' },
             ].map((dest) => (
               <Link
                 key={dest.name}
-                href={`/explore?destination=${dest.name}`}
-                className={`group relative h-36 rounded-2xl bg-gradient-to-br ${dest.bg} p-5 flex flex-col justify-between border border-white/20 shadow-md card-tactile active-press`}
+                href={`/discover?destination=${dest.name}`}
+                className="group relative rounded-2xl bg-white/5 border border-white/10 p-5 flex flex-col justify-between hover:bg-white/10 active-press transition-all duration-200"
               >
-                <span className="text-3xl group-hover:scale-125 transition-transform duration-300">
+                <span className="text-2.5xl mb-3 group-hover:scale-110 transition-transform">
                   {dest.emoji}
                 </span>
                 <div>
-                  <h3 className="font-display text-lg font-bold text-white">{dest.name}</h3>
-                  <span className="text-[11px] text-white/80 font-semibold flex items-center gap-1">
-                    View Lists <ArrowRight className="h-3 w-3" />
+                  <h3 className="font-sans text-base font-bold text-white">{dest.name}</h3>
+                  <span className="text-[10px] text-[#A1A1AA] font-semibold flex items-center gap-1 mt-0.5">
+                    Explore Guides <ArrowRight className="h-3 w-3 text-[#E0533C]" />
                   </span>
                 </div>
               </Link>
@@ -235,23 +235,21 @@ export default async function HomePage() {
 
       {/* Final Call to Action */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="rounded-3xl bg-gradient-to-r from-violet-600 via-purple-600 to-blue-600 text-white p-10 sm:p-16 text-center space-y-6 shadow-2xl relative overflow-hidden">
-          <div className="relative z-10 space-y-4">
-            <h2 className="font-display text-3xl sm:text-5xl font-black">
-              Ready to organize your next adventure?
-            </h2>
-            <p className="text-violet-100 max-w-lg mx-auto text-base font-medium">
-              Create your first Trackilio List in seconds. Keep it private or share it with travelers worldwide.
-            </p>
-            <div className="pt-2">
-              <Link
-                href="/create"
-                className="inline-flex items-center gap-2 rounded-full bg-white px-8 py-4 text-sm font-extrabold text-violet-700 shadow-xl hover:bg-violet-50 hover:scale-105 active-press transition-all"
-              >
-                Start Your List Now
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
+        <div className="rounded-3xl bg-[#E0533C] text-white p-10 sm:p-14 text-center space-y-5 shadow-sm relative overflow-hidden">
+          <h2 className="font-sans text-3xl sm:text-5xl font-black">
+            Ready to organize your next adventure?
+          </h2>
+          <p className="text-white/90 max-w-lg mx-auto text-sm font-medium">
+            Create your first Trackilio List in seconds. Keep it private or share it with travelers worldwide.
+          </p>
+          <div className="pt-2">
+            <Link
+              href="/create"
+              className="inline-flex items-center gap-2 rounded-xl bg-[#18181B] hover:bg-black px-7 py-3.5 text-sm font-extrabold text-white shadow-sm active-press transition-all"
+            >
+              Start Your List Now
+              <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
         </div>
       </section>

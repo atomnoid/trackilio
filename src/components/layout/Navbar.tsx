@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { TrackilioLogo } from './TrackilioLogo';
-import { Compass, Plus, Search, User, FolderHeart } from 'lucide-react';
+import { Compass, Plus, Search, User, FolderHeart, Info } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 export function Navbar() {
@@ -19,74 +19,67 @@ export function Navbar() {
   }, []);
 
   const navLinks = [
-    { href: '/explore', label: 'Explore', icon: Compass },
-    { href: '/dashboard', label: 'My Lists', icon: FolderHeart },
+    { href: '/discover', label: 'Discover' },
+    { href: '/dashboard', label: 'My Lists' },
+    { href: '/about', label: 'About' },
   ];
 
   return (
     <header
       className={`sticky top-0 z-40 transition-all duration-300 ${
         scrolled
-          ? 'bg-white/85 backdrop-blur-md shadow-sm border-b border-violet-100/60 py-3'
-          : 'bg-transparent py-4'
+          ? 'bg-[#FAF8F3]/90 backdrop-blur-md border-b border-[#E8E3D8] py-3'
+          : 'bg-transparent py-5'
       }`}
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between gap-4">
-          {/* Logo */}
+        <div className="flex items-center justify-between gap-6">
+          {/* Brand Logo */}
           <TrackilioLogo />
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center gap-1 bg-white/70 backdrop-blur-sm border border-slate-200/60 rounded-full px-3 py-1.5 shadow-sm">
+          <nav className="hidden md:flex items-center gap-8 text-sm font-semibold">
             {navLinks.map((link) => {
-              const Icon = link.icon;
               const isActive = pathname === link.href;
               return (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all ${
+                  className={`transition-colors ${
                     isActive
-                      ? 'bg-violet-600 text-white shadow-md shadow-violet-500/20'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-violet-50/80'
+                      ? 'text-[#E0533C] font-bold'
+                      : 'text-[#3F3F46] hover:text-[#18181B]'
                   }`}
                 >
-                  <Icon className={`h-4 w-4 ${isActive ? 'text-white' : 'text-slate-500'}`} />
                   {link.label}
                 </Link>
               );
             })}
           </nav>
 
-          {/* Actions & Profile */}
+          {/* Actions & CTA */}
           <div className="flex items-center gap-3">
-            {/* Quick Search trigger */}
             <Link
-              href="/explore"
-              className="p-2.5 rounded-full text-slate-600 hover:text-violet-600 hover:bg-violet-50 transition-colors"
+              href="/discover"
+              className="p-2 text-[#71717A] hover:text-[#18181B] hover:bg-[#F3EFE6] rounded-xl transition-colors"
               title="Search Places & Lists"
             >
-              <Search className="h-5 w-5" />
+              <Search className="h-4.5 w-4.5" />
             </Link>
 
-            {/* Create List CTA Button */}
+            <Link
+              href="/auth/login"
+              className="hidden sm:inline-block text-sm font-bold text-[#3F3F46] hover:text-[#18181B] px-3 py-2 transition-colors"
+            >
+              Log in
+            </Link>
+
             <Link
               href="/create"
-              className="hidden sm:inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-violet-600 to-blue-600 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-violet-500/25 hover:shadow-xl hover:shadow-violet-500/35 hover:scale-[1.02] active-press transition-all"
+              className="inline-flex items-center gap-2 rounded-xl bg-[#18181B] hover:bg-[#C8422C] text-white px-4.5 py-2.5 text-xs font-bold shadow-sm active-press transition-all"
             >
-              <Plus className="h-4 w-4 stroke-[3]" />
-              Create List
-            </Link>
-
-            {/* Profile Avatar link */}
-            <Link
-              href="/dashboard"
-              className="relative p-1 rounded-full border-2 border-violet-200 hover:border-violet-600 transition-colors"
-              title="User Profile & Dashboard"
-            >
-              <div className="h-8 w-8 rounded-full bg-violet-100 flex items-center justify-center text-violet-700 font-bold text-xs">
-                <User className="h-4 w-4 text-violet-600" />
-              </div>
+              <Plus className="h-4 w-4 stroke-[2.5]" />
+              Create a list
             </Link>
           </div>
         </div>

@@ -7,7 +7,7 @@ import { PlaceCard } from '@/components/places/PlaceCard';
 import { PlaceForm } from '@/components/places/PlaceForm';
 import { ShareButton } from '@/components/ui/ShareButton';
 import { WanderListJsonLd } from '@/components/seo/WanderListJsonLd';
-import { MapPin, Globe, Lock, User, Calendar, Sparkles } from 'lucide-react';
+import { MapPin, Globe, Lock, Calendar } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import { ListCover } from '@/components/lists/ListCover';
 
@@ -30,19 +30,20 @@ export async function generateMetadata({ params }: WanderListPageProps): Promise
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
   const canonicalUrl = `${siteUrl}/l/${list.slug}`;
+  const placeCount = list.places_count || 0;
 
   return {
-    title: `${list.title} | Trackilio`,
+    title: `${list.title} — ${placeCount > 0 ? `${placeCount} Places to Visit` : 'Travel List'} | Trackilio`,
     description:
       list.description ||
-      `Explore places and recommendations for ${list.destination || 'traveling'} on Trackilio.`,
+      `A curated travel list of places to visit for ${list.destination || 'your next adventure'}, created by the Trackilio community.`,
     alternates: {
       canonical: canonicalUrl,
     },
     openGraph: {
       title: `${list.title} | Trackilio`,
       description:
-        list.description || `Travel bucket list and places for ${list.destination || 'your next trip'}.`,
+        list.description || `A curated travel list of places for ${list.destination || 'your next trip'}.`,
       url: canonicalUrl,
     },
     twitter: {
@@ -81,20 +82,20 @@ export default async function PublicWanderListPage({ params }: WanderListPagePro
       {list.is_public && <WanderListJsonLd list={list} places={places} />}
 
       {/* Hero Header with Vector Cover */}
-      <section className="relative bg-slate-950 text-white overflow-hidden pb-12">
+      <section className="relative bg-[#18181B] text-white overflow-hidden pb-12">
         <ListCover
           title={list.title}
           destination={list.destination || ''}
           variant="hero"
         />
 
-        <div className="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 pt-8 space-y-6">
+        <div className="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 pt-8 space-y-5">
           <div className="flex items-center justify-between gap-4">
             <span
-              className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1 text-xs font-bold backdrop-blur-md shadow-md ${
+              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-extrabold shadow-2xs ${
                 list.is_public
-                  ? 'bg-emerald-500/90 text-white border border-emerald-400/40'
-                  : 'bg-slate-800 text-slate-300 border border-slate-700'
+                  ? 'bg-[#E8F5E9] text-[#2E7D32]'
+                  : 'bg-white/10 text-white'
               }`}
             >
               {list.is_public ? <Globe className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
@@ -104,14 +105,14 @@ export default async function PublicWanderListPage({ params }: WanderListPagePro
             {list.is_public && <ShareButton title={list.title} />}
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2">
             {list.destination && (
-              <div className="flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-amber-400">
+              <div className="flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-amber-300">
                 <MapPin className="h-4 w-4" />
                 <span>{list.destination}</span>
               </div>
             )}
-            <h1 className="font-display text-3xl sm:text-5xl font-black tracking-tight text-white">
+            <h1 className="font-sans text-3xl sm:text-5xl font-black tracking-tight text-white">
               {list.title}
             </h1>
             {list.description && (
@@ -123,7 +124,7 @@ export default async function PublicWanderListPage({ params }: WanderListPagePro
 
           <div className="flex flex-wrap items-center gap-6 pt-4 border-t border-white/10 text-xs text-slate-400 font-medium">
             <div className="flex items-center gap-2">
-              <div className="h-6 w-6 rounded-full bg-violet-600 text-white font-bold flex items-center justify-center text-[10px]">
+              <div className="h-6 w-6 rounded-md bg-[#E0533C] text-white font-bold flex items-center justify-center text-[10px]">
                 {list.owner?.display_name?.charAt(0).toUpperCase() || 'T'}
               </div>
               <span>Created by <strong className="text-white">{list.owner?.display_name || 'Traveler'}</strong></span>
@@ -144,8 +145,8 @@ export default async function PublicWanderListPage({ params }: WanderListPagePro
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           {/* Places List */}
           <div className="lg:col-span-7 space-y-6">
-            <h2 className="font-display text-2xl font-black text-slate-900 border-b border-slate-200/80 pb-3">
-              Saved Places & Spots ({places.length})
+            <h2 className="font-sans text-2xl font-black text-[#18181B] border-b border-[#E8E3D8] pb-3">
+              Saved Places ({places.length})
             </h2>
 
             {places.length > 0 ? (
@@ -160,26 +161,26 @@ export default async function PublicWanderListPage({ params }: WanderListPagePro
                 ))}
               </div>
             ) : (
-              <div className="rounded-3xl bg-white border border-slate-200 p-10 text-center space-y-3 shadow-sm">
-                <MapPin className="mx-auto h-10 w-10 text-violet-400 stroke-[1.8]" />
-                <h3 className="font-display text-xl font-bold text-slate-900">No places added yet</h3>
-                <p className="text-xs text-slate-500 max-w-sm mx-auto">
+              <div className="rounded-3xl bg-white border border-[#E8E3D8] p-10 text-center space-y-3 shadow-2xs">
+                <MapPin className="mx-auto h-9 w-9 text-[#E0533C] stroke-[1.8]" />
+                <h3 className="font-sans text-lg font-bold text-[#18181B]">No places added yet</h3>
+                <p className="text-xs text-[#71717A] max-w-sm mx-auto font-medium">
                   Add your favorite cafes, hotels, sights, and hidden gems to this Trackilio List.
                 </p>
               </div>
             )}
           </div>
 
-          {/* Add Place Form Sidebar */}
+          {/* Sidebar */}
           <div className="lg:col-span-5 space-y-6">
             {isOwner ? (
               <div className="sticky top-24">
                 <PlaceForm listId={list.id} currentUserId={user?.id} />
               </div>
             ) : (
-              <div className="rounded-3xl bg-gradient-to-br from-violet-50 to-purple-50 border border-violet-200/60 p-6 space-y-3">
-                <h3 className="font-display text-lg font-bold text-slate-900">About this Trackilio List</h3>
-                <p className="text-xs text-slate-600 leading-relaxed font-medium">
+              <div className="rounded-3xl bg-[#F5F1E8] border border-[#E2DAC8] p-6 space-y-2.5">
+                <h3 className="font-sans text-base font-bold text-[#18181B]">About this list</h3>
+                <p className="text-xs text-[#71717A] leading-relaxed font-medium">
                   This list was created by {list.owner?.display_name || 'a traveler'} for {list.destination || 'exploring places'}. Upvote your favorite spots or add a recommendation comment!
                 </p>
               </div>
