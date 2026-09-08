@@ -56,7 +56,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${plusJakarta.variable} ${newsreader.variable}`}>
-      <body className="flex min-h-screen flex-col bg-[#FAF8F3] text-[#18181B] font-sans pb-16 md:pb-0">
+      <body className="flex min-h-screen flex-col bg-[#FAF6F0] text-[#2C2A29] font-sans pb-16 md:pb-0">
         <Navbar />
         <main className="flex-1">{children}</main>
         <Footer />

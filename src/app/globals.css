@@ -1,56 +1,59 @@
 @import "tailwindcss";
 
 @theme {
-  --color-warm-bg: #FAF8F3;
-  --color-warm-card: #FFFFFF;
-  --color-warm-subtle: #F3EFE6;
-  --color-warm-border: #E8E3D8;
+  --color-cozy-bg: #FAF6F0;
+  --color-cozy-card: #FFFFFF;
+  --color-cozy-subtle: #F3ECE1;
+  --color-cozy-border: #E6DFD5;
   
-  --color-ink-900: #18181B;
-  --color-ink-700: #3F3F46;
-  --color-ink-500: #71717A;
-  --color-ink-400: #A1A1AA;
+  --color-espresso-900: #2C2A29;
+  --color-espresso-700: #4A4643;
+  --color-espresso-500: #78726D;
+  --color-espresso-400: #9E968F;
   
-  --color-terracotta-500: #E0533C;
-  --color-terracotta-600: #C8422C;
-  --color-terracotta-50: #FDF3F1;
+  --color-sage-600: #4A6B5D;
+  --color-sage-700: #3B594B;
+  --color-sage-50: #F0F5F2;
   
-  --color-sage-100: #E8F5E9;
-  --color-sage-700: #2E7D32;
-  
-  --color-butter-100: #FEF9C3;
-  --color-butter-800: #854D0E;
+  --color-[#4A6B5D]: #4A6B5D;
+  --color-[#3B594B]: #3B594B;
 
-  --color-dusty-100: #E0F2FE;
-  --color-dusty-700: #0369A1;
+  --color-rose-pastel: #F4DCD9;
+  --color-[#DF9B9B]: #DF9B9B;
+
+  --color-butter-pastel: #F7EBC6;
+  --color-[#E6C875]: #E6C875;
+
+  --color-sky-pastel: #D8E5ED;
+  --color-[#7FA6C8]: #7FA6C8;
 
   --font-sans: var(--font-sans), system-ui, -apple-system, sans-serif;
   --font-serif: var(--font-serif), Georgia, serif;
 }
 
 body {
-  background-color: #FAF8F3;
-  color: #18181B;
+  background-color: #FAF6F0;
+  color: #2C2A29;
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
 
-/* Tactile Warm Editorial Card Elevate */
-.editorial-card {
+/* Cozy Pastel Editorial Card */
+.cozy-card {
   background-color: #FFFFFF;
-  border: 1px solid #E8E3D8;
+  border: 1px solid #E6DFD5;
   border-radius: 1.25rem;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.editorial-card:hover {
+.cozy-card:hover {
   transform: translateY(-3px);
-  border-color: #D6CFBF;
-  box-shadow: 0 16px 32px -12px rgba(24, 24, 27, 0.08);
+  border-color: #D8CEBE;
+  box-shadow: 0 16px 32px -12px rgba(44, 42, 41, 0.06);
 }
 
-/* Micro interaction press */
+/* Micro interaction active press */
 .active-press:active {
   transform: scale(0.97);
 }

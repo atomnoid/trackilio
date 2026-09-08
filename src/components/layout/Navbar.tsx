@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { TrackilioLogo } from './TrackilioLogo';
-import { Compass, Plus, Search, User, FolderHeart, Info } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 export function Navbar() {
@@ -28,7 +28,7 @@ export function Navbar() {
     <header
       className={`sticky top-0 z-40 transition-all duration-300 ${
         scrolled
-          ? 'bg-[#FAF8F3]/90 backdrop-blur-md border-b border-[#E8E3D8] py-3'
+          ? 'bg-[#FAF6F0]/90 backdrop-blur-md border-b border-[#E6DFD5] py-3'
           : 'bg-transparent py-5'
       }`}
     >
@@ -47,8 +47,8 @@ export function Navbar() {
                   href={link.href}
                   className={`transition-colors ${
                     isActive
-                      ? 'text-[#E0533C] font-bold'
-                      : 'text-[#3F3F46] hover:text-[#18181B]'
+                      ? 'text-[#4A6B5D] font-bold'
+                      : 'text-[#4A4643] hover:text-[#2C2A29]'
                   }`}
                 >
                   {link.label}
@@ -61,7 +61,7 @@ export function Navbar() {
           <div className="flex items-center gap-3">
             <Link
               href="/discover"
-              className="p-2 text-[#71717A] hover:text-[#18181B] hover:bg-[#F3EFE6] rounded-xl transition-colors"
+              className="p-2 text-[#78726D] hover:text-[#2C2A29] hover:bg-[#F3ECE1] rounded-xl transition-colors"
               title="Search Places & Lists"
             >
               <Search className="h-4.5 w-4.5" />
@@ -69,14 +69,14 @@ export function Navbar() {
 
             <Link
               href="/auth/login"
-              className="hidden sm:inline-block text-sm font-bold text-[#3F3F46] hover:text-[#18181B] px-3 py-2 transition-colors"
+              className="hidden sm:inline-block text-sm font-bold text-[#4A4643] hover:text-[#2C2A29] px-3 py-2 transition-colors"
             >
               Log in
             </Link>
 
             <Link
               href="/create"
-              className="inline-flex items-center gap-2 rounded-xl bg-[#18181B] hover:bg-[#C8422C] text-white px-4.5 py-2.5 text-xs font-bold shadow-sm active-press transition-all"
+              className="inline-flex items-center gap-2 rounded-xl bg-[#4A6B5D] hover:bg-[#3B594B] text-white px-4.5 py-2.5 text-xs font-bold shadow-2xs active-press transition-all"
             >
               <Plus className="h-4 w-4 stroke-[2.5]" />
               Create a list

@@ -17,62 +17,62 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
   return (
     <div className="mx-auto max-w-md px-4 py-16 space-y-6">
       <div className="text-center space-y-2">
-        <h1 className="font-display text-3xl font-black text-slate-900">Join Trackilio ✨</h1>
-        <p className="text-sm text-slate-600 font-normal">Start organizing places, planning trips, and discovering content.</p>
+        <h1 className="font-sans text-3xl font-black text-[#2C2A29]">Join Trackilio ✨</h1>
+        <p className="text-sm text-[#78726D] font-normal">Start organizing places, planning trips, and discovering content.</p>
       </div>
 
       {resolvedParams.error && (
-        <div className="rounded-2xl bg-rose-50 border border-rose-200 p-4 text-xs font-semibold text-rose-700 text-center">
+        <div className="rounded-2xl bg-[#FBF0F0] border border-[#F2D5D5] p-4 text-xs font-semibold text-[#C87A7A] text-center">
           {resolvedParams.error}
         </div>
       )}
 
-      <form action="/auth/signup/action" method="POST" className="bg-white border border-slate-200/80 rounded-3xl p-8 shadow-xl shadow-violet-500/5 space-y-5">
+      <form action="/auth/signup/action" method="POST" className="bg-white border border-[#E6DFD5] rounded-3xl p-8 shadow-xs space-y-5">
         <div className="space-y-1">
-          <label className="block text-xs font-bold text-slate-800">Display Name</label>
+          <label className="block text-xs font-bold text-[#2C2A29]">Display Name</label>
           <input
             type="text"
             name="displayName"
             required
             placeholder="e.g. Elena Rostova"
-            className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-violet-600 focus:bg-white transition-all"
+            className="w-full rounded-2xl border border-[#E6DFD5] bg-[#FAF6F0] px-4 py-3 text-sm font-medium text-[#2C2A29] focus:outline-none focus:ring-1 focus:ring-[#2C2A29] focus:bg-white transition-all"
           />
         </div>
 
         <div className="space-y-1">
-          <label className="block text-xs font-bold text-slate-800">Email Address</label>
+          <label className="block text-xs font-bold text-[#2C2A29]">Email Address</label>
           <input
             type="email"
             name="email"
             required
             placeholder="you@example.com"
-            className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-violet-600 focus:bg-white transition-all"
+            className="w-full rounded-2xl border border-[#E6DFD5] bg-[#FAF6F0] px-4 py-3 text-sm font-medium text-[#2C2A29] focus:outline-none focus:ring-1 focus:ring-[#2C2A29] focus:bg-white transition-all"
           />
         </div>
 
         <div className="space-y-1">
-          <label className="block text-xs font-bold text-slate-800">Password</label>
+          <label className="block text-xs font-bold text-[#2C2A29]">Password</label>
           <input
             type="password"
             name="password"
             required
             minLength={6}
             placeholder="Minimum 6 characters"
-            className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-violet-600 focus:bg-white transition-all"
+            className="w-full rounded-2xl border border-[#E6DFD5] bg-[#FAF6F0] px-4 py-3 text-sm font-medium text-[#2C2A29] focus:outline-none focus:ring-1 focus:ring-[#2C2A29] focus:bg-white transition-all"
           />
         </div>
 
         <button
           type="submit"
-          className="w-full rounded-2xl bg-gradient-to-r from-violet-600 to-purple-600 text-white font-extrabold py-3.5 text-sm shadow-lg shadow-violet-500/25 hover:shadow-xl hover:scale-[1.01] active-press transition-all"
+          className="w-full rounded-2xl bg-[#4A6B5D] hover:bg-[#3B594B] text-white font-extrabold py-3.5 text-sm shadow-2xs active-press transition-all"
         >
           Create Account
         </button>
       </form>
 
-      <p className="text-center text-xs text-slate-500 font-medium">
+      <p className="text-center text-xs text-[#78726D] font-medium">
         Already have an account?{' '}
-        <Link href="/auth/login" className="font-extrabold text-violet-600 hover:underline">
+        <Link href="/auth/login" className="font-extrabold text-[#4A6B5D] hover:underline">
           Log in
         </Link>
       </p>

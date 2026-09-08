@@ -69,36 +69,36 @@ export function PlaceForm({ listId, onSuccess }: PlaceFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xl shadow-violet-500/5 space-y-4">
-      <h3 className="font-display text-lg font-extrabold text-slate-900 flex items-center gap-2">
-        <PlusCircle className="h-5 w-5 text-violet-600" /> Add a Place to List
+    <form onSubmit={handleSubmit} className="bg-white border border-[#E6DFD5] rounded-3xl p-6 shadow-2xs space-y-4">
+      <h3 className="font-sans text-base font-extrabold text-[#2C2A29] flex items-center gap-2">
+        <PlusCircle className="h-4.5 w-4.5 text-[#4A6B5D]" /> Add a Place to List
       </h3>
 
       {error && (
-        <div className="rounded-2xl bg-rose-50 border border-rose-200 p-3 text-xs text-rose-700 font-medium">
+        <div className="rounded-2xl bg-[#FBF0F0] border border-[#F2D5D5] p-3 text-xs text-[#C87A7A] font-medium">
           {error}
         </div>
       )}
 
       <div className="space-y-1">
-        <label className="block text-xs font-bold text-slate-800">Place Name *</label>
+        <label className="block text-xs font-bold text-[#2C2A29]">Place Name *</label>
         <input
           type="text"
           required
           placeholder="e.g. Arabica Coffee Kyoto"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-violet-600 focus:bg-white transition-all"
+          className="w-full rounded-2xl border border-[#E6DFD5] bg-[#FAF6F0] px-4 py-2.5 text-xs font-medium text-[#2C2A29] focus:outline-none focus:ring-1 focus:ring-[#2C2A29] focus:bg-white transition-all"
         />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div className="space-y-1">
-          <label className="block text-xs font-bold text-slate-800">Category</label>
+          <label className="block text-xs font-bold text-[#2C2A29]">Category</label>
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-violet-600"
+            className="w-full rounded-2xl border border-[#E6DFD5] bg-[#FAF6F0] px-3 py-2.5 text-xs font-bold text-[#2C2A29] focus:outline-none focus:ring-1 focus:ring-[#2C2A29]"
           >
             <option value="Cafe">Cafe</option>
             <option value="Restaurant">Restaurant</option>
@@ -110,24 +110,24 @@ export function PlaceForm({ listId, onSuccess }: PlaceFormProps) {
         </div>
 
         <div className="space-y-1">
-          <label className="block text-xs font-bold text-slate-800">City / Region</label>
+          <label className="block text-xs font-bold text-[#2C2A29]">City / Region</label>
           <input
             type="text"
             placeholder="e.g. Kyoto"
             value={location}
             onChange={(e) => setLocation(e.target.value)}
-            className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-violet-600 focus:bg-white transition-all"
+            className="w-full rounded-2xl border border-[#E6DFD5] bg-[#FAF6F0] px-3 py-2.5 text-xs font-medium text-[#2C2A29] focus:outline-none focus:ring-1 focus:ring-[#2C2A29] focus:bg-white transition-all"
           />
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div className="space-y-1">
-          <label className="block text-xs font-bold text-slate-800">Priority</label>
+          <label className="block text-xs font-bold text-[#2C2A29]">Priority</label>
           <select
             value={priority}
             onChange={(e) => setPriority(e.target.value as PriorityLevel)}
-            className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-violet-600"
+            className="w-full rounded-2xl border border-[#E6DFD5] bg-[#FAF6F0] px-3 py-2.5 text-xs font-bold text-[#2C2A29] focus:outline-none focus:ring-1 focus:ring-[#2C2A29]"
           >
             <option value="must_visit">🔥 Must Visit</option>
             <option value="want_to_visit">🧭 Want to Visit</option>
@@ -136,11 +136,11 @@ export function PlaceForm({ listId, onSuccess }: PlaceFormProps) {
         </div>
 
         <div className="space-y-1">
-          <label className="block text-xs font-bold text-slate-800">Status</label>
+          <label className="block text-xs font-bold text-[#2C2A29]">Status</label>
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value as VisitStatus)}
-            className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-violet-600"
+            className="w-full rounded-2xl border border-[#E6DFD5] bg-[#FAF6F0] px-3 py-2.5 text-xs font-bold text-[#2C2A29] focus:outline-none focus:ring-1 focus:ring-[#2C2A29]"
           >
             <option value="saved">Saved</option>
             <option value="planned">Planned</option>
@@ -150,31 +150,31 @@ export function PlaceForm({ listId, onSuccess }: PlaceFormProps) {
       </div>
 
       <div className="space-y-1">
-        <label className="block text-xs font-bold text-slate-800">Google Maps URL</label>
+        <label className="block text-xs font-bold text-[#2C2A29]">Google Maps URL</label>
         <input
           type="url"
           placeholder="https://maps.google.com/..."
           value={mapsUrl}
           onChange={(e) => setMapsUrl(e.target.value)}
-          className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-violet-600 focus:bg-white transition-all"
+          className="w-full rounded-2xl border border-[#E6DFD5] bg-[#FAF6F0] px-3 py-2.5 text-xs font-medium text-[#2C2A29] focus:outline-none focus:ring-1 focus:ring-[#2C2A29] focus:bg-white transition-all"
         />
       </div>
 
       <div className="space-y-1">
-        <label className="block text-xs font-bold text-slate-800">Note / Recommendation</label>
+        <label className="block text-xs font-bold text-[#2C2A29]">Note / Recommendation</label>
         <textarea
           rows={2}
           placeholder="Best coffee near Higashiyama, try the matcha latte..."
           value={note}
           onChange={(e) => setNote(e.target.value)}
-          className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-violet-600 focus:bg-white transition-all"
+          className="w-full rounded-2xl border border-[#E6DFD5] bg-[#FAF6F0] px-3 py-2.5 text-xs font-medium text-[#2C2A29] focus:outline-none focus:ring-1 focus:ring-[#2C2A29] focus:bg-white transition-all"
         />
       </div>
 
       <button
         type="submit"
         disabled={loading || !name.trim()}
-        className="w-full rounded-2xl bg-gradient-to-r from-violet-600 to-purple-600 text-white font-extrabold py-3 text-xs shadow-md hover:shadow-lg active-press transition-all disabled:opacity-50"
+        className="w-full rounded-2xl bg-[#4A6B5D] hover:bg-[#3B594B] text-white font-extrabold py-3 text-xs shadow-2xs active-press transition-all disabled:opacity-50"
       >
         {loading ? 'Adding Place...' : 'Save Place to List'}
       </button>

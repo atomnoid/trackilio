@@ -17,13 +17,13 @@ function hashString(str: string): number {
   return Math.abs(hash);
 }
 
-// Warm Editorial Palettes (No Neon Gradients)
-const WARM_PALETTES = [
-  { bg: 'bg-[#F4EFE6]', accent: '#E0533C', text: '#18181B', border: '#E2DAC8', pattern: '#D5C9B3' },
-  { bg: 'bg-[#EBF2EA]', accent: '#2E7D32', text: '#18181B', border: '#D0E2CF', pattern: '#BED5BC' },
-  { bg: 'bg-[#EFF6FB]', accent: '#0369A1', text: '#18181B', border: '#D2E5F5', pattern: '#B8D6EF' },
-  { bg: 'bg-[#FDF6E2]', accent: '#B45309', text: '#18181B', border: '#F3E5BE', pattern: '#E5D3A2' },
-  { bg: 'bg-[#F9EFEF]', accent: '#991B1B', text: '#18181B', border: '#F0D5D5', pattern: '#E2BCBC' },
+// Cozy Pastel Editorial Palettes
+const PASTEL_PALETTES = [
+  { bg: 'bg-[#F0F5F2]', accent: '#4A6B5D', text: '#2C2A29', border: '#D5E3DC', pattern: '#C3D6CC' },
+  { bg: 'bg-[#EFF6FB]', accent: '#5C82A6', text: '#2C2A29', border: '#D5E5F2', pattern: '#C1D7E8' },
+  { bg: 'bg-[#FBF0F0]', accent: '#C87A7A', text: '#2C2A29', border: '#F2D5D5', pattern: '#E5BFBF' },
+  { bg: 'bg-[#FDF8EC]', accent: '#B89742', text: '#2C2A29', border: '#F2E6C8', pattern: '#E5D6AA' },
+  { bg: 'bg-[#F5EFE6]', accent: '#4A4643', text: '#2C2A29', border: '#E6DFD5', pattern: '#D8CEBE' },
 ];
 
 export function ListCover({
@@ -33,8 +33,8 @@ export function ListCover({
   className = '',
 }: ListCoverProps) {
   const seed = hashString(`${title}-${destination}`);
-  const paletteIndex = seed % WARM_PALETTES.length;
-  const palette = WARM_PALETTES[paletteIndex];
+  const paletteIndex = seed % PASTEL_PALETTES.length;
+  const palette = PASTEL_PALETTES[paletteIndex];
 
   const displayDest = destination || title || 'Explore';
   const initials = displayDest
@@ -52,9 +52,9 @@ export function ListCover({
 
   return (
     <div
-      className={`relative w-full overflow-hidden ${palette.bg} ${heightClass} ${className} flex items-center justify-center select-none border-b border-[#E8E3D8]`}
+      className={`relative w-full overflow-hidden ${palette.bg} ${heightClass} ${className} flex items-center justify-center select-none border-b border-[#E6DFD5]`}
     >
-      {/* Editorial Grid / Dot Linework */}
+      {/* Soft Editorial Grid */}
       <div
         className="absolute inset-0 opacity-20 pointer-events-none"
         style={{
@@ -63,7 +63,7 @@ export function ListCover({
         }}
       />
 
-      {/* SVG Vector Drawing */}
+      {/* SVG Vector Details */}
       <svg
         className="absolute inset-0 w-full h-full pointer-events-none"
         viewBox="0 0 400 200"
@@ -76,24 +76,24 @@ export function ListCover({
             <path
               d="M-20 150 C 100 40, 200 160, 420 70"
               stroke={palette.accent}
-              strokeWidth="2.5"
+              strokeWidth="2"
               strokeDasharray="6 5"
-              strokeOpacity="0.7"
+              strokeOpacity="0.75"
             />
             <g transform="translate(140, 80)">
-              <circle cx="0" cy="0" r="10" fill={palette.accent} />
-              <circle cx="0" cy="0" r="4" fill="#FFFFFF" />
+              <circle cx="0" cy="0" r="9" fill={palette.accent} />
+              <circle cx="0" cy="0" r="3.5" fill="#FFFFFF" />
             </g>
             <g transform="translate(300, 110)">
-              <circle cx="0" cy="0" r="12" fill={palette.text} fillOpacity="0.8" />
-              <circle cx="0" cy="0" r="4" fill="#FFFFFF" />
+              <circle cx="0" cy="0" r="11" fill={palette.text} fillOpacity="0.7" />
+              <circle cx="0" cy="0" r="3.5" fill="#FFFFFF" />
             </g>
           </>
         )}
 
         {patternType === 1 && (
           <>
-            <circle cx="340" cy="50" r="40" fill={palette.pattern} fillOpacity="0.5" />
+            <circle cx="340" cy="50" r="40" fill={palette.pattern} fillOpacity="0.4" />
             <path
               d="M -20 140 Q 120 180, 200 130 T 420 160"
               stroke={palette.accent}
@@ -106,7 +106,7 @@ export function ListCover({
               height="60"
               rx="8"
               fill={palette.text}
-              fillOpacity="0.06"
+              fillOpacity="0.04"
               stroke={palette.border}
             />
           </>
@@ -129,16 +129,16 @@ export function ListCover({
         )}
       </svg>
 
-      {/* Destination Badge Initials Stamp */}
+      {/* Destination Badge Stamp */}
       <div className="relative z-10 flex flex-col items-center justify-center text-center p-4">
-        <div className="h-13 w-13 rounded-2xl bg-white border border-[#E8E3D8] flex items-center justify-center shadow-sm">
-          <span className="font-sans text-xl font-black text-[#18181B] tracking-wider">
+        <div className="h-13 w-13 rounded-2xl bg-white border border-[#E6DFD5] flex items-center justify-center shadow-2xs">
+          <span className="font-sans text-xl font-black text-[#2C2A29] tracking-wider">
             {initials}
           </span>
         </div>
 
         {destination && (
-          <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-white/90 border border-[#E8E3D8] px-3 py-1 text-xs font-bold text-[#18181B] shadow-2xs">
+          <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-white/90 border border-[#E6DFD5] px-3 py-1 text-xs font-bold text-[#2C2A29] shadow-2xs">
             📍 {destination}
           </span>
         )}
