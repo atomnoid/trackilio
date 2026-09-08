@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+@theme {
+  --color-cream: #FAF8F5;
+  --color-charcoal: #1C1917;
+  --color-terracotta: #C25E00;
+  --color-olive: #3F5E4D;
+  --color-sand: #F5F2EC;
+  --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
+  --font-serif: var(--font-newsreader), Georgia, serif;
+}
+
+body {
+  background-color: #FAF8F5;
+  color: #1C1917;
+  -webkit-font-smoothing: antialiased;
+}
