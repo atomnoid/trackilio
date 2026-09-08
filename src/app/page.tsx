@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { ArrowRight, Compass, Plus } from 'lucide-react';
 import { getPublicWanderLists } from '@/services/lists';
+import { WanderList } from '@/types/database';
 import { WanderListCard } from '@/components/lists/WanderListCard';
 import { HeroMap } from '@/components/illustrations/HeroMap';
 import {
@@ -16,13 +17,14 @@ export default async function HomePage() {
   const featuredLists = await getPublicWanderLists({ limit: 6 });
 
   // Fallback demo data if DB has no lists yet
-  const fallbackLists = [
+  const fallbackLists: WanderList[] = [
     {
       id: 'demo-1',
       owner_id: 'demo-user',
       title: '7 Days in Kyoto: Cafes & Bamboo Groves',
       description: 'The ultimate slow-travel guide to Kyoto including hidden tea houses and early morning shrines.',
       destination: 'Kyoto, Japan',
+      cover_image: null,
       slug: '7-days-in-kyoto-cafes-bamboo-groves',
       is_public: true,
       created_at: new Date().toISOString(),
@@ -35,6 +37,7 @@ export default async function HomePage() {
       title: 'Best Hidden Cafes in Kolkata',
       description: 'Colonial charm meets third-wave coffee culture across North & South Kolkata.',
       destination: 'Kolkata, India',
+      cover_image: null,
       slug: 'best-hidden-cafes-in-kolkata',
       is_public: true,
       created_at: new Date().toISOString(),
@@ -47,6 +50,7 @@ export default async function HomePage() {
       title: 'Paris Food Bucket List: Pastries & Bistro Wine',
       description: 'A curated list of authentic Parisian bakeries, natural wine bars, and classic bistros.',
       destination: 'Paris, France',
+      cover_image: null,
       slug: 'paris-food-bucket-list-pastries-bistro-wine',
       is_public: true,
       created_at: new Date().toISOString(),

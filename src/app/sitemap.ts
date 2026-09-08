@@ -1,5 +1,8 @@
 import { MetadataRoute } from 'next';
 import { getPublicWanderLists } from '@/services/lists';
+import { createClient } from '@/lib/supabase/server';
+
+export const dynamic = 'force-dynamic';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
@@ -13,6 +16,29 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
+  // Fetch all public profiles that have a username set
+  let profileEntries: MetadataRoute.Sitemap = [];
+  try {
+    const supabase = await createClient();
+    const { data: profiles } = await (supabase as any)
+      .from('profiles')
+      .select('username, updated_at')
+      .not('username', 'is', null);
+
+    if (profiles) {
+      profileEntries = profiles
+        .filter((p: any) => p.username)
+        .map((p: any) => ({
+          url: `${siteUrl}/u/${p.username}`,
+          lastModified: p.updated_at ? new Date(p.updated_at) : new Date(),
+          changeFrequency: 'weekly' as const,
+          priority: 0.7,
+        }));
+    }
+  } catch {
+    // Non-critical — continue without profile entries
+  }
+
   return [
     {
       url: siteUrl,
@@ -21,10 +47,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 1.0,
     },
     {
-      url: `${siteUrl}/explore`,
+      url: `${siteUrl}/discover`,
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 0.9,
+    },
+    {
+      url: `${siteUrl}/blend`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.6,
     },
     {
       url: `${siteUrl}/about`,
@@ -33,5 +65,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.5,
     },
     ...listEntries,
+    ...profileEntries,
   ];
 }
+

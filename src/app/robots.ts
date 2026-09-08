@@ -6,9 +6,10 @@ export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: '*',
-      allow: ['/', '/explore', '/l/*', '/about'],
-      disallow: ['/dashboard', '/create', '/settings', '/auth/*'],
+      allow: ['/', '/discover', '/l/*', '/u/*', '/blend/*', '/about'],
+      disallow: ['/dashboard', '/create', '/settings', '/auth/*', '/api/*'],
     },
     sitemap: `${siteUrl}/sitemap.xml`,
   };
 }
+

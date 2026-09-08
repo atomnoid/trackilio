@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ListPlace } from '@/types/database';
-import { MapPin, ExternalLink, ThumbsUp, MessageSquare, Flame, Compass, Send } from 'lucide-react';
+import { ListPlace, VoteType } from '@/types/database';
+import { MapPin, ExternalLink, ArrowBigUp, ArrowBigDown, MessageSquare, Flame, Compass, Send } from 'lucide-react';
 
 interface CommentShape {
   id: string;
@@ -20,34 +20,59 @@ interface PlaceCardProps {
 export function PlaceCard({ listPlace, currentUserId }: PlaceCardProps) {
   const place = listPlace.place;
   const [votesCount, setVotesCount] = useState(listPlace.votes_count ?? 0);
-  const [hasVoted, setHasVoted] = useState(listPlace.user_has_voted ?? false);
+  const [userVote, setUserVote] = useState<VoteType | null>(
+    listPlace.user_vote_type ?? (listPlace.user_has_voted ? 'up' : null)
+  );
   const [comments, setComments] = useState<CommentShape[]>((listPlace.comments ?? []) as CommentShape[]);
   const [newComment, setNewComment] = useState('');
   const [showComments, setShowComments] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [animateVote, setAnimateVote] = useState(false);
+  const [animateVote, setAnimateVote] = useState<'up' | 'down' | null>(null);
 
-  const handleVote = async () => {
+  const handleVote = async (targetType: VoteType) => {
     if (!currentUserId) {
       alert('Please log in to vote on places.');
       return;
     }
+
+    const prevVote = userVote;
     const prevCount = votesCount;
-    const prevVoted = hasVoted;
 
-    setHasVoted(!prevVoted);
-    setVotesCount(prevVoted ? prevCount - 1 : prevCount + 1);
-    setAnimateVote(true);
-    setTimeout(() => setAnimateVote(false), 300);
+    let nextVote: VoteType | null = null;
+    let nextCount = prevCount;
 
-    const res = await fetch('/api/votes', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ listPlaceId: listPlace.id }),
-    });
+    if (prevVote === targetType) {
+      // Toggle off
+      nextVote = null;
+      nextCount = targetType === 'up' ? prevCount - 1 : prevCount + 1;
+    } else if (prevVote === null) {
+      // New vote
+      nextVote = targetType;
+      nextCount = targetType === 'up' ? prevCount + 1 : prevCount - 1;
+    } else {
+      // Switch vote (up -> down or down -> up)
+      nextVote = targetType;
+      nextCount = targetType === 'up' ? prevCount + 2 : prevCount - 2;
+    }
 
-    if (!res.ok) {
-      setHasVoted(prevVoted);
+    setUserVote(nextVote);
+    setVotesCount(nextCount);
+    setAnimateVote(targetType);
+    setTimeout(() => setAnimateVote(null), 300);
+
+    try {
+      const res = await fetch('/api/votes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ listPlaceId: listPlace.id, voteType: targetType }),
+      });
+
+      if (!res.ok) {
+        setUserVote(prevVote);
+        setVotesCount(prevCount);
+      }
+    } catch {
+      setUserVote(prevVote);
       setVotesCount(prevCount);
     }
   };
@@ -147,26 +172,57 @@ export function PlaceCard({ listPlace, currentUserId }: PlaceCardProps) {
 
       {/* Action Footer */}
       <div className="pt-3 border-t border-[#E8E3D8] flex items-center justify-between gap-4 text-xs">
-        <button
-          onClick={handleVote}
-          className={`inline-flex items-center gap-1.5 font-bold px-3 py-1.5 rounded-lg active-press transition-all ${
-            animateVote ? 'scale-105' : ''
-          } ${
-            hasVoted
-              ? 'bg-[#18181B] text-white shadow-2xs'
-              : 'bg-[#F3EFE6] text-[#18181B] hover:bg-[#E2DAC8]'
-          }`}
-        >
-          <ThumbsUp className={`h-3.5 w-3.5 ${hasVoted ? 'fill-white' : ''}`} />
-          <span>{votesCount} Upvotes</span>
-        </button>
+        <div className="inline-flex items-center rounded-xl bg-[#F5F1E8] border border-[#E6DFD5] p-0.5 shadow-2xs">
+          {/* Upvote Button */}
+          <button
+            onClick={() => handleVote('up')}
+            title="Upvote this spot"
+            aria-label="Upvote"
+            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg font-extrabold transition-all active-press ${
+              userVote === 'up'
+                ? 'bg-[#4A6B5D] text-white shadow-xs'
+                : 'text-[#5C5652] hover:text-[#4A6B5D] hover:bg-white/60'
+            } ${animateVote === 'up' ? 'scale-110' : ''}`}
+          >
+            <ArrowBigUp className={`h-4 w-4 ${userVote === 'up' ? 'fill-current' : ''}`} />
+            <span className="text-[11px] hidden sm:inline">Upvote</span>
+          </button>
+
+          {/* Net Score */}
+          <span
+            className={`px-2 py-1 font-mono font-black text-xs ${
+              votesCount > 0
+                ? 'text-[#4A6B5D]'
+                : votesCount < 0
+                ? 'text-[#E0533C]'
+                : 'text-[#78726D]'
+            }`}
+          >
+            {votesCount > 0 ? `+${votesCount}` : votesCount}
+          </span>
+
+          {/* Downvote Button */}
+          <button
+            onClick={() => handleVote('down')}
+            title="Downvote this spot"
+            aria-label="Downvote"
+            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg font-extrabold transition-all active-press ${
+              userVote === 'down'
+                ? 'bg-[#E0533C] text-white shadow-xs'
+                : 'text-[#5C5652] hover:text-[#E0533C] hover:bg-white/60'
+            } ${animateVote === 'down' ? 'scale-110' : ''}`}
+          >
+            <ArrowBigDown className={`h-4 w-4 ${userVote === 'down' ? 'fill-current' : ''}`} />
+            <span className="text-[11px] hidden sm:inline">Downvote</span>
+          </button>
+        </div>
 
         <button
           onClick={() => setShowComments(!showComments)}
-          className="inline-flex items-center gap-1.5 text-[#71717A] hover:text-[#18181B] font-bold px-2 py-1"
+          className="inline-flex items-center gap-1.5 text-[#78726D] hover:text-[#2C2A29] font-bold px-2.5 py-1.5 rounded-lg hover:bg-[#F5F1E8] transition-colors"
         >
           <MessageSquare className="h-3.5 w-3.5" />
-          <span>{comments.length} Comments</span>
+          <span>{comments.length} {comments.length === 1 ? 'Comment' : 'Comments'}</span>
         </button>
       </div>
 

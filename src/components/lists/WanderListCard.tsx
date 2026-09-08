@@ -9,13 +9,13 @@ interface WanderListCardProps {
 }
 
 export function WanderListCard({ list }: WanderListCardProps) {
+  const profileIdentifier = list.owner?.username || list.owner_id;
+  const profileUrl = profileIdentifier ? `/u/${profileIdentifier}` : null;
+
   return (
-    <Link
-      href={`/l/${list.slug}`}
-      className="group block cozy-card overflow-hidden active-press"
-    >
+    <div className="group relative block cozy-card overflow-hidden hover:-translate-y-1 hover:shadow-md transition-all duration-200">
       {/* Vector Illustration Cover */}
-      <div className="relative">
+      <Link href={`/l/${list.slug}`} className="block relative">
         <ListCover
           title={list.title}
           destination={list.destination || ''}
@@ -35,42 +35,70 @@ export function WanderListCard({ list }: WanderListCardProps) {
             {list.is_public ? 'Public' : 'Private'}
           </span>
         </div>
-      </div>
+      </Link>
 
       {/* Card Content Body */}
       <div className="p-5 space-y-2.5">
-        {list.destination && (
-          <div className="flex items-center gap-1 text-[11px] font-extrabold uppercase tracking-wider text-[#4A6B5D]">
-            <MapPin className="h-3.5 w-3.5" />
-            <span>{list.destination}</span>
-          </div>
-        )}
-
-        <h3 className="font-sans text-lg font-black text-[#2C2A29] group-hover:text-[#4A6B5D] transition-colors line-clamp-1">
-          {list.title}
-        </h3>
-
-        {list.description && (
-          <p className="text-xs text-[#78726D] line-clamp-2 leading-relaxed font-medium">
-            {list.description}
-          </p>
-        )}
-
-        <div className="pt-3 border-t border-[#E6DFD5] flex items-center justify-between text-xs text-[#78726D]">
-          <div className="flex items-center gap-2">
-            <div className="h-6 w-6 rounded-lg bg-[#2C2A29] text-white font-bold text-[10px] flex items-center justify-center">
-              {list.owner?.display_name?.charAt(0).toUpperCase() || 'T'}
+        <Link href={`/l/${list.slug}`} className="block space-y-2.5">
+          {list.destination && (
+            <div className="flex items-center gap-1 text-[11px] font-extrabold uppercase tracking-wider text-[#4A6B5D]">
+              <MapPin className="h-3.5 w-3.5" />
+              <span>{list.destination}</span>
             </div>
-            <span className="font-bold text-[#2C2A29] truncate max-w-[120px]">
-              {list.owner?.display_name || 'Traveler'}
-            </span>
-          </div>
+          )}
 
-          <span className="font-extrabold text-[#4A6B5D] group-hover:translate-x-0.5 transition-transform inline-flex items-center gap-1">
+          <h3 className="font-sans text-lg font-black text-[#2C2A29] group-hover:text-[#4A6B5D] transition-colors line-clamp-1">
+            {list.title}
+          </h3>
+
+          {list.description && (
+            <p className="text-xs text-[#78726D] line-clamp-2 leading-relaxed font-medium">
+              {list.description}
+            </p>
+          )}
+        </Link>
+
+        {/* Card Footer */}
+        <div className="pt-3 border-t border-[#E6DFD5] flex items-center justify-between text-xs text-[#78726D]">
+          {profileUrl ? (
+            <Link
+              href={profileUrl}
+              className="flex items-center gap-2 group/author hover:opacity-80 transition-opacity"
+              title={`View ${list.owner?.display_name || 'Traveler'}'s profile`}
+            >
+              <div className="h-6 w-6 rounded-lg bg-[#2C2A29] text-white font-bold text-[10px] flex items-center justify-center group-hover/author:bg-[#4A6B5D] transition-colors">
+                {list.owner?.display_name?.charAt(0).toUpperCase() || 'T'}
+              </div>
+              <div className="flex flex-col">
+                <span className="font-bold text-[#2C2A29] truncate max-w-[120px] group-hover/author:text-[#4A6B5D] transition-colors">
+                  {list.owner?.display_name || 'Traveler'}
+                </span>
+                {list.owner?.username && (
+                  <span className="text-[10px] text-[#9E968F] leading-none">
+                    @{list.owner.username}
+                  </span>
+                )}
+              </div>
+            </Link>
+          ) : (
+            <div className="flex items-center gap-2">
+              <div className="h-6 w-6 rounded-lg bg-[#2C2A29] text-white font-bold text-[10px] flex items-center justify-center">
+                {list.owner?.display_name?.charAt(0).toUpperCase() || 'T'}
+              </div>
+              <span className="font-bold text-[#2C2A29] truncate max-w-[120px]">
+                {list.owner?.display_name || 'Traveler'}
+              </span>
+            </div>
+          )}
+
+          <Link
+            href={`/l/${list.slug}`}
+            className="font-extrabold text-[#4A6B5D] group-hover:translate-x-0.5 transition-transform inline-flex items-center gap-1 hover:underline"
+          >
             View <ArrowRight className="h-3 w-3" />
-          </span>
+          </Link>
         </div>
       </div>
-    </Link>
+    </div>
   );
 }

@@ -12,7 +12,7 @@ export async function getPlacesForList(
     .select(`
       *,
       place:places(*),
-      votes(id, user_id),
+      votes(id, user_id, vote_type),
       comments(*, profile:profiles(*))
     `)
     .eq('list_id', listId)
@@ -23,14 +23,19 @@ export async function getPlacesForList(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return listPlaces.map((lp: any) => {
     const votesArr = lp.votes || [];
-    const hasVoted = currentUserId
-      ? votesArr.some((v: { user_id: string }) => v.user_id === currentUserId)
-      : false;
+    const userVote = currentUserId
+      ? votesArr.find((v: { user_id: string; vote_type?: string }) => v.user_id === currentUserId)
+      : null;
+    const upvotes = votesArr.filter((v: any) => v.vote_type !== 'down').length;
+    const downvotes = votesArr.filter((v: any) => v.vote_type === 'down').length;
 
     return {
       ...lp,
-      votes_count: votesArr.length,
-      user_has_voted: hasVoted,
+      votes_count: upvotes - downvotes,
+      upvotes_count: upvotes,
+      downvotes_count: downvotes,
+      user_has_voted: !!userVote,
+      user_vote_type: userVote ? (userVote.vote_type || 'up') : null,
       comments: lp.comments || [],
     };
   }) as ListPlace[];

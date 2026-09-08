@@ -38,14 +38,14 @@ export async function getPublicWanderLists(params?: {
   query?: string;
   limit?: number;
   offset?: number;
+  sort?: 'recent' | 'trending' | 'popular';
 }): Promise<WanderList[]> {
   try {
     const supabase = await createClient();
     let q = (supabase as any)
       .from('wander_lists')
       .select('*, owner:profiles(*)')
-      .eq('is_public', true)
-      .order('created_at', { ascending: false });
+      .eq('is_public', true);
 
     if (params?.destination) {
       q = q.ilike('destination', `%${params.destination}%`);
@@ -53,8 +53,19 @@ export async function getPublicWanderLists(params?: {
     if (params?.query) {
       q = q.or(`title.ilike.%${params.query}%,description.ilike.%${params.query}%`);
     }
+
+    if (params?.sort === 'trending') {
+      q = q.order('updated_at', { ascending: false });
+    } else {
+      // 'recent' or default
+      q = q.order('created_at', { ascending: false });
+    }
+
     if (params?.limit) {
       q = q.limit(params.limit);
+    }
+    if (params?.offset) {
+      q = q.range(params.offset, params.offset + (params.limit || 24) - 1);
     }
 
     const { data, error } = await q;

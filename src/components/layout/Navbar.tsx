@@ -53,6 +53,7 @@ export function Navbar() {
 
   const navLinks = [
     { href: '/discover', label: 'Discover' },
+    { href: '/blend', label: '✨ Blend' },
     { href: '/dashboard', label: 'My Lists' },
     { href: '/about', label: 'About' },
   ];
