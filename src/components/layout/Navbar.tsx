@@ -13,6 +13,9 @@ export function Navbar() {
   const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [username, setUsername] = useState<string | null>(null);
+  const [displayName, setDisplayName] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -26,15 +29,44 @@ export function Navbar() {
   useEffect(() => {
     const supabase = createClient();
 
+    const fetchUserProfile = async (userId: string) => {
+      try {
+        const { data } = await (supabase as any)
+          .from('profiles')
+          .select('username, display_name, avatar_url')
+          .eq('id', userId)
+          .maybeSingle();
+
+        if (data) {
+          if (data.username) setUsername(data.username);
+          if (data.display_name) setDisplayName(data.display_name);
+          if (data.avatar_url) setAvatarUrl(data.avatar_url);
+        }
+      } catch {
+        // Fallback to auth metadata
+      }
+    };
+
     // Fetch initial user auth state
     supabase.auth.getUser().then(({ data }) => {
       setUser(data.user);
+      if (data.user) {
+        fetchUserProfile(data.user.id);
+      }
       setLoading(false);
     });
 
     // Listen to real-time auth state changes (login, signup, logout)
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+      if (currentUser) {
+        fetchUserProfile(currentUser.id);
+      } else {
+        setUsername(null);
+        setDisplayName(null);
+        setAvatarUrl(null);
+      }
       setLoading(false);
     });
 
@@ -47,6 +79,9 @@ export function Navbar() {
     const supabase = createClient();
     await supabase.auth.signOut();
     setUser(null);
+    setUsername(null);
+    setDisplayName(null);
+    setAvatarUrl(null);
     router.push('/auth/login');
     router.refresh();
   };
@@ -57,6 +92,10 @@ export function Navbar() {
     { href: '/dashboard', label: 'My Lists' },
     { href: '/about', label: 'About' },
   ];
+
+  const profileHref = username ? `/u/${username}` : user ? `/u/${user.id}` : '/dashboard';
+  const nameToShow = displayName || user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'Profile';
+  const initialChar = nameToShow.charAt(0).toUpperCase();
 
   return (
     <header
@@ -104,18 +143,27 @@ export function Navbar() {
             {!loading && (
               <>
                 {user ? (
-                  /* Authenticated User Actions */
+                  /* Authenticated User Actions — Profile Logo Links to /u/[username] */
                   <div className="flex items-center gap-2">
                     <Link
-                      href="/dashboard"
+                      href={profileHref}
                       className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#F0F5F2] border border-[#D5E3DC] hover:bg-[#E2EFE9] transition-colors"
-                      title="User Profile & Dashboard"
+                      title="View Public Profile"
                     >
-                      <div className="h-6 w-6 rounded-lg bg-[#4A6B5D] text-white font-bold text-[10px] flex items-center justify-center">
-                        {user.user_metadata?.display_name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase() || 'U'}
-                      </div>
+                      {avatarUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={avatarUrl}
+                          alt={nameToShow}
+                          className="h-6 w-6 rounded-lg object-cover border border-[#D5E3DC]"
+                        />
+                      ) : (
+                        <div className="h-6 w-6 rounded-lg bg-[#4A6B5D] text-white font-bold text-[10px] flex items-center justify-center">
+                          {initialChar}
+                        </div>
+                      )}
                       <span className="hidden sm:inline text-xs font-bold text-[#2C2A29] max-w-[100px] truncate">
-                        {user.user_metadata?.display_name || user.email?.split('@')[0]}
+                        {nameToShow}
                       </span>
                     </Link>
 
