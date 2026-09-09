@@ -84,6 +84,7 @@ export default async function PublicWanderListPage({ params }: WanderListPagePro
 
   const currentMember = members.find((m) => m.user_id === user?.id);
   const canEdit = isOwner || currentMember?.role === 'editor';
+  const hasCollaborators = members.length > 1;
 
   return (
     <div className="pb-24 space-y-10">
