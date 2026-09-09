@@ -150,28 +150,41 @@ export async function getWanderListBySlug(slugOrId: string): Promise<WanderList 
   try {
     const supabase = await createClient();
     const cleanParam = decodeURIComponent(slugOrId).trim();
+    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cleanParam);
+    let data: WanderList | null = null;
 
-    // 1. Try matching by slug
-    let { data, error } = await (supabase as any)
-      .from('wander_lists')
-      .select('*, owner:profiles(*)')
-      .eq('slug', cleanParam)
-      .maybeSingle();
-
-    // 2. If not found and input looks like a UUID or ID fallback, try matching by id
-    if (!data) {
-      const { data: byIdData, error: idError } = await (supabase as any)
+    // 1. If it's a UUID, check by ID
+    if (isUUID) {
+      const { data: byIdData } = await (supabase as any)
         .from('wander_lists')
         .select('*, owner:profiles(*)')
         .eq('id', cleanParam)
         .maybeSingle();
-
-      if (!idError && byIdData) {
-        data = byIdData;
-      }
+      data = byIdData;
     }
 
-    if (error || !data) return null;
+    // 2. Try matching by exact slug
+    if (!data) {
+      const { data: bySlugData } = await (supabase as any)
+        .from('wander_lists')
+        .select('*, owner:profiles(*)')
+        .eq('slug', cleanParam)
+        .maybeSingle();
+      data = bySlugData;
+    }
+
+    // 3. Try case-insensitive slug match
+    if (!data) {
+      const { data: byIlikeSlug } = await (supabase as any)
+        .from('wander_lists')
+        .select('*, owner:profiles(*)')
+        .ilike('slug', cleanParam)
+        .limit(1)
+        .maybeSingle();
+      data = byIlikeSlug;
+    }
+
+    if (!data) return null;
     const enriched = await enrichListsWithCounts(supabase, [data as WanderList]);
     return enriched[0] || null;
   } catch (err: any) {

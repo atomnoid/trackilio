@@ -1,150 +1,263 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 
 export function MapIllustration({ className = 'w-full h-auto' }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 540 360" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-      {/* Background paper texture feel */}
-      <rect width="540" height="360" rx="24" fill="#F5E7C6" stroke="#E8DECA" strokeWidth="2" />
-      
-      {/* Topographic organic land shapes */}
-      <path d="M40 90C90 40 160 80 210 50C260 20 320 80 390 60C460 40 500 110 510 160C520 210 460 260 400 270C340 280 300 330 220 320C140 310 90 260 60 210C30 160 -10 140 40 90Z" fill="#FAF3E1" stroke="#E8DECA" strokeWidth="2" />
-      <path d="M120 140C160 110 220 150 270 120C320 90 380 160 420 180C460 200 440 240 380 250C320 260 260 220 200 240C140 260 90 210 100 170C110 130 80 170 120 140Z" fill="#F5E7C6" stroke="#E8DECA" strokeWidth="1.5" strokeDasharray="4 4" />
-      
-      {/* Connecting travel route */}
-      <path d="M110 200C160 140 220 220 310 150C370 100 420 170 450 130" stroke="#FA8112" strokeWidth="3" strokeDasharray="6 6" strokeLinecap="round" />
-      
-      {/* City Pin 1 - Kolkata */}
-      <g transform="translate(110, 200)">
-        <circle r="16" fill="#222222" />
-        <circle r="6" fill="#FA8112" />
-        <rect x="22" y="-14" width="90" height="28" rx="8" fill="#FFFFFF" stroke="#E8DECA" />
-        <text x="32" y="4" fill="#222222" fontSize="11" fontWeight="800" fontFamily="sans-serif">☕ Cafés in Town</text>
-      </g>
-      
-      {/* City Pin 2 - Hidden Gem */}
-      <g transform="translate(310, 150)">
-        <circle r="16" fill="#FA8112" />
-        <circle r="6" fill="#FFFFFF" />
-        <rect x="22" y="-14" width="85" height="28" rx="8" fill="#FFFFFF" stroke="#E8DECA" />
-        <text x="32" y="4" fill="#222222" fontSize="11" fontWeight="800" fontFamily="sans-serif">💎 Secret Spot</text>
-      </g>
+  const [activePin, setActivePin] = useState<number>(0);
 
-      {/* City Pin 3 - Destination */}
-      <g transform="translate(450, 130)">
-        <circle r="16" fill="#222222" />
-        <circle r="6" fill="#FA8112" />
-        <rect x="-105" y="-14" width="95" height="28" rx="8" fill="#FFFFFF" stroke="#E8DECA" />
-        <text x="-95" y="4" fill="#222222" fontSize="11" fontWeight="800" fontFamily="sans-serif">🌿 Weekend Trip</text>
-      </g>
-    </svg>
+  const pins = [
+    { name: '☕ Blue Tokai Roastery', location: 'Kolkata, India', x: 110, y: 190, category: 'Cafe' },
+    { name: '💎 Hidden Tea Pavilion', location: 'Kyoto, Japan', x: 275, y: 140, category: 'Must Visit' },
+    { name: '🌿 Cliffside Sunset View', location: 'Goa, India', x: 430, y: 165, category: 'Viewpoint' },
+  ];
+
+  return (
+    <div className={`relative rounded-3xl bg-[#F5E7C6] border border-[#E8DECA] p-4 sm:p-6 shadow-sm overflow-hidden select-none ${className}`}>
+      {/* Subtle organic contour lines in background */}
+      <svg viewBox="0 0 540 320" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto">
+        {/* Background land contour patches */}
+        <motion.path
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8 }}
+          d="M30 80C80 30 150 70 200 40C250 10 320 65 380 45C450 25 490 90 505 140C515 190 460 240 400 250C340 260 300 305 220 295C140 285 90 240 60 190C30 145 -10 125 30 80Z"
+          fill="#FAF3E1"
+          stroke="#E8DECA"
+          strokeWidth="2"
+        />
+        <path
+          d="M110 130C150 100 210 140 260 110C310 80 370 145 410 165C450 185 430 225 370 235C310 245 250 205 190 225C130 245 80 195 90 155C100 115 70 155 110 130Z"
+          fill="#F5E7C6"
+          stroke="#E8DECA"
+          strokeWidth="1.5"
+          strokeDasharray="4 4"
+        />
+
+        {/* Animated connecting dotted travel line */}
+        <motion.path
+          initial={{ pathLength: 0, opacity: 0 }}
+          animate={{ pathLength: 1, opacity: 1 }}
+          transition={{ duration: 1.5, ease: 'easeInOut' }}
+          d="M 110 190 C 180 120, 220 200, 275 140 C 340 80, 380 200, 430 165"
+          stroke="#FA8112"
+          strokeWidth="3"
+          strokeDasharray="6 6"
+          strokeLinecap="round"
+        />
+      </svg>
+
+      {/* Interactive Floating Location Cards & Pins */}
+      <div className="absolute inset-0 p-4 sm:p-6 pointer-events-none">
+        {pins.map((pin, i) => {
+          const isSelected = activePin === i;
+          return (
+            <motion.div
+              key={pin.name}
+              initial={{ scale: 0.8, opacity: 0, y: 10 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 + i * 0.2, duration: 0.5 }}
+              style={{
+                left: `${(pin.x / 540) * 100}%`,
+                top: `${(pin.y / 320) * 100}%`,
+              }}
+              className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-auto"
+            >
+              <button
+                onClick={() => setActivePin(i)}
+                className="group relative flex items-center gap-2 focus:outline-none cursor-pointer"
+              >
+                {/* Pin Core */}
+                <div
+                  className={`h-9 w-9 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-md ${
+                    isSelected
+                      ? 'bg-[#222222] text-white scale-110 ring-4 ring-[#FA8112]/30'
+                      : 'bg-[#FA8112] text-white group-hover:scale-105'
+                  }`}
+                >
+                  <span className="text-xs font-black">
+                    {i === 0 ? '☕' : i === 1 ? '💎' : '📍'}
+                  </span>
+                </div>
+
+                {/* Floating Tag Box */}
+                <motion.div
+                  whileHover={{ y: -2 }}
+                  className={`px-3 py-1.5 rounded-xl border transition-all shadow-xs ${
+                    isSelected
+                      ? 'bg-[#222222] border-[#222222] text-white'
+                      : 'bg-white border-[#E8DECA] text-[#222222] group-hover:border-[#222222]'
+                  }`}
+                >
+                  <div className="text-[11px] font-black leading-tight truncate max-w-[140px] sm:max-w-[170px]">
+                    {pin.name}
+                  </div>
+                  <div className={`text-[9px] font-bold ${isSelected ? 'text-[#F5E7C6]' : 'text-[#6B6862]'}`}>
+                    {pin.location}
+                  </div>
+                </motion.div>
+              </button>
+            </motion.div>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 
 export function BlendIllustration({ className = 'w-full h-auto' }: { className?: string }) {
   return (
-    <svg viewBox="0 0 460 260" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-      <rect width="460" height="260" rx="20" fill="#FAF3E1" stroke="#E8DECA" strokeWidth="2" />
-      
-      {/* Person A Circle */}
-      <g transform="translate(130, 130)">
-        <circle r="65" fill="#F5E7C6" stroke="#222222" strokeWidth="2" />
-        <circle r="22" fill="#222222" />
-        <text x="0" y="5" textAnchor="middle" fill="#FFFFFF" fontSize="12" fontWeight="800" fontFamily="sans-serif">YOU</text>
-        <text x="0" y="42" textAnchor="middle" fill="#222222" fontSize="11" fontWeight="700" fontFamily="sans-serif">18 Places</text>
-      </g>
-      
-      {/* Overlapping Blend Center */}
-      <g transform="translate(230, 130)">
-        <ellipse rx="38" ry="50" fill="#FA8112" fillOpacity="0.15" stroke="#FA8112" strokeWidth="2" strokeDasharray="4 4" />
-        <rect x="-35" y="-16" width="70" height="32" rx="10" fill="#FA8112" />
-        <text x="0" y="4" textAnchor="middle" fill="#FFFFFF" fontSize="13" fontWeight="900" fontFamily="sans-serif">84%</text>
-      </g>
+    <div className={`relative rounded-3xl bg-[#FAF3E1] border border-[#E8DECA] p-6 shadow-sm overflow-hidden ${className}`}>
+      <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
+        {/* Person A */}
+        <motion.div
+          whileHover={{ scale: 1.03 }}
+          className="sm:col-span-4 bg-[#F5E7C6] border-2 border-[#222222] rounded-2xl p-4 text-center space-y-2 shadow-xs"
+        >
+          <div className="h-12 w-12 rounded-full bg-[#222222] text-white flex items-center justify-center font-black text-xs mx-auto shadow-2xs">
+            YOU
+          </div>
+          <div>
+            <div className="text-xs font-black text-[#222222]">@your_username</div>
+            <div className="text-[11px] font-bold text-[#6B6862]">18 Places Saved</div>
+          </div>
+        </motion.div>
 
-      {/* Person B Circle */}
-      <g transform="translate(330, 130)">
-        <circle r="65" fill="#F5E7C6" stroke="#222222" strokeWidth="2" />
-        <circle r="22" fill="#222222" />
-        <text x="0" y="5" textAnchor="middle" fill="#FFFFFF" fontSize="12" fontWeight="800" fontFamily="sans-serif">ALEX</text>
-        <text x="0" y="42" textAnchor="middle" fill="#222222" fontSize="11" fontWeight="700" fontFamily="sans-serif">24 Places</text>
-      </g>
+        {/* Overlapping Blend Center */}
+        <motion.div
+          initial={{ scale: 0.9 }}
+          animate={{ scale: [0.95, 1, 0.95] }}
+          transition={{ repeat: Infinity, duration: 4, ease: 'easeInOut' }}
+          className="sm:col-span-4 bg-[#FAF3E1] border-2 border-dashed border-[#FA8112] rounded-2xl p-4 text-center space-y-1 shadow-sm"
+        >
+          <div className="inline-block bg-[#FA8112] text-white text-base font-black px-4 py-1.5 rounded-xl shadow-xs">
+            84% Match
+          </div>
+          <div className="text-[11px] font-extrabold text-[#222222] pt-1">
+            9 shared spots in common
+          </div>
+          <p className="text-[10px] text-[#6B6862] font-medium">
+            High overlap in artisan bakeries & sunset viewpoints
+          </p>
+        </motion.div>
 
-      <text x="230" y="225" textAnchor="middle" fill="#6B6862" fontSize="11" fontWeight="600" fontFamily="sans-serif">9 shared spots in common</text>
-    </svg>
+        {/* Person B */}
+        <motion.div
+          whileHover={{ scale: 1.03 }}
+          className="sm:col-span-4 bg-[#F5E7C6] border-2 border-[#222222] rounded-2xl p-4 text-center space-y-2 shadow-xs"
+        >
+          <div className="h-12 w-12 rounded-full bg-[#222222] text-white flex items-center justify-center font-black text-xs mx-auto shadow-2xs">
+            ALEX
+          </div>
+          <div>
+            <div className="text-xs font-black text-[#222222]">@alex_wanderer</div>
+            <div className="text-[11px] font-bold text-[#6B6862]">24 Places Saved</div>
+          </div>
+        </motion.div>
+      </div>
+    </div>
   );
 }
 
 export function SaveFlowIllustration({ className = 'w-full h-auto' }: { className?: string }) {
   return (
-    <svg viewBox="0 0 460 220" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-      <rect width="460" height="220" rx="20" fill="#FAF3E1" stroke="#E8DECA" strokeWidth="2" />
-      
-      {/* Card 1: Spot */}
-      <g transform="translate(30, 50)">
-        <rect width="110" height="120" rx="14" fill="#FFFFFF" stroke="#E8DECA" strokeWidth="1.5" />
-        <rect x="12" y="14" width="86" height="42" rx="8" fill="#F5E7C6" />
-        <text x="14" y="74" fill="#222222" fontSize="10" fontWeight="800" fontFamily="sans-serif">Blue Tokai Cafe</text>
-        <text x="14" y="88" fill="#6B6862" fontSize="8" fontFamily="sans-serif">Kolkata</text>
-        <rect x="12" y="98" width="86" height="12" rx="4" fill="#FA8112" />
-        <text x="55" y="107" textAnchor="middle" fill="#FFFFFF" fontSize="7" fontWeight="800" fontFamily="sans-serif">SAVED</text>
-      </g>
+    <div className={`rounded-3xl bg-[#FAF3E1] border border-[#E8DECA] p-6 shadow-sm ${className}`}>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+        {/* Step 1: Spot */}
+        <motion.div
+          whileHover={{ y: -3 }}
+          className="bg-white rounded-2xl border border-[#E8DECA] p-4 space-y-2.5 shadow-xs"
+        >
+          <div className="h-12 rounded-xl bg-[#F5E7C6] flex items-center justify-center text-xl font-black">
+            ☕
+          </div>
+          <div>
+            <div className="text-xs font-black text-[#222222]">Blue Tokai Cafe</div>
+            <div className="text-[10px] text-[#6B6862]">Kolkata, India</div>
+          </div>
+          <span className="block text-center text-[10px] font-black uppercase text-white bg-[#FA8112] py-1 rounded-lg shadow-2xs">
+            Saved to Wishlist
+          </span>
+        </motion.div>
 
-      {/* Arrow 1 */}
-      <path d="M150 110 H180" stroke="#FA8112" strokeWidth="2" strokeDasharray="3 3" />
-      
-      {/* Card 2: List */}
-      <g transform="translate(190, 40)">
-        <rect width="120" height="140" rx="14" fill="#F5E7C6" stroke="#222222" strokeWidth="2" />
-        <rect x="12" y="16" width="96" height="18" rx="6" fill="#FFFFFF" />
-        <text x="20" y="29" fill="#222222" fontSize="9" fontWeight="800" fontFamily="sans-serif">📋 Weekend in Goa</text>
-        <rect x="12" y="42" width="96" height="24" rx="6" fill="#FFFFFF" />
-        <text x="20" y="57" fill="#222222" fontSize="8" fontWeight="700" fontFamily="sans-serif">1. Blue Tokai Cafe</text>
-        <rect x="12" y="72" width="96" height="24" rx="6" fill="#FFFFFF" opacity="0.8" />
-        <text x="20" y="87" fill="#6B6862" fontSize="8" fontFamily="sans-serif">+ Add another spot</text>
-      </g>
+        {/* Step 2: List */}
+        <motion.div
+          whileHover={{ y: -3 }}
+          className="bg-[#F5E7C6] rounded-2xl border-2 border-[#222222] p-4 space-y-2.5 shadow-xs"
+        >
+          <div className="flex items-center justify-between pb-1 border-b border-[#E8DECA]">
+            <span className="text-xs font-black text-[#222222]">📋 Weekend in Goa</span>
+            <span className="text-[9px] font-bold bg-white px-2 py-0.5 rounded-md border border-[#E8DECA]">
+              Public
+            </span>
+          </div>
+          <div className="space-y-1.5">
+            <div className="p-2 rounded-lg bg-white text-[11px] font-bold text-[#222222] shadow-2xs">
+              1. Blue Tokai Cafe
+            </div>
+            <div className="p-2 rounded-lg bg-white/70 text-[11px] font-semibold text-[#6B6862] border border-dashed border-[#E8DECA]">
+              + Add another spot
+            </div>
+          </div>
+        </motion.div>
 
-      {/* Arrow 2 */}
-      <path d="M320 110 H350" stroke="#FA8112" strokeWidth="2" strokeDasharray="3 3" />
-
-      {/* Card 3: Outing */}
-      <g transform="translate(360, 50)">
-        <rect width="70" height="120" rx="14" fill="#222222" />
-        <text x="35" y="55" textAnchor="middle" fill="#FFFFFF" fontSize="16">🚀</text>
-        <text x="35" y="80" textAnchor="middle" fill="#FFFFFF" fontSize="10" fontWeight="900" fontFamily="sans-serif">Ready</text>
-        <text x="35" y="95" textAnchor="middle" fill="#F5E7C6" fontSize="9" fontFamily="sans-serif">to go out</text>
-      </g>
-    </svg>
+        {/* Step 3: Outing */}
+        <motion.div
+          whileHover={{ y: -3 }}
+          className="bg-[#222222] text-white rounded-2xl p-5 text-center space-y-2 shadow-md"
+        >
+          <div className="text-3xl">🚀</div>
+          <div className="font-sans text-sm font-black text-[#FAF3E1]">
+            Ready for your trip
+          </div>
+          <p className="text-[10px] text-[#F5E7C6] font-medium leading-snug">
+            All spots, offline-friendly maps, and collaborator notes in one place.
+          </p>
+        </motion.div>
+      </div>
+    </div>
   );
 }
 
 export function CollabIllustration({ className = 'w-full h-auto' }: { className?: string }) {
   return (
-    <svg viewBox="0 0 460 220" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-      <rect width="460" height="220" rx="20" fill="#F5E7C6" stroke="#E8DECA" strokeWidth="2" />
-      
+    <div className={`rounded-3xl bg-[#F5E7C6] border border-[#E8DECA] p-6 shadow-sm space-y-4 ${className}`}>
       {/* Collaborators row */}
-      <g transform="translate(40, 45)">
-        <circle cx="20" cy="20" r="20" fill="#222222" />
-        <text x="20" y="24" textAnchor="middle" fill="#FFFFFF" fontSize="11" fontWeight="800" fontFamily="sans-serif">YOU</text>
-        
-        <circle cx="75" cy="20" r="20" fill="#FA8112" />
-        <text x="75" y="24" textAnchor="middle" fill="#FFFFFF" fontSize="11" fontWeight="800" fontFamily="sans-serif">RIA</text>
-        
-        <circle cx="130" cy="20" r="20" fill="#222222" />
-        <text x="130" y="24" textAnchor="middle" fill="#FFFFFF" fontSize="11" fontWeight="800" fontFamily="sans-serif">SAM</text>
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#E8DECA]">
+        <div className="flex items-center gap-2">
+          <div className="flex items-center -space-x-2">
+            <div className="h-9 w-9 rounded-full bg-[#222222] text-white flex items-center justify-center font-black text-[11px] border-2 border-[#F5E7C6] shadow-2xs">
+              YOU
+            </div>
+            <div className="h-9 w-9 rounded-full bg-[#FA8112] text-white flex items-center justify-center font-black text-[11px] border-2 border-[#F5E7C6] shadow-2xs">
+              RIA
+            </div>
+            <div className="h-9 w-9 rounded-full bg-[#222222] text-white flex items-center justify-center font-black text-[11px] border-2 border-[#F5E7C6] shadow-2xs">
+              SAM
+            </div>
+          </div>
+          <span className="text-xs font-bold text-[#222222]">3 Co-Planners</span>
+        </div>
 
-        <rect x="165" y="5" width="80" height="30" rx="15" fill="#FFFFFF" stroke="#E8DECA" />
-        <text x="205" y="24" textAnchor="middle" fill="#222222" fontSize="10" fontWeight="800" fontFamily="sans-serif">+ Invite</text>
-      </g>
+        <span className="inline-flex items-center gap-1 bg-white border border-[#E8DECA] px-3 py-1 rounded-xl text-xs font-black text-[#222222] shadow-2xs">
+          + Invite @friend
+        </span>
+      </div>
 
       {/* Shared List Note Card */}
-      <g transform="translate(40, 105)">
-        <rect width="380" height="85" rx="14" fill="#FFFFFF" stroke="#222222" strokeWidth="1.5" />
-        <text x="20" y="32" fill="#222222" fontSize="13" fontWeight="900" fontFamily="sans-serif">Japan 2027 Itinerary</text>
-        <text x="20" y="54" fill="#6B6862" fontSize="11" fontFamily="sans-serif">3 editors • 14 places saved • Real-time sync</text>
-        
-        <rect x="290" y="20" width="70" height="28" rx="8" fill="#F5E7C6" />
-        <text x="325" y="38" textAnchor="middle" fill="#222222" fontSize="10" fontWeight="800" fontFamily="sans-serif">Shared</text>
-      </g>
-    </svg>
+      <div className="bg-white rounded-2xl border border-[#E8DECA] p-4 space-y-2 shadow-2xs">
+        <div className="flex items-center justify-between">
+          <div className="text-xs font-black text-[#222222]">
+            Arashiyama Bamboo Grove
+          </div>
+          <span className="text-[10px] font-bold text-[#FA8112] bg-[#FAF3E1] px-2 py-0.5 rounded-md">
+            Must Visit
+          </span>
+        </div>
+        <p className="text-[11px] text-[#6B6862] italic leading-relaxed">
+          &ldquo;Ria: Let’s go early at 7 AM so we get the natural light before tourists arrive!&rdquo;
+        </p>
+      </div>
+    </div>
   );
 }

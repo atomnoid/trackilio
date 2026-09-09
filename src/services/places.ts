@@ -300,21 +300,50 @@ export async function getPlaceBySlugOrId(
   try {
     const supabase = await createClient();
     const clean = identifier.toLowerCase().trim();
+    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(identifier);
+    let place = null;
 
-    // Query place by slug or ID
-    let { data: place } = await (supabase as any)
-      .from('places')
-      .select('*')
-      .eq('slug', clean)
-      .maybeSingle();
-
-    if (!place) {
+    // 1. If identifier is a UUID, query by ID
+    if (isUUID) {
       const { data: byId } = await (supabase as any)
         .from('places')
         .select('*')
         .eq('id', identifier)
         .maybeSingle();
       place = byId;
+    }
+
+    // 2. Query place by exact slug
+    if (!place) {
+      const { data: bySlug } = await (supabase as any)
+        .from('places')
+        .select('*')
+        .eq('slug', clean)
+        .maybeSingle();
+      place = bySlug;
+    }
+
+    // 3. Query place by case-insensitive slug
+    if (!place) {
+      const { data: byIlikeSlug } = await (supabase as any)
+        .from('places')
+        .select('*')
+        .ilike('slug', clean)
+        .limit(1)
+        .maybeSingle();
+      place = byIlikeSlug;
+    }
+
+    // 4. Fallback: match by name from slug words
+    if (!place) {
+      const nameWords = clean.replace(/-/g, ' ').trim();
+      const { data: byName } = await (supabase as any)
+        .from('places')
+        .select('*')
+        .ilike('name', `%${nameWords}%`)
+        .limit(1)
+        .maybeSingle();
+      place = byName;
     }
 
     if (!place) return null;
