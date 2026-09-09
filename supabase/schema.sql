@@ -60,16 +60,27 @@ CREATE INDEX IF NOT EXISTS idx_list_members_user_id ON public.list_members(user_
 CREATE TABLE IF NOT EXISTS public.places (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name TEXT NOT NULL CHECK (char_length(trim(name)) > 0),
+  slug TEXT,
   location TEXT,
+  city TEXT,
   country TEXT,
+  address TEXT,
+  description TEXT,
   category TEXT,
   tags TEXT[] DEFAULT '{}'::TEXT[],
+  website TEXT,
+  image_url TEXT,
+  rating NUMERIC(3,2),
+  lat NUMERIC(10,7),
+  lng NUMERIC(10,7),
   maps_url TEXT CHECK (maps_url IS NULL OR maps_url ~* '^https?://'),
   created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
 CREATE INDEX IF NOT EXISTS idx_places_tags ON public.places USING GIN (tags);
+CREATE INDEX IF NOT EXISTS idx_places_city ON public.places(city);
+CREATE INDEX IF NOT EXISTS idx_places_slug ON public.places(slug);
 
 -- 5. LIST_PLACES
 CREATE TABLE IF NOT EXISTS public.list_places (
