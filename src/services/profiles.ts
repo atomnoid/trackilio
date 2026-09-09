@@ -92,20 +92,34 @@ export async function getPublicProfileByUsernameOrId(
 
     if (!profile) return null;
 
-    // Fetch ONLY public lists belonging to this profile
-    const { data: publicLists } = await (supabase as any)
-      .from('wander_lists')
-      .select('*, owner:profiles(*)')
-      .eq('owner_id', profile.id)
-      .eq('is_public', true)
-      .order('created_at', { ascending: false });
+    // Fetch public lists + follower/following counts in parallel
+    const [publicListsRes, followersRes, followingRes] = await Promise.all([
+      (supabase as any)
+        .from('wander_lists')
+        .select('*, owner:profiles(*)')
+        .eq('owner_id', profile.id)
+        .eq('is_public', true)
+        .order('created_at', { ascending: false }),
+      (supabase as any)
+        .from('follows')
+        .select('id', { count: 'exact', head: true })
+        .eq('following_id', profile.id),
+      (supabase as any)
+        .from('follows')
+        .select('id', { count: 'exact', head: true })
+        .eq('follower_id', profile.id),
+    ]);
+
+    const publicLists = (publicListsRes.data ?? []) as WanderList[];
 
     return {
       profile: {
         ...profile,
-        public_lists_count: (publicLists ?? []).length,
+        public_lists_count: publicLists.length,
+        followers_count: followersRes.count ?? 0,
+        following_count: followingRes.count ?? 0,
       } as Profile,
-      publicLists: (publicLists ?? []) as WanderList[],
+      publicLists,
     };
   } catch {
     return null;

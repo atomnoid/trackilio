@@ -2,8 +2,11 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getPublicProfileByUsernameOrId } from '@/services/profiles';
+import { isFollowing as checkIsFollowing } from '@/services/follows';
 import { WanderListCard } from '@/components/lists/WanderListCard';
 import { ProfileJsonLd } from '@/components/seo/ProfileJsonLd';
+import { FollowButton } from '@/components/profile/FollowButton';
+import { FollowStats } from '@/components/profile/FollowStats';
 import { MapPin, Globe, Layers, ArrowRight, User, Settings, Sparkles } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 
@@ -70,6 +73,9 @@ export default async function PublicProfilePage({ params }: ProfilePageProps) {
   } = await supabase.auth.getUser();
 
   const isSelf = currentUser && currentUser.id === profile.id;
+  const initialIsFollowing = currentUser && !isSelf
+    ? await checkIsFollowing(currentUser.id, profile.id)
+    : false;
 
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8 sm:space-y-10">
@@ -133,11 +139,19 @@ export default async function PublicProfilePage({ params }: ProfilePageProps) {
                 <Globe className="h-3.5 w-3.5" />
                 {listCount} Curated List{listCount !== 1 ? 's' : ''}
               </span>
+
+              {/* Followers & Following Clickable Stats */}
+              <FollowStats
+                userId={profile.id}
+                initialFollowersCount={profile.followers_count || 0}
+                initialFollowingCount={profile.following_count || 0}
+                displayName={displayName}
+              />
             </div>
           </div>
 
-          {/* Actions: Edit Profile (if self) or Blend Taste */}
-          <div className="pt-2 sm:pt-0 w-full sm:w-auto flex flex-col sm:flex-row gap-2 shrink-0">
+          {/* Actions: Edit Profile (if self) or Follow + Blend Taste */}
+          <div className="pt-2 sm:pt-0 w-full sm:w-auto flex flex-wrap sm:flex-nowrap gap-2 shrink-0">
             {isSelf ? (
               <Link
                 href="/settings"
@@ -146,16 +160,24 @@ export default async function PublicProfilePage({ params }: ProfilePageProps) {
                 <Settings className="h-4 w-4 text-gray-400" />
                 <span>Edit Settings</span>
               </Link>
-            ) : profile.username ? (
-              <Link
-                href={`/blend?with=${encodeURIComponent(profile.username)}`}
-                className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#FF5841] to-[#C53678] hover:opacity-95 text-white font-extrabold px-5 py-2.5 text-xs sm:text-sm shadow-sm active-press transition-all"
-              >
-                <Sparkles className="h-4 w-4" />
-                <span>Blend Taste</span>
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-            ) : null}
+            ) : (
+              <>
+                <FollowButton
+                  targetUserId={profile.id}
+                  initialIsFollowing={initialIsFollowing}
+                  className="w-full sm:w-auto"
+                />
+                {profile.username && (
+                  <Link
+                    href={`/blend?with=${encodeURIComponent(profile.username)}`}
+                    className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold px-4 py-2.5 text-xs sm:text-sm active-press transition-all border border-gray-200 shadow-2xs"
+                  >
+                    <Sparkles className="h-4 w-4 text-[#FF5841]" />
+                    <span>Blend Taste</span>
+                  </Link>
+                )}
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -205,3 +227,4 @@ export default async function PublicProfilePage({ params }: ProfilePageProps) {
     </div>
   );
 }
+

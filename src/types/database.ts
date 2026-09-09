@@ -15,6 +15,19 @@ export interface Profile {
   // Computed fields
   public_lists_count?: number;
   total_votes_count?: number;
+  followers_count?: number;
+  following_count?: number;
+  is_following?: boolean; // relative to currently-viewing user
+}
+
+export interface Follow {
+  id: string;
+  follower_id: string;
+  following_id: string;
+  created_at: string;
+  // Joined
+  follower?: Profile;
+  following?: Profile;
 }
 
 export interface WanderList {
@@ -150,6 +163,41 @@ export interface BlendSession {
   user_b?: Profile;
 }
 
+// Unified search result types
+export type SearchResultType = 'place' | 'list' | 'user';
+
+export interface PlaceSearchResult extends Place {
+  _type: 'place';
+  _score: number;
+}
+
+export interface ListSearchResult extends WanderList {
+  _type: 'list';
+  _score: number;
+}
+
+export interface UserSearchResult extends Profile {
+  _type: 'user';
+  _score: number;
+}
+
+export type SearchResult = PlaceSearchResult | ListSearchResult | UserSearchResult;
+
+export interface ParsedSearchIntent {
+  /** Original normalized query terms (stop words removed) */
+  terms: string[];
+  /** Detected canonical category, e.g. 'cafe', 'restaurant' */
+  category: string | null;
+  /** Detected location / city / country */
+  location: string | null;
+  /** Ranking intent: 'popular' | 'trending' | 'rated' | null */
+  rankingIntent: 'popular' | 'trending' | 'rated' | null;
+  /** Requested result count (e.g. "top 10" → 10) */
+  limit: number | null;
+  /** Full raw query for fallback matching */
+  rawQuery: string;
+}
+
 export interface Database {
   public: {
     Tables: {
@@ -202,6 +250,11 @@ export interface Database {
         Row: SavedPlace;
         Insert: Omit<SavedPlace, 'id' | 'created_at'> & { id?: string; created_at?: string };
         Update: Partial<Omit<SavedPlace, 'id'>>;
+      };
+      follows: {
+        Row: Follow;
+        Insert: Omit<Follow, 'id' | 'created_at'> & { id?: string; created_at?: string };
+        Update: Partial<Omit<Follow, 'id'>>;
       };
     };
   };
