@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { MemberRole } from '@/types/database';
-import { UserPlus, Trash2, Loader2, Users, Crown, ExternalLink } from 'lucide-react';
+import { UserPlusIcon, TrashIcon, SpinnerIcon, UsersIcon, CrownIcon, ExternalLinkIcon } from '@/components/icons/Icons';
 import { sanitizeUsername } from '@/lib/username';
 
 interface MemberEntry {
@@ -144,7 +144,7 @@ export function MembersPanel({
       {/* Header */}
       <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-[#FFEAE6] to-[#F9E2EE] flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Users className="h-4 w-4 text-[#FF5841]" />
+          <UsersIcon className="h-4 w-4 text-[#FA8112]" />
           <h3 className="font-sans text-sm font-black text-gray-900">
             Collaborators ({members.length})
           </h3>
@@ -191,7 +191,7 @@ export function MembersPanel({
                     className="text-[10px] text-[#FF5841] hover:underline font-semibold inline-flex items-center gap-0.5"
                   >
                     @{m.profile.username}
-                    <ExternalLink className="h-2.5 w-2.5 opacity-60" />
+                    <ExternalLinkIcon className="h-2.5 w-2.5 opacity-60" />
                   </a>
                 ) : (
                   <p className="text-[10px] text-gray-400 font-medium">Collaborator</p>
@@ -201,7 +201,7 @@ export function MembersPanel({
               {/* Role badge / selector */}
               {isThisOwner ? (
                 <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-[#FF5841] to-[#C53678] text-white px-2.5 py-0.5 text-[10px] font-extrabold shrink-0 shadow-sm">
-                  <Crown className="h-2.5 w-2.5" /> Owner
+                  <CrownIcon className="h-2.5 w-2.5" /> Owner
                 </span>
               ) : isOwner ? (
                 <div className="relative shrink-0 flex items-center gap-1.5">
@@ -215,7 +215,7 @@ export function MembersPanel({
                     <option value="viewer">Viewer</option>
                   </select>
                   {updatingId === m.user_id && (
-                    <Loader2 className="h-3 w-3 animate-spin text-[#FF5841]" />
+                    <SpinnerIcon className="h-3 w-3 animate-spin text-[#FA8112]" />
                   )}
                 </div>
               ) : (
@@ -232,7 +232,7 @@ export function MembersPanel({
                   title={m.user_id === currentUserId ? 'Leave list' : 'Remove member'}
                   className="shrink-0 p-1.5 rounded-lg text-gray-400 hover:text-rose-600 hover:bg-rose-50 disabled:opacity-40 transition-colors"
                 >
-                  <Trash2 className="h-3.5 w-3.5" />
+                  <TrashIcon className="h-3.5 w-3.5" />
                 </button>
               ) : null}
             </li>
@@ -256,7 +256,7 @@ export function MembersPanel({
 
           <form onSubmit={handleInvite} className="flex flex-col gap-2">
             <label className="text-[10px] font-extrabold uppercase tracking-wider text-gray-500 flex items-center gap-1">
-              <UserPlus className="h-3 w-3 text-[#FF5841]" /> Invite by @username
+              <UserPlusIcon className="h-3 w-3 text-[#FA8112]" /> Invite by @username
             </label>
             <div className="flex gap-2">
               <input
@@ -284,12 +284,12 @@ export function MembersPanel({
             >
               {inviting ? (
                 <>
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  <SpinnerIcon className="h-3.5 w-3.5 animate-spin" />
                   Inviting…
                 </>
               ) : (
                 <>
-                  <UserPlus className="h-3.5 w-3.5" />
+                  <UserPlusIcon className="h-3.5 w-3.5" />
                   Invite Collaborator
                 </>
               )}

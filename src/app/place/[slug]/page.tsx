@@ -9,15 +9,15 @@ import { AddToListModal } from '@/components/places/AddToListModal';
 import { PlaceDiscoveryCard } from '@/components/places/PlaceDiscoveryCard';
 import { getExternalMapUrl, getOpenStreetMapEmbedUrl } from '@/lib/maps';
 import {
-  MapPin,
-  Globe,
-  ExternalLink,
-  ArrowBigUp,
-  Layers,
-  Sparkles,
-  ArrowRight,
-  Compass,
-} from 'lucide-react';
+  PinIcon,
+  GlobeIcon,
+  ExternalLinkIcon,
+  ArrowUpBigIcon,
+  ListIcon,
+  SparklesIcon,
+  ArrowRightIcon,
+  CompassIcon,
+} from '@/components/icons/Icons';
 
 export const revalidate = 60;
 
@@ -109,13 +109,13 @@ export default async function PlaceDetailPage({ params }: PlaceDetailPageProps) 
           {/* Category & Tags & Upvotes Badge */}
           <div className="flex flex-wrap items-center gap-2">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FFEAE6] border border-[#FFD3CC] px-3.5 py-1 text-xs font-bold text-[#FF5841]">
-              <Compass className="h-3.5 w-3.5" />
+              <CompassIcon className="h-3.5 w-3.5" />
               {place.category || 'Spot'}
             </span>
 
             {upvotes > 0 && (
               <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FFEAE6] border border-[#FFD3CC] px-3.5 py-1 text-xs font-black text-[#FF5841]">
-                <ArrowBigUp className="h-4 w-4 fill-[#FF5841]" />
+                <ArrowUpBigIcon className="h-4 w-4 fill-[#FF5841]" />
                 <span>{upvotes} Upvote{upvotes !== 1 ? 's' : ''}</span>
               </span>
             )}
@@ -159,7 +159,7 @@ export default async function PlaceDetailPage({ params }: PlaceDetailPageProps) 
 
           {locationDisplay && (
             <div className="flex items-center gap-2 text-sm sm:text-base font-semibold text-[#FF5841]">
-              <MapPin className="h-4 w-4 shrink-0" />
+              <PinIcon className="h-4 w-4 shrink-0" />
               <span>{locationDisplay}</span>
             </div>
           )}
@@ -180,9 +180,9 @@ export default async function PlaceDetailPage({ params }: PlaceDetailPageProps) 
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 rounded-2xl bg-gray-50 border border-gray-200 hover:bg-white hover:border-[#FF5841]/40 text-gray-800 px-4 py-2.5 transition-colors active-press"
           >
-            <MapPin className="h-3.5 w-3.5 text-[#FF5841]" />
+            <PinIcon className="h-3.5 w-3.5 text-[#FF5841]" />
             <span>Open in Maps</span>
-            <ExternalLink className="h-3 w-3 text-gray-400" />
+            <ExternalLinkIcon className="h-3 w-3 text-gray-400" />
           </a>
 
           {place.website && (
@@ -192,9 +192,9 @@ export default async function PlaceDetailPage({ params }: PlaceDetailPageProps) 
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 rounded-2xl bg-gray-50 border border-gray-200 hover:bg-white hover:border-[#FF5841]/40 text-gray-800 px-4 py-2.5 transition-colors active-press"
             >
-              <Globe className="h-3.5 w-3.5 text-[#C53678]" />
+              <GlobeIcon className="h-3.5 w-3.5 text-[#C53678]" />
               <span>Official Website</span>
-              <ExternalLink className="h-3 w-3 text-gray-400" />
+              <ExternalLinkIcon className="h-3 w-3 text-gray-400" />
             </a>
           )}
         </div>
@@ -216,7 +216,7 @@ export default async function PlaceDetailPage({ params }: PlaceDetailPageProps) 
       <section className="space-y-6">
         <div className="flex items-center justify-between pb-3 border-b border-gray-200">
           <h2 className="font-sans text-xl font-black text-gray-900 flex items-center gap-2">
-            <Layers className="h-5 w-5 text-[#FF5841]" />
+            <ListIcon className="h-5 w-5 text-[#FF5841]" />
             Found in Curated Lists ({relatedLists.length})
           </h2>
         </div>
@@ -239,7 +239,7 @@ export default async function PlaceDetailPage({ params }: PlaceDetailPageProps) 
                       {list.destination ? ` • ${list.destination}` : ''}
                     </p>
                   </div>
-                  <ArrowRight className="h-4 w-4 text-[#C53678] group-hover:translate-x-1 transition-transform shrink-0" />
+                  <ArrowRightIcon className="h-4 w-4 text-[#C53678] group-hover:translate-x-1 transition-transform shrink-0" />
                 </div>
               </Link>
             ))}
@@ -263,7 +263,7 @@ export default async function PlaceDetailPage({ params }: PlaceDetailPageProps) 
         <section className="space-y-6 pt-4">
           <div className="flex items-center justify-between pb-3 border-b border-gray-200">
             <h2 className="font-sans text-xl sm:text-2xl font-black text-gray-900 flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-[#C53678]" />
+              <SparklesIcon className="h-5 w-5 text-[#C53678]" />
               More {place.category ? `${place.category} Spots` : 'Places'} to Explore
             </h2>
           </div>

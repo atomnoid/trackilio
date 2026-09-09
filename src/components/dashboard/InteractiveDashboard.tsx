@@ -4,20 +4,16 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
-  Plus,
-  Compass,
-  Globe,
-  Lock,
-  Sparkles,
-  MapPin,
-  Bookmark,
-  Users,
-  CheckCircle2,
-  HeartHandshake,
-  ArrowRight,
-  UserPlus,
-  Share2,
-} from 'lucide-react';
+  PlusIcon,
+  CompassIcon,
+  GlobeIcon,
+  LockIcon,
+  SparklesIcon,
+  PinIcon,
+  BookmarkIcon,
+  UsersIcon,
+  CheckCircleIcon,
+} from '@/components/icons/Icons';
 import { SavedPlace, WanderList, BlendSession, Profile, DailyFact } from '@/types/database';
 import { WanderListCard } from '@/components/lists/WanderListCard';
 import { PlaceDiscoveryCard } from '@/components/places/PlaceDiscoveryCard';
@@ -117,7 +113,7 @@ export function InteractiveDashboard({
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="space-y-3 max-w-xl">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FFEAE6] border border-[#FFD3CC] px-3.5 py-1 text-xs font-black text-[#FF5841] shadow-2xs">
-              <Sparkles className="h-3.5 w-3.5" />
+              <SparklesIcon className="h-3.5 w-3.5" />
               <span>Modern Travel Workspace</span>
             </span>
             <h1 className="font-sans text-3xl sm:text-4xl font-black text-[#1A1723] tracking-tight">
@@ -138,7 +134,7 @@ export function InteractiveDashboard({
                   : 'bg-[#FFEAE6] hover:bg-[#FFDCD6] border border-[#FFD3CC] text-[#FF5841]'
               }`}
             >
-              <Users className="h-4 w-4" />
+              <UsersIcon className="h-4 w-4" />
               <span>Collaborated Lists ({collabLists.length})</span>
             </button>
 
@@ -146,7 +142,7 @@ export function InteractiveDashboard({
               href="/blend"
               className="inline-flex items-center gap-2 rounded-2xl bg-white border border-[#EFE9EC] hover:border-[#FF5841] text-[#C53678] px-4.5 py-3 text-xs font-bold shadow-2xs active-press transition-all"
             >
-              <Sparkles className="h-4 w-4 text-[#FF5841]" />
+              <SparklesIcon className="h-4 w-4 text-[#FF5841]" />
               <span>Blend Taste</span>
             </Link>
 
@@ -154,7 +150,7 @@ export function InteractiveDashboard({
               href="/create"
               className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#FF5841] to-[#C53678] hover:opacity-95 text-white px-5 py-3 text-xs font-black shadow-xs active-press transition-all"
             >
-              <Plus className="h-4 w-4 stroke-[2.5]" />
+              <PlusIcon className="h-4 w-4 stroke-[2.5]" />
               <span>New List</span>
             </Link>
           </div>
@@ -170,7 +166,7 @@ export function InteractiveDashboard({
             className="flex flex-col sm:flex-row gap-2.5 bg-[#FAFAFC] p-2 rounded-2xl border border-[#EFE9EC] shadow-2xs"
           >
             <div className="relative flex-1">
-              <MapPin className="absolute left-3.5 top-3 h-4.5 w-4.5 text-[#FF5841]" />
+              <PinIcon className="absolute left-3.5 top-3 h-4.5 w-4.5 text-[#FF5841]" />
               <input
                 type="text"
                 placeholder="Where to next? Enter trip name (e.g. 5 Days in Kyoto or Amalfi Coast Getaway)..."
@@ -190,7 +186,7 @@ export function InteractiveDashboard({
 
           {createdSuccess && (
             <p className="text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-1.5 mt-2 inline-flex items-center gap-1.5">
-              <CheckCircle2 className="h-3.5 w-3.5" />
+              <CheckCircleIcon className="h-3.5 w-3.5" />
               {createdSuccess}
             </p>
           )}
@@ -259,7 +255,7 @@ export function InteractiveDashboard({
                   : 'text-[#FF5841] bg-[#FFF5F3] hover:bg-[#FFEAE6]'
               }`}
             >
-              <Users className="h-3.5 w-3.5" />
+              <UsersIcon className="h-3.5 w-3.5" />
               <span>Collaborated ({collabLists.length})</span>
             </button>
 
@@ -272,7 +268,7 @@ export function InteractiveDashboard({
                   : 'text-[#4F4B5E] hover:text-[#1A1723] hover:bg-[#F6F4F8]'
               }`}
             >
-              <Bookmark className="h-3.5 w-3.5" />
+              <BookmarkIcon className="h-3.5 w-3.5" />
               <span>Saved Lists ({savedLists.length})</span>
             </button>
 
@@ -284,7 +280,7 @@ export function InteractiveDashboard({
                   : 'text-[#4F4B5E] hover:text-[#1A1723] hover:bg-[#F6F4F8]'
               }`}
             >
-              <Sparkles className="h-3.5 w-3.5 text-[#FF5841]" />
+              <SparklesIcon className="h-3.5 w-3.5 text-[#FF5841]" />
               <span>Blends ({blendSessions.length})</span>
             </button>
 
@@ -335,7 +331,7 @@ export function InteractiveDashboard({
             ) : (
               <div className="rounded-3xl border border-[#EFE9EC] bg-white p-10 sm:p-14 text-center space-y-4 shadow-xs">
                 <div className="mx-auto h-14 w-14 rounded-2xl bg-[#FFEAE6] text-[#FF5841] flex items-center justify-center shadow-2xs">
-                  <Users className="h-7 w-7" />
+                  <UsersIcon className="h-7 w-7" />
                 </div>
                 <div className="space-y-1.5">
                   <h3 className="font-sans text-base sm:text-lg font-bold text-[#1A1723]">
@@ -350,7 +346,7 @@ export function InteractiveDashboard({
                     href="/create"
                     className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#FF5841] to-[#C53678] text-white px-5 py-2.5 text-xs font-black shadow-xs active-press"
                   >
-                    <Plus className="h-4 w-4" /> Create a List to Collaborate
+                    <PlusIcon className="h-4 w-4" /> Create a List to Collaborate
                   </Link>
                 </div>
               </div>
@@ -370,7 +366,7 @@ export function InteractiveDashboard({
             ) : (
               <div className="rounded-3xl border border-[#EFE9EC] bg-white p-10 sm:p-14 text-center space-y-4 shadow-xs">
                 <div className="mx-auto h-14 w-14 rounded-2xl bg-[#F9E2EE] text-[#C53678] flex items-center justify-center shadow-2xs">
-                  <Bookmark className="h-7 w-7" />
+                  <BookmarkIcon className="h-7 w-7" />
                 </div>
                 <div className="space-y-1.5">
                   <h3 className="font-sans text-base sm:text-lg font-bold text-[#1A1723]">
@@ -385,7 +381,7 @@ export function InteractiveDashboard({
                     href="/discover"
                     className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#FF5841] to-[#C53678] text-white px-5 py-2.5 text-xs font-black shadow-xs active-press"
                   >
-                    <Compass className="h-4 w-4" /> Discover Public Lists
+                    <CompassIcon className="h-4 w-4" /> Discover Public Lists
                   </Link>
                 </div>
               </div>
@@ -405,7 +401,7 @@ export function InteractiveDashboard({
             ) : (
               <div className="rounded-3xl border border-[#EFE9EC] bg-white p-10 sm:p-14 text-center space-y-4 shadow-xs">
                 <div className="mx-auto h-14 w-14 rounded-2xl bg-[#FFEAE6] text-[#FF5841] flex items-center justify-center shadow-2xs">
-                  <Sparkles className="h-7 w-7" />
+                  <SparklesIcon className="h-7 w-7" />
                 </div>
                 <div className="space-y-1.5">
                   <h3 className="font-sans text-base sm:text-lg font-bold text-[#1A1723]">
@@ -420,7 +416,7 @@ export function InteractiveDashboard({
                     href="/blend"
                     className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#FF5841] to-[#C53678] text-white px-5 py-2.5 text-xs font-black shadow-xs active-press"
                   >
-                    <Sparkles className="h-4 w-4" /> Start a Blend Now
+                    <SparklesIcon className="h-4 w-4" /> Start a Blend Now
                   </Link>
                 </div>
               </div>
@@ -442,7 +438,7 @@ export function InteractiveDashboard({
             ) : (
               <div className="rounded-3xl border border-[#EFE9EC] bg-white p-10 sm:p-14 text-center space-y-4 shadow-xs">
                 <div className="mx-auto h-14 w-14 rounded-2xl bg-[#F6F4F8] text-[#7E7890] flex items-center justify-center shadow-2xs">
-                  <Bookmark className="h-7 w-7" />
+                  <BookmarkIcon className="h-7 w-7" />
                 </div>
                 <div className="space-y-1.5">
                   <h3 className="font-sans text-base sm:text-lg font-bold text-[#1A1723]">
@@ -457,7 +453,7 @@ export function InteractiveDashboard({
                     href="/discover"
                     className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#FF5841] to-[#C53678] text-white px-5 py-2.5 text-xs font-black shadow-xs active-press"
                   >
-                    <Compass className="h-4 w-4" /> Discover Places
+                    <CompassIcon className="h-4 w-4" /> Discover Places
                   </Link>
                 </div>
               </div>
@@ -490,7 +486,7 @@ export function InteractiveDashboard({
               ) : (
                 <div className="rounded-3xl border border-[#EFE9EC] bg-white p-10 sm:p-14 text-center space-y-4 shadow-xs">
                   <div className="mx-auto h-14 w-14 rounded-2xl bg-[#FFEAE6] text-[#FF5841] flex items-center justify-center shadow-2xs">
-                    <Compass className="h-7 w-7" />
+                    <CompassIcon className="h-7 w-7" />
                   </div>
                   <div className="space-y-1.5">
                     <h3 className="font-sans text-base sm:text-lg font-bold text-[#1A1723]">
@@ -505,7 +501,7 @@ export function InteractiveDashboard({
                       href="/create"
                       className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#FF5841] to-[#C53678] text-white px-5 py-2.5 text-xs font-black shadow-xs active-press"
                     >
-                      <Plus className="h-4 w-4" /> Create Your First List
+                      <PlusIcon className="h-4 w-4" /> Create Your First List
                     </Link>
                   </div>
                 </div>

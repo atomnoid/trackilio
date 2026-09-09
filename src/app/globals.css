@@ -1,86 +1,76 @@
 @import "tailwindcss";
 
 @theme {
-  /* Mila-Inspired Modern Flat Design Palette */
-  --color-sunset-orange: #FF5841;
-  --color-sunset-orange-hover: #E8452E;
-  --color-sunset-orange-light: #FFEAE6;
-  --color-sunset-orange-subtle: #FFF5F3;
+  /* Trackilio Editorial Brand Palette */
+  --color-brand-bg: #FAF3E1;
+  --color-brand-cream: #F5E7C6;
+  --color-brand-orange: #FA8112;
+  --color-brand-orange-hover: #E4720A;
+  --color-brand-orange-light: #FDE8D0;
+  --color-brand-dark: #222222;
+  --color-brand-muted: #6B6862;
+  --color-brand-border: #E8DECA;
+  --color-brand-border-dark: #222222;
 
-  --color-red-violet: #C53678;
-  --color-red-violet-hover: #AF2665;
-  --color-red-violet-light: #F9E2EE;
-  --color-red-violet-subtle: #FDF4F8;
-
-  --color-purple-deep: #7928CA;
-  --color-purple-light: #F3E8FF;
-
-  /* Crisp White Canvas & Surfaces */
-  --color-surface-canvas: #FAFAFC;
-  --color-surface-card: #FFFFFF;
-  --color-surface-subtle: #F6F4F8;
-  --color-surface-border: #EFE9EC;
-  --color-surface-border-hover: #E0D3D9;
-
-  /* Modern Flat Typography */
-  --color-text-main: #1A1723;
-  --color-text-body: #4F4B5E;
-  --color-text-muted: #7E7890;
-  --color-text-soft: #A39EAF;
+  --color-surface: #FFFFFF;
+  --color-surface-secondary: #F5E7C6;
+  --color-surface-tertiary: #EFE2C2;
+  --color-foreground: #222222;
+  --color-accent: #FA8112;
 
   --font-sans: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-serif: var(--font-serif), Georgia, serif;
 }
 
+:root {
+  --background: #FAF3E1;
+  --surface: #FFFFFF;
+  --surface-secondary: #F5E7C6;
+  --foreground: #222222;
+  --accent: #FA8112;
+  --border: #E8DECA;
+  --muted: #6B6862;
+}
+
 body {
-  background-color: #FAFAFC;
-  color: #1A1723;
+  background-color: #FAF3E1;
+  color: #222222;
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
-  background-image: 
-    radial-gradient(at 10% 10%, rgba(255, 88, 65, 0.07) 0px, transparent 45%),
-    radial-gradient(at 90% 15%, rgba(197, 54, 120, 0.07) 0px, transparent 45%),
-    radial-gradient(at 50% 90%, rgba(121, 40, 202, 0.05) 0px, transparent 45%);
+  background-image:
+    radial-gradient(at 15% 10%, rgba(245, 231, 198, 0.4) 0px, transparent 40%),
+    radial-gradient(at 85% 90%, rgba(250, 129, 18, 0.04) 0px, transparent 45%);
   background-attachment: fixed;
 }
 
-/* Modern Flat Card */
-.flat-card {
-  background-color: #FFFFFF;
-  border: 1px solid #EFE9EC;
-  border-radius: 1.5rem;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+/* Tactile button press */
+.active-press {
+  transition: transform 0.15s cubic-bezier(0.2, 0, 0, 1);
 }
-
-.flat-card:hover {
-  transform: translateY(-3px);
-  border-color: #E0D3D9;
-  box-shadow: 0 16px 36px -12px rgba(197, 54, 120, 0.08);
-}
-
-/* Vibrant Sunset Gradient Text */
-.gradient-text-sunset {
-  background: linear-gradient(135deg, #FF5841 0%, #C53678 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-/* Micro interaction active press */
 .active-press:active {
   transform: scale(0.97);
 }
 
-/* Route SVG Path Drawing Animation */
-@keyframes route-draw {
-  to {
-    stroke-dashoffset: -36;
-  }
+/* Editorial Card Styles */
+.trackilio-card {
+  background-color: #FFFFFF;
+  border: 1px solid #E8DECA;
+  border-radius: 1.25rem;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.animate-route-draw {
-  stroke-dasharray: 6 5;
-  animation: route-draw 3s linear infinite;
+.trackilio-card:hover {
+  transform: translateY(-2px);
+  border-color: #222222;
+  box-shadow: 0 8px 24px -6px rgba(34, 34, 34, 0.06);
+}
+
+.trackilio-card-cream {
+  background-color: #F5E7C6;
+  border: 1px solid #E8DECA;
+  border-radius: 1.25rem;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Hide scrollbar utility */
@@ -93,30 +83,19 @@ body {
 }
 
 @keyframes spin-slow {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .animate-spin-slow {
-  animation: spin-slow 10s linear infinite;
+  animation: spin-slow 12s linear infinite;
 }
 
 @keyframes fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .animate-fade-in {
-  animation: fade-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fade-in 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
-

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { getBlendSession } from '@/services/blend';
 import { AnimatedScore } from '@/components/blend/AnimatedScore';
 import { ShareBlendButton } from '@/components/blend/ShareBlendButton';
-import { MapPin, ArrowRight, RefreshCw } from 'lucide-react';
+import { PinIcon, ArrowRightIcon, RefreshIcon } from '@/components/icons/Icons';
 
 export const revalidate = 3600; // Blend results are immutable after creation
 
@@ -116,7 +116,7 @@ export default async function BlendResultPage({ params }: BlendResultPageProps) 
             href="/blend"
             className="inline-flex items-center justify-center gap-2 rounded-xl bg-white border border-[#E6DFD5] hover:border-[#2C2A29] text-[#2C2A29] font-bold px-6 py-3 text-sm shadow-sm active-press transition-all"
           >
-            <RefreshCw className="h-4 w-4" />
+            <RefreshIcon className="h-4 w-4" />
             New Blend
           </Link>
         </div>
@@ -134,7 +134,7 @@ export default async function BlendResultPage({ params }: BlendResultPageProps) 
                 key={i}
                 className="flex items-center gap-3 rounded-xl bg-[#FAF6F0] border border-[#E6DFD5] px-4 py-2.5"
               >
-                <MapPin className="h-4 w-4 text-[#4A6B5D] shrink-0" />
+                <PinIcon className="h-4 w-4 text-[#4A6B5D] shrink-0" />
                 <div>
                   <span className="text-sm font-bold text-[#2C2A29]">{place.name}</span>
                   {place.destination && (
@@ -195,7 +195,7 @@ export default async function BlendResultPage({ params }: BlendResultPageProps) 
                 </p>
                 <p className="font-sans text-sm font-black text-[#2C2A29] mt-0.5">{nameA}</p>
               </div>
-              <ArrowRight className="h-4 w-4 text-[#4A6B5D] group-hover:translate-x-1 transition-transform" />
+              <ArrowRightIcon className="h-4 w-4 text-[#4A6B5D] group-hover:translate-x-1 transition-transform" />
             </div>
           </Link>
         )}
@@ -211,7 +211,7 @@ export default async function BlendResultPage({ params }: BlendResultPageProps) 
                 </p>
                 <p className="font-sans text-sm font-black text-[#2C2A29] mt-0.5">{nameB}</p>
               </div>
-              <ArrowRight className="h-4 w-4 text-[#4A6B5D] group-hover:translate-x-1 transition-transform" />
+              <ArrowRightIcon className="h-4 w-4 text-[#4A6B5D] group-hover:translate-x-1 transition-transform" />
             </div>
           </Link>
         )}

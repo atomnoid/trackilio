@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Bookmark, MapPin, Share2, Users } from 'lucide-react';
+import { BookmarkIcon, PinIcon, ShareIcon, UsersIcon } from '@/components/icons/Icons';
 
 export function CollectIllustration() {
   return (
@@ -10,7 +10,7 @@ export function CollectIllustration() {
       <div className="absolute top-4 left-5 bg-white rounded-xl p-3 shadow-2xs border border-[#E6DFD5] w-40 rotate-[-3deg]">
         <div className="flex items-center gap-2 mb-1">
           <span className="p-1 rounded-md bg-[#F0F5F2] text-[#4A6B5D]">
-            <MapPin className="h-3.5 w-3.5" />
+            <PinIcon className="h-3.5 w-3.5" />
           </span>
           <span className="text-xs font-bold text-[#2C2A29]">Tsukiji Market</span>
         </div>
@@ -30,7 +30,7 @@ export function CollectIllustration() {
 
       {/* Collector Stamp Icon */}
       <div className="relative z-10 h-14 w-14 rounded-2xl bg-[#4A6B5D] text-white flex items-center justify-center shadow-2xs">
-        <Bookmark className="h-7 w-7 stroke-[2]" />
+        <BookmarkIcon className="h-7 w-7 stroke-[2]" />
       </div>
     </div>
   );
@@ -117,7 +117,7 @@ export function ShareIllustration() {
       <div className="bg-white rounded-2xl p-4 border border-[#E6DFD5] max-w-xs w-full space-y-2.5 shadow-2xs">
         <div className="flex items-center justify-between">
           <span className="text-xs font-bold text-[#2C2A29] flex items-center gap-1.5">
-            <Users className="h-4 w-4 text-[#4A6B5D]" /> Collaborators
+            <UsersIcon className="h-4 w-4 text-[#4A6B5D]" /> Collaborators
           </span>
           <span className="text-[10px] bg-[#F0F5F2] text-[#4A6B5D] font-bold px-2 py-0.5 rounded-full">
             Public List
@@ -139,7 +139,7 @@ export function ShareIllustration() {
         </div>
         <div className="pt-1.5 border-t border-[#E6DFD5] flex items-center justify-between text-[11px] font-bold text-[#4A6B5D]">
           <span>trackilio.com/l/japan-2026</span>
-          <Share2 className="h-3.5 w-3.5" />
+          <ShareIcon className="h-3.5 w-3.5" />
         </div>
       </div>
     </div>

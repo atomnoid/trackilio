@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ShieldCheck, Lock, Eye, FileText, Mail, Sparkles } from 'lucide-react';
+import { ShieldIcon, LockIcon, EyeIcon, FileTextIcon, MailIcon, SparklesIcon } from '@/components/icons/Icons';
 
 export const metadata: Metadata = {
   title: 'Privacy Policy | Trackilio',
@@ -13,7 +13,7 @@ export default function PrivacyPolicyPage() {
       {/* Header */}
       <div className="space-y-4 text-center max-w-2xl mx-auto">
         <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FFEAE6] border border-[#FFD3CC] px-4 py-1.5 text-xs font-black text-[#FF5841]">
-          <ShieldCheck className="h-3.5 w-3.5" />
+          <ShieldIcon className="h-3.5 w-3.5" />
           Transparency & Security
         </span>
         <h1 className="font-sans text-4xl sm:text-5xl font-black text-gray-900 tracking-tight">
@@ -97,7 +97,7 @@ export default function PrivacyPolicyPage() {
 
         <section className="space-y-4 pt-4 border-t border-gray-100">
           <h2 className="font-sans text-xl sm:text-2xl font-black text-gray-900 flex items-center gap-2">
-            <Mail className="h-5 w-5 text-[#FF5841]" />
+            <MailIcon className="h-5 w-5 text-[#FF5841]" />
             Questions or Concerns?
           </h2>
           <p>
@@ -108,7 +108,7 @@ export default function PrivacyPolicyPage() {
               href="mailto:trackiliocontact@gmail.com"
               className="inline-flex items-center gap-2 rounded-2xl bg-[#FFEAE6] hover:bg-[#FFD3CC] border border-[#FFD3CC] text-[#FF5841] font-black px-6 py-3 text-xs shadow-2xs transition-all"
             >
-              <Mail className="h-4 w-4" />
+              <MailIcon className="h-4 w-4" />
               <span>trackiliocontact@gmail.com</span>
             </a>
           </div>

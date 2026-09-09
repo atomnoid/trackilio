@@ -10,7 +10,7 @@ import { PlaceForm } from '@/components/places/PlaceForm';
 import { WanderListJsonLd } from '@/components/seo/WanderListJsonLd';
 import { MembersPanel } from '@/components/lists/MembersPanel';
 import { ListHeaderActions } from '@/components/lists/ListHeaderActions';
-import { MapPin, Globe, Lock, Calendar, Users, Sparkles } from 'lucide-react';
+import { PinIcon, GlobeIcon, LockIcon, CalendarIcon, UsersIcon, SparklesIcon } from '@/components/icons/Icons';
 import { formatDate } from '@/lib/utils';
 
 export const revalidate = 10;
@@ -106,13 +106,13 @@ export default async function PublicWanderListPage({ params }: WanderListPagePro
                     : 'bg-[#F6F4F8] text-[#4F4B5E] border border-[#EFE9EC]'
                 }`}
               >
-                {list.is_public ? <Globe className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
+                {list.is_public ? <GlobeIcon className="h-3.5 w-3.5" /> : <LockIcon className="h-3.5 w-3.5" />}
                 <span>{list.is_public ? 'Public Guide' : 'Private Itinerary'}</span>
               </span>
 
               {hasCollaborators && (
                 <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-black bg-[#F9E2EE] text-[#C53678] border border-[#F4CDDF]">
-                  <Users className="h-3.5 w-3.5" />
+                  <UsersIcon className="h-3.5 w-3.5" />
                   <span>{members.length} Collaborators</span>
                 </span>
               )}
@@ -135,7 +135,7 @@ export default async function PublicWanderListPage({ params }: WanderListPagePro
           <div className="space-y-3">
             {list.destination && (
               <div className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-[#FF5841] bg-[#FFF5F3] px-3 py-1 rounded-xl border border-[#FFEAE6]">
-                <MapPin className="h-3.5 w-3.5" />
+                <PinIcon className="h-3.5 w-3.5" />
                 <span>{list.destination}</span>
               </div>
             )}
@@ -167,7 +167,7 @@ export default async function PublicWanderListPage({ params }: WanderListPagePro
             </Link>
 
             <div className="flex items-center gap-1.5">
-              <Calendar className="h-3.5 w-3.5 text-[#7E7890]" />
+              <CalendarIcon className="h-3.5 w-3.5 text-[#7E7890]" />
               <span>Updated {formatDate(list.updated_at)}</span>
             </div>
 
@@ -202,7 +202,7 @@ export default async function PublicWanderListPage({ params }: WanderListPagePro
               </div>
             ) : (
               <div className="rounded-3xl bg-white border border-[#EFE9EC] p-10 text-center space-y-3 shadow-2xs">
-                <MapPin className="mx-auto h-9 w-9 text-[#FF5841] stroke-[1.8]" />
+                <PinIcon className="mx-auto h-9 w-9 text-[#FF5841] stroke-[1.8]" />
                 <h3 className="font-sans text-base font-bold text-[#1A1723]">No places added yet</h3>
                 <p className="text-xs text-[#7E7890] max-w-sm mx-auto font-medium">
                   Add your favorite cafes, hotels, sights, and hidden gems to this itinerary.

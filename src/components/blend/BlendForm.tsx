@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, Loader2, AtSign, Sparkles } from 'lucide-react';
+import { ArrowRightIcon, SpinnerIcon, AtSignIcon, SparklesIcon } from '@/components/icons/Icons';
 import { sanitizeUsername } from '@/lib/username';
 
 interface BlendFormProps {
@@ -48,7 +48,7 @@ export function BlendForm({ prefillUsername }: BlendFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="relative">
-        <AtSign className="absolute left-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#FF5841]" />
+        <AtSignIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#FA8112]" />
         <input
           type="text"
           value={username}
@@ -74,14 +74,14 @@ export function BlendForm({ prefillUsername }: BlendFormProps) {
       >
         {loading ? (
           <>
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <SpinnerIcon className="h-4 w-4 animate-spin" />
             <span>Calculating Blend Score…</span>
           </>
         ) : (
           <>
-            <Sparkles className="h-4 w-4" />
+            <SparklesIcon className="h-4 w-4" />
             <span>Generate Travel Blend</span>
-            <ArrowRight className="h-4 w-4" />
+            <ArrowRightIcon className="h-4 w-4" />
           </>
         )}
       </button>

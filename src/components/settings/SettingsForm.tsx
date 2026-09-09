@@ -2,19 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  User,
-  AtSign,
-  MapPin,
-  FileText,
-  Mail,
-  Loader2,
-  CheckCircle2,
-  XCircle,
-  ExternalLink,
-  Sparkles,
-  Save,
-} from 'lucide-react';
+import { UserIcon, AtSignIcon, PinIcon, MailIcon, SpinnerIcon, CheckCircleIcon, XCircleIcon, ExternalLinkIcon, SaveIcon } from '@/components/icons/Icons';
 import Link from 'next/link';
 import { Profile } from '@/types/database';
 import { validateUsernameFormat, sanitizeUsername } from '@/lib/username';
@@ -141,14 +129,14 @@ export function SettingsForm({ initialProfile, userEmail, userId }: SettingsForm
     <form onSubmit={handleSubmit} className="space-y-6">
       {successNotice && (
         <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-4 text-xs font-bold text-emerald-800 flex items-center gap-2">
-          <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
+          <CheckCircleIcon className="h-4 w-4 shrink-0 text-emerald-600" />
           <span>{successNotice}</span>
         </div>
       )}
 
       {errorMessage && (
         <div className="rounded-2xl bg-rose-50 border border-rose-200 p-4 text-xs font-bold text-rose-800 flex items-center gap-2">
-          <XCircle className="h-4 w-4 shrink-0 text-rose-600" />
+          <XCircleIcon className="h-4 w-4 shrink-0 text-rose-600" />
           <span>{errorMessage}</span>
         </div>
       )}
@@ -156,14 +144,14 @@ export function SettingsForm({ initialProfile, userEmail, userId }: SettingsForm
       <div className="bg-white border border-gray-100 rounded-3xl p-6 sm:p-8 shadow-sm space-y-5">
         <div className="flex items-center justify-between pb-3 border-b border-gray-100">
           <h2 className="font-sans text-base font-black text-gray-900 flex items-center gap-2">
-            <User className="h-4.5 w-4.5 text-[#FF5841]" /> Profile Details
+            <UserIcon className="h-4 w-4 text-[#FA8112]" /> Profile Details
           </h2>
           <Link
             href={`/u/${currentCleanHandle}`}
             className="inline-flex items-center gap-1.5 text-xs font-bold text-[#C53678] hover:text-[#FF5841] transition-colors"
           >
             <span>View Public Profile</span>
-            <ExternalLink className="h-3 w-3" />
+            <ExternalLinkIcon className="h-3 w-3" />
           </Link>
         </div>
 
@@ -173,7 +161,7 @@ export function SettingsForm({ initialProfile, userEmail, userId }: SettingsForm
             Display Name <span className="text-rose-400">*</span>
           </label>
           <div className="relative">
-            <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <UserIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <input
               type="text"
               required
@@ -194,7 +182,7 @@ export function SettingsForm({ initialProfile, userEmail, userId }: SettingsForm
             <span className="text-[11px] font-semibold text-gray-400">Unique to you</span>
           </div>
           <div className="relative">
-            <AtSign className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#FF5841]" />
+            <AtSignIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#FA8112]" />
             <input
               type="text"
               required
@@ -212,11 +200,11 @@ export function SettingsForm({ initialProfile, userEmail, userId }: SettingsForm
               }`}
             />
             <div className="absolute right-3.5 top-1/2 -translate-y-1/2">
-              {usernameStatus === 'checking' && <Loader2 className="h-4 w-4 animate-spin text-gray-400" />}
-              {usernameStatus === 'available' && <CheckCircle2 className="h-4 w-4 text-emerald-600" />}
+              {usernameStatus === 'checking' && <SpinnerIcon className="h-4 w-4 animate-spin text-gray-400" />}
+              {usernameStatus === 'available' && <CheckCircleIcon className="h-4 w-4 text-emerald-600" />}
               {usernameStatus === 'same' && <span className="text-xs font-bold text-gray-400">Current</span>}
               {(usernameStatus === 'taken' || usernameStatus === 'invalid') && (
-                <XCircle className="h-4 w-4 text-rose-500" />
+                <XCircleIcon className="h-4 w-4 text-rose-500" />
               )}
             </div>
           </div>
@@ -270,7 +258,7 @@ export function SettingsForm({ initialProfile, userEmail, userId }: SettingsForm
         <div className="space-y-1.5">
           <label className="block text-xs font-bold text-gray-800">Home Base / Location</label>
           <div className="relative">
-            <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#FF5841]" />
+            <PinIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#FA8112]" />
             <input
               type="text"
               value={location}
@@ -297,7 +285,7 @@ export function SettingsForm({ initialProfile, userEmail, userId }: SettingsForm
         <div className="space-y-1.5">
           <label className="block text-xs font-bold text-gray-800">Email Address</label>
           <div className="relative">
-            <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <MailIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <input
               type="email"
               value={userEmail}
@@ -315,12 +303,12 @@ export function SettingsForm({ initialProfile, userEmail, userId }: SettingsForm
         >
           {saving ? (
             <>
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <SpinnerIcon className="h-4 w-4 animate-spin" />
               <span>Saving Profile…</span>
             </>
           ) : (
             <>
-              <Save className="h-4 w-4" />
+              <SaveIcon className="h-4 w-4" />
               <span>Save Changes</span>
             </>
           )}

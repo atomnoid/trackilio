@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
-import { X, Users, Loader2 } from 'lucide-react';
+import { CloseIcon, SpinnerIcon } from '@/components/icons/Icons';
 import type { Profile } from '@/types/database';
 
 interface FollowListModalProps {
@@ -46,7 +46,6 @@ export function FollowListModal({
       });
   }, [isOpen, userId, type]);
 
-  // Handle ESC key and scroll locking
   useEffect(() => {
     if (!isOpen) return;
 
@@ -73,8 +72,8 @@ export function FollowListModal({
         position: 'fixed',
         inset: 0,
         zIndex: 99999,
-        backgroundColor: 'rgba(15, 23, 42, 0.6)',
-        backdropFilter: 'blur(6px)',
+        backgroundColor: 'rgba(34, 34, 34, 0.6)',
+        backdropFilter: 'blur(4px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -87,11 +86,11 @@ export function FollowListModal({
       <div
         style={{
           width: '100%',
-          maxWidth: '480px',
-          backgroundColor: '#FFFFFF',
-          borderRadius: '24px',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-          border: '1px solid #F1F5F9',
+          maxWidth: '440px',
+          backgroundColor: '#FAF3E1',
+          borderRadius: '20px',
+          boxShadow: '0 20px 40px -10px rgba(34, 34, 34, 0.2)',
+          border: '1px solid #E8DECA',
           display: 'flex',
           flexDirection: 'column',
           maxHeight: '75vh',
@@ -101,18 +100,19 @@ export function FollowListModal({
         {/* Modal Header */}
         <div
           style={{
-            padding: '18px 24px',
-            borderBottom: '1px solid #F1F5F9',
+            padding: '16px 20px',
+            borderBottom: '1px solid #E8DECA',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
+            backgroundColor: '#F5E7C6',
           }}
         >
           <div>
-            <h3 style={{ fontSize: '17px', fontWeight: 900, color: '#0F172A', margin: 0 }}>
+            <h3 style={{ fontSize: '15px', fontWeight: 900, color: '#222222', margin: 0 }}>
               {title}
             </h3>
-            <p style={{ fontSize: '12px', color: '#64748B', margin: '2px 0 0 0' }}>
+            <p style={{ fontSize: '11px', color: '#6B6862', margin: '2px 0 0 0' }}>
               {titleName}&apos;s {title.toLowerCase()}
             </p>
           </div>
@@ -120,26 +120,26 @@ export function FollowListModal({
             type="button"
             onClick={onClose}
             style={{
-              background: '#F1F5F9',
-              border: 'none',
+              background: '#FAF3E1',
+              border: '1px solid #E8DECA',
               borderRadius: '50%',
-              width: '32px',
-              height: '32px',
+              width: '28px',
+              height: '28px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
-              color: '#64748B',
+              color: '#222222',
             }}
           >
-            <X style={{ width: '16px', height: '16px' }} />
+            <CloseIcon className="w-3.5 h-3.5" />
           </button>
         </div>
 
         {/* Modal Body */}
         <div
           style={{
-            padding: '16px 20px',
+            padding: '14px 16px',
             overflowY: 'auto',
             flex: 1,
             display: 'flex',
@@ -148,28 +148,12 @@ export function FollowListModal({
           }}
         >
           {loading ? (
-            <div style={{ padding: '40px 0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Loader2 style={{ width: '28px', height: '28px', color: '#FF5841', animation: 'spin 1s linear infinite' }} />
+            <div style={{ padding: '36px 0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <SpinnerIcon className="w-6 h-6 animate-spin text-[#FA8112]" />
             </div>
           ) : profiles.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '40px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
-              <div
-                style={{
-                  width: '44px',
-                  height: '44px',
-                  borderRadius: '14px',
-                  backgroundColor: '#F1F5F9',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#94A3B8',
-                }}
-              >
-                <Users style={{ width: '22px', height: '22px' }} />
-              </div>
-              <p style={{ fontSize: '13px', fontWeight: 600, color: '#64748B', margin: 0 }}>
-                {type === 'followers' ? 'No followers yet.' : 'Not following anyone yet.'}
-              </p>
+            <div style={{ textAlign: 'center', padding: '36px 16px', color: '#6B6862', fontSize: '13px' }}>
+              {type === 'followers' ? 'No followers yet.' : 'Not following anyone yet.'}
             </div>
           ) : (
             profiles.map((p) => {
@@ -186,20 +170,18 @@ export function FollowListModal({
                     alignItems: 'center',
                     gap: '12px',
                     padding: '10px 12px',
-                    borderRadius: '16px',
-                    backgroundColor: '#F8FAFC',
-                    border: '1px solid #F1F5F9',
+                    borderRadius: '14px',
+                    backgroundColor: '#FFFFFF',
+                    border: '1px solid #E8DECA',
                     textDecoration: 'none',
                     color: 'inherit',
                     transition: 'all 0.15s ease',
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#FFEAE6';
-                    e.currentTarget.style.borderColor = '#FFD3CC';
+                    e.currentTarget.style.backgroundColor = '#F5E7C6';
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#F8FAFC';
-                    e.currentTarget.style.borderColor = '#F1F5F9';
+                    e.currentTarget.style.backgroundColor = '#FFFFFF';
                   }}
                 >
                   {p.avatar_url ? (
@@ -207,20 +189,20 @@ export function FollowListModal({
                     <img
                       src={p.avatar_url}
                       alt={name}
-                      style={{ width: '40px', height: '40px', borderRadius: '12px', objectFit: 'cover' }}
+                      style={{ width: '36px', height: '36px', borderRadius: '10px', objectFit: 'cover' }}
                     />
                   ) : (
                     <div
                       style={{
-                        width: '40px',
-                        height: '40px',
-                        borderRadius: '12px',
-                        background: 'linear-gradient(to bottom right, #FF5841, #C53678)',
+                        width: '36px',
+                        height: '36px',
+                        borderRadius: '10px',
+                        backgroundColor: '#222222',
                         color: '#FFF',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        fontSize: '14px',
+                        fontSize: '13px',
                         fontWeight: 800,
                         flexShrink: 0,
                       }}
@@ -230,11 +212,11 @@ export function FollowListModal({
                   )}
 
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: '13px', fontWeight: 800, color: '#0F172A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <div style={{ fontSize: '13px', fontWeight: 800, color: '#222222', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {name}
                     </div>
                     {p.username && (
-                      <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>
+                      <div style={{ fontSize: '11px', color: '#6B6862' }}>
                         @{p.username}
                       </div>
                     )}

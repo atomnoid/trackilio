@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Bookmark, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { BookmarkIcon, SpinnerIcon } from '@/components/icons/Icons';
 
 interface SavePlaceButtonProps {
   placeId: string;
@@ -44,11 +44,9 @@ export function SavePlaceButton({
       });
 
       if (!res.ok) {
-        // Rollback
         setSaved(!nextState);
       }
     } catch {
-      // Rollback
       setSaved(!nextState);
     } finally {
       setLoading(false);
@@ -59,17 +57,17 @@ export function SavePlaceButton({
     <button
       onClick={handleToggle}
       disabled={loading}
-      className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition-all active-press ${
+      className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition-all active-press cursor-pointer ${
         saved
-          ? 'bg-[#FF5841] text-white shadow-sm hover:bg-[#E84430]'
-          : 'bg-[#FFEAE6] hover:bg-[#FFDCD6] text-[#FF5841] border border-[#FFD3CC]'
+          ? 'bg-[#222222] text-white'
+          : 'bg-[#F5E7C6] hover:bg-[#EFE2C2] text-[#222222] border border-[#E8DECA]'
       } ${className}`}
       title={saved ? 'Saved in your places' : 'Save place'}
     >
       {loading ? (
-        <Loader2 className="h-4 w-4 animate-spin" />
+        <SpinnerIcon className="w-3.5 h-3.5 animate-spin" />
       ) : (
-        <Bookmark className={`h-4 w-4 ${saved ? 'fill-current' : ''}`} />
+        <BookmarkIcon className="w-3.5 h-3.5" filled={saved} />
       )}
       {showText && <span>{saved ? 'Saved' : 'Save'}</span>}
     </button>

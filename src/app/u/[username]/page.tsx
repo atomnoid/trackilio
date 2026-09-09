@@ -7,7 +7,7 @@ import { WanderListCard } from '@/components/lists/WanderListCard';
 import { ProfileJsonLd } from '@/components/seo/ProfileJsonLd';
 import { FollowButton } from '@/components/profile/FollowButton';
 import { FollowStats } from '@/components/profile/FollowStats';
-import { MapPin, Globe, Layers, ArrowRight, User, Settings } from 'lucide-react';
+import { PinIcon, ArrowRightIcon } from '@/components/icons/Icons';
 import { createClient } from '@/lib/supabase/server';
 
 export const revalidate = 60;
@@ -78,7 +78,7 @@ export default async function PublicProfilePage({ params }: ProfilePageProps) {
     : false;
 
   return (
-    <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8 sm:space-y-10">
+    <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8 bg-[#FAF3E1]">
       {/* Structured Data */}
       <ProfileJsonLd
         profile={profile}
@@ -86,12 +86,9 @@ export default async function PublicProfilePage({ params }: ProfilePageProps) {
         username={profile.username ?? username}
       />
 
-      {/* Serene Pastel Header Card */}
-      <header className="rounded-3xl bg-white border border-gray-100 p-6 sm:p-8 md:p-10 shadow-sm relative overflow-hidden">
-        <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-[#FF5841]/10 blur-2xl pointer-events-none" />
-        <div className="absolute -bottom-16 -left-16 w-64 h-64 rounded-full bg-[#C53678]/10 blur-2xl pointer-events-none" />
-
-        <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-6">
+      {/* Profile Header Card */}
+      <header className="rounded-3xl bg-white border border-[#E8DECA] p-6 sm:p-8 md:p-10 shadow-2xs relative">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-6">
           {/* Avatar */}
           <div className="relative shrink-0">
             {profile.avatar_url ? (
@@ -99,10 +96,10 @@ export default async function PublicProfilePage({ params }: ProfilePageProps) {
               <img
                 src={profile.avatar_url}
                 alt={displayName}
-                className="h-20 w-20 sm:h-24 sm:w-24 rounded-2xl object-cover border border-gray-200 shadow-sm"
+                className="h-20 w-20 sm:h-24 sm:w-24 rounded-2xl object-cover border border-[#E8DECA]"
               />
             ) : (
-              <div className="h-20 w-20 sm:h-24 sm:w-24 rounded-2xl bg-gradient-to-br from-[#FF5841] to-[#C53678] text-white font-black text-2xl sm:text-3xl flex items-center justify-center shadow-sm">
+              <div className="h-20 w-20 sm:h-24 sm:w-24 rounded-2xl bg-[#222222] text-[#FAF3E1] font-black text-2xl sm:text-3xl flex items-center justify-center">
                 {initials}
               </div>
             )}
@@ -111,33 +108,32 @@ export default async function PublicProfilePage({ params }: ProfilePageProps) {
           {/* Profile Identity */}
           <div className="flex-1 min-w-0 space-y-2">
             <div className="flex flex-wrap items-center gap-2.5">
-              <h1 className="font-sans text-2xl sm:text-3xl md:text-4xl font-black text-gray-900 tracking-tight">
+              <h1 className="font-sans text-2xl sm:text-3xl font-black text-[#222222] tracking-tight">
                 {displayName}
               </h1>
               {profile.username && (
-                <span className="rounded-full bg-[#FFEAE6] border border-[#FFD3CC] px-3 py-0.5 text-xs font-bold text-[#FF5841]">
+                <span className="rounded-full bg-[#F5E7C6] border border-[#E8DECA] px-3 py-0.5 text-xs font-bold text-[#222222]">
                   @{profile.username}
                 </span>
               )}
             </div>
 
             {profile.bio && (
-              <p className="text-sm sm:text-base text-gray-600 font-medium leading-relaxed max-w-2xl">
+              <p className="text-sm text-[#6B6862] leading-relaxed max-w-2xl">
                 {profile.bio}
               </p>
             )}
 
             {/* Badges / Stats */}
-            <div className="flex flex-wrap items-center gap-2.5 pt-1 text-xs font-bold text-gray-500">
+            <div className="flex flex-wrap items-center gap-2.5 pt-1 text-xs font-bold text-[#6B6862]">
               {profile.location && (
-                <span className="inline-flex items-center gap-1.5 rounded-xl bg-gray-50 border border-gray-200 px-3 py-1 text-gray-600">
-                  <MapPin className="h-3.5 w-3.5 text-[#FF5841]" />
+                <span className="inline-flex items-center gap-1.5 rounded-xl bg-[#FAF3E1] border border-[#E8DECA] px-3 py-1 text-[#222222]">
+                  <PinIcon className="w-3 h-3 text-[#FA8112]" />
                   {profile.location}
                 </span>
               )}
-              <span className="inline-flex items-center gap-1.5 rounded-xl bg-[#FFEAE6] border border-[#FFD3CC] px-3 py-1 text-[#FF5841]">
-                <Globe className="h-3.5 w-3.5" />
-                {listCount} Curated List{listCount !== 1 ? 's' : ''}
+              <span className="inline-flex items-center gap-1.5 rounded-xl bg-[#F5E7C6] border border-[#E8DECA] px-3 py-1 text-[#222222]">
+                {listCount} Public List{listCount !== 1 ? 's' : ''}
               </span>
 
               {/* Followers & Following Clickable Stats */}
@@ -155,9 +151,8 @@ export default async function PublicProfilePage({ params }: ProfilePageProps) {
             {isSelf ? (
               <Link
                 href="/settings"
-                className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-800 font-bold px-4 py-2.5 text-xs sm:text-sm active-press transition-colors shadow-xs"
+                className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-[#FAF3E1] hover:bg-[#F5E7C6] border border-[#E8DECA] text-[#222222] font-bold px-4 py-2 text-xs active-press transition-colors"
               >
-                <Settings className="h-4 w-4 text-gray-400" />
                 <span>Edit Settings</span>
               </Link>
             ) : (
@@ -168,20 +163,15 @@ export default async function PublicProfilePage({ params }: ProfilePageProps) {
               />
             )}
           </div>
-
         </div>
       </header>
 
       {/* Curated Lists Section */}
       <section className="space-y-6">
-        <div className="flex items-center justify-between pb-2 border-b border-gray-100">
-          <h2 className="font-sans text-xl sm:text-2xl font-black text-gray-900 flex items-center gap-2">
-            <Layers className="h-5 w-5 text-[#FF5841]" />
-            Curated Travel Lists
+        <div className="flex items-center justify-between pb-2 border-b border-[#E8DECA]">
+          <h2 className="font-sans text-xl font-black text-[#222222]">
+            Public Travel Lists ({listCount})
           </h2>
-          <span className="text-xs font-bold text-[#FF5841] bg-[#FFEAE6] border border-[#FFD3CC] px-3 py-1 rounded-full">
-            {listCount}
-          </span>
         </div>
 
         {listCount > 0 ? (
@@ -191,24 +181,20 @@ export default async function PublicProfilePage({ params }: ProfilePageProps) {
             ))}
           </div>
         ) : (
-          <div className="rounded-3xl border border-gray-100 bg-white p-10 sm:p-14 text-center space-y-4 shadow-xs">
-            <div className="mx-auto h-12 w-12 rounded-2xl bg-[#FFEAE6] border border-[#FFD3CC] text-[#FF5841] flex items-center justify-center">
-              <User className="h-6 w-6 stroke-[1.75]" />
-            </div>
-            <div className="space-y-1">
-              <h3 className="font-sans text-base sm:text-lg font-bold text-gray-900">
-                No public lists yet
-              </h3>
-              <p className="text-xs sm:text-sm text-gray-500 font-medium max-w-sm mx-auto">
-                {displayName} hasn&apos;t shared any public travel lists yet. Check back soon for new itineraries!
-              </p>
-            </div>
+          <div className="rounded-2xl border border-[#E8DECA] bg-white p-10 text-center space-y-3 shadow-2xs">
+            <h3 className="font-sans text-base font-bold text-[#222222]">
+              No public lists yet
+            </h3>
+            <p className="text-xs text-[#6B6862] max-w-sm mx-auto">
+              {displayName} hasn&apos;t shared any public travel lists yet. Check back soon for new itineraries!
+            </p>
             <div className="pt-2">
               <Link
                 href="/discover"
-                className="inline-flex items-center gap-2 text-xs font-bold text-[#C53678] hover:text-[#FF5841] transition-colors"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-[#222222] hover:text-[#FA8112] transition-colors"
               >
-                Discover other travelers&apos; lists <ArrowRight className="h-3 w-3" />
+                <span>Discover other travelers&apos; lists</span>
+                <ArrowRightIcon className="w-3 h-3" />
               </Link>
             </div>
           </div>
@@ -217,4 +203,3 @@ export default async function PublicProfilePage({ params }: ProfilePageProps) {
     </div>
   );
 }
-

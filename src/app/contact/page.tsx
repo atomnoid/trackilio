@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Mail, Shield, Sparkles, MapPin, Compass, Users, CheckCircle2, MessageSquare } from 'lucide-react';
+import { MailIcon, ShieldIcon, SparklesIcon, UsersIcon, MessageSquareIcon } from '@/components/icons/Icons';
 
 export const metadata: Metadata = {
   title: 'Contact Us & Support | Trackilio',
@@ -12,7 +12,7 @@ export default function ContactPage() {
       {/* Header */}
       <div className="text-center space-y-4 max-w-2xl mx-auto">
         <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FFEAE6] border border-[#FFD3CC] px-4 py-1.5 text-xs font-black text-[#FF5841]">
-          <MessageSquare className="h-3.5 w-3.5" />
+          <MessageSquareIcon className="h-3.5 w-3.5" />
           We would love to hear from you
         </span>
         <h1 className="font-sans text-4xl sm:text-5xl font-black text-gray-900 tracking-tight">
@@ -30,7 +30,7 @@ export default function ContactPage() {
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
           <div className="space-y-3">
             <div className="inline-flex items-center justify-center h-12 w-12 rounded-2xl bg-gradient-to-r from-[#FF5841] to-[#C53678] text-white shadow-xs">
-              <Mail className="h-6 w-6" />
+              <MailIcon className="h-6 w-6" />
             </div>
             <h2 className="font-sans text-2xl font-black text-gray-900">
               Direct Email Support
@@ -45,7 +45,7 @@ export default function ContactPage() {
               href="mailto:trackiliocontact@gmail.com"
               className="inline-flex items-center justify-center gap-2.5 rounded-2xl bg-gradient-to-r from-[#FF5841] to-[#C53678] hover:opacity-95 text-white font-black px-8 py-4 text-sm shadow-md hover:shadow-lg transition-all active-press"
             >
-              <Mail className="h-4.5 w-4.5" />
+              <MailIcon className="h-4.5 w-4.5" />
               <span>trackiliocontact@gmail.com</span>
             </a>
           </div>
@@ -56,7 +56,7 @@ export default function ContactPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white rounded-3xl border border-gray-100 p-6 space-y-3 shadow-2xs hover:border-[#FF5841]/30 transition-all">
           <div className="h-10 w-10 rounded-xl bg-[#FFEAE6] text-[#FF5841] flex items-center justify-center font-bold">
-            <Sparkles className="h-5 w-5" />
+            <SparklesIcon className="h-5 w-5" />
           </div>
           <h3 className="font-sans text-base font-black text-gray-900">Feature Requests</h3>
           <p className="text-xs text-gray-500 leading-relaxed font-normal">
@@ -66,7 +66,7 @@ export default function ContactPage() {
 
         <div className="bg-white rounded-3xl border border-gray-100 p-6 space-y-3 shadow-2xs hover:border-[#FF5841]/30 transition-all">
           <div className="h-10 w-10 rounded-xl bg-[#F9E2EE] text-[#C53678] flex items-center justify-center font-bold">
-            <Users className="h-5 w-5" />
+            <UsersIcon className="h-5 w-5" />
           </div>
           <h3 className="font-sans text-base font-black text-gray-900">Creator Partnerships</h3>
           <p className="text-xs text-gray-500 leading-relaxed font-normal">
@@ -76,7 +76,7 @@ export default function ContactPage() {
 
         <div className="bg-white rounded-3xl border border-gray-100 p-6 space-y-3 shadow-2xs hover:border-[#FF5841]/30 transition-all">
           <div className="h-10 w-10 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center font-bold">
-            <Shield className="h-5 w-5" />
+            <ShieldIcon className="h-5 w-5" />
           </div>
           <h3 className="font-sans text-base font-black text-gray-900">Privacy & Accounts</h3>
           <p className="text-xs text-gray-500 leading-relaxed font-normal">

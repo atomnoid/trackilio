@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { PriorityLevel, VisitStatus } from '@/types/database';
-import { Edit3, Trash2, X, Loader2, AlertTriangle, Tag } from 'lucide-react';
+import { EditIcon, TrashIcon, CloseIcon, SpinnerIcon, AlertTriangleIcon, TagIcon } from '@/components/icons/Icons';
 
 interface EditPlaceModalProps {
   listPlaceId: string;
@@ -153,12 +153,12 @@ export function EditPlaceModal({
           aria-label="Close modal"
           className="absolute top-5 right-5 p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-2xl transition-colors"
         >
-          <X className="h-5 w-5" />
+          <CloseIcon className="h-5 w-5" />
         </button>
 
         <div className="space-y-1 pr-8">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FFEAE6] text-[#FF5841] text-xs font-black">
-            <Edit3 className="h-3.5 w-3.5" />
+            <EditIcon className="h-3.5 w-3.5" />
             <span>Place Settings</span>
           </div>
           <h2 className="font-sans text-2xl font-black text-gray-900 tracking-tight">
@@ -175,7 +175,7 @@ export function EditPlaceModal({
         {showDeleteConfirm ? (
           <div className="rounded-2xl bg-rose-50 border border-rose-200 p-5 space-y-4">
             <div className="flex items-start gap-3">
-              <AlertTriangle className="h-5 w-5 text-rose-600 shrink-0 mt-0.5" />
+              <AlertTriangleIcon className="h-5 w-5 text-rose-600 shrink-0 mt-0.5" />
               <div className="space-y-1">
                 <h4 className="font-sans text-sm font-black text-rose-900">
                   Remove &ldquo;{name}&rdquo; from this list?
@@ -201,7 +201,7 @@ export function EditPlaceModal({
                 disabled={deleting}
                 className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-black py-2.5 px-4 transition-colors disabled:opacity-50"
               >
-                {deleting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                {deleting ? <SpinnerIcon className="h-3.5 w-3.5 animate-spin" /> : <TrashIcon className="h-3.5 w-3.5" />}
                 <span>{deleting ? 'Removing…' : 'Yes, Remove Place'}</span>
               </button>
             </div>
@@ -253,7 +253,7 @@ export function EditPlaceModal({
             <div className="space-y-2 pt-1">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-bold text-gray-700 flex items-center gap-1.5">
-                  <Tag className="h-3.5 w-3.5 text-[#C53678]" />
+                  <TagIcon className="h-3.5 w-3.5 text-[#C53678]" />
                   <span>Tags (Max 3)</span>
                 </label>
                 <span className="text-[10px] font-bold text-gray-400">
@@ -278,7 +278,7 @@ export function EditPlaceModal({
                     >
                       <span>{t.emoji}</span>
                       <span>{t.label}</span>
-                      {isSelected && <X className="h-3 w-3 ml-0.5" />}
+                      {isSelected && <CloseIcon className="h-3 w-3 ml-0.5" />}
                     </button>
                   );
                 })}
@@ -341,7 +341,7 @@ export function EditPlaceModal({
                 onClick={() => setShowDeleteConfirm(true)}
                 className="inline-flex items-center gap-1.5 px-3.5 py-3 rounded-2xl text-rose-600 hover:bg-rose-50 text-xs font-bold transition-colors"
               >
-                <Trash2 className="h-4 w-4" />
+                <TrashIcon className="h-4 w-4" />
                 <span>Remove Place</span>
               </button>
 
@@ -358,7 +358,7 @@ export function EditPlaceModal({
                   disabled={loading || !name.trim()}
                   className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#FF5841] to-[#C53678] hover:opacity-95 disabled:opacity-50 text-white font-black py-3 px-5 text-xs shadow-xs active-press transition-all"
                 >
-                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                  {loading ? <SpinnerIcon className="h-4 w-4 animate-spin" /> : null}
                   <span>{loading ? 'Saving…' : 'Save Changes'}</span>
                 </button>
               </div>

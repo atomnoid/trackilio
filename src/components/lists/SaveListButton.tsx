@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Bookmark, Loader2, Check } from 'lucide-react';
+import { BookmarkIcon, SpinnerIcon } from '@/components/icons/Icons';
 import { useRouter } from 'next/navigation';
 
 interface SaveListButtonProps {
@@ -67,9 +67,9 @@ export function SaveListButton({
         } ${className}`}
       >
         {loading ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
+          <SpinnerIcon className="h-4 w-4 animate-spin" />
         ) : (
-          <Bookmark className={`h-4 w-4 ${saved ? 'fill-current' : ''}`} />
+          <BookmarkIcon className={`h-4 w-4 ${saved ? 'fill-current' : ''}`} filled={saved} />
         )}
       </button>
     );
@@ -86,9 +86,9 @@ export function SaveListButton({
       } ${className}`}
     >
       {loading ? (
-        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+        <SpinnerIcon className="h-3.5 w-3.5 animate-spin" />
       ) : (
-        <Bookmark className={`h-3.5 w-3.5 ${saved ? 'fill-current' : ''}`} />
+        <BookmarkIcon className="h-3.5 w-3.5" filled={saved} />
       )}
       <span>{saved ? 'Saved in My Lists' : 'Save List'}</span>
     </button>

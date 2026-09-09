@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
-import { Search, X, MapPin, Layers, User, Sparkles, ArrowRight, Loader2, Compass } from 'lucide-react';
+import { SearchIcon, CloseIcon, PinIcon, ListIcon, UserIcon, SpinnerIcon, ArrowRightIcon } from '@/components/icons/Icons';
 import type { PlaceSearchResult, ListSearchResult, UserSearchResult } from '@/types/database';
 
 interface SearchOverlayProps {
@@ -17,7 +17,7 @@ type TabType = 'all' | 'places' | 'lists' | 'users';
 const TRENDING_QUERIES = [
   'Best cafes in Kolkata',
   'Goa hidden gems',
-  'Romantic date spots',
+  'Date spots in Mumbai',
   'Tokyo ramen bars',
   'Weekend road trips',
 ];
@@ -41,20 +41,16 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
     setMounted(true);
   }, []);
 
-  // Handle ESC key and scroll locking
   useEffect(() => {
     if (!isOpen) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose();
-      }
+      if (e.key === 'Escape') onClose();
     };
 
     window.addEventListener('keydown', handleKeyDown);
     document.body.style.overflow = 'hidden';
 
-    // Focus input on open
     const focusTimer = setTimeout(() => {
       inputRef.current?.focus();
     }, 50);
@@ -66,7 +62,6 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
     };
   }, [isOpen, onClose]);
 
-  // Fetch search results debounced
   const fetchResults = useCallback(async (q: string) => {
     if (!q.trim()) {
       setPlaces([]);
@@ -130,13 +125,13 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
         position: 'fixed',
         inset: 0,
         zIndex: 99999,
-        backgroundColor: 'rgba(15, 23, 42, 0.65)',
-        backdropFilter: 'blur(8px)',
+        backgroundColor: 'rgba(34, 34, 34, 0.65)',
+        backdropFilter: 'blur(4px)',
         display: 'flex',
         alignItems: 'flex-start',
         justifyContent: 'center',
         padding: '16px',
-        paddingTop: 'clamp(20px, 8vh, 80px)',
+        paddingTop: 'clamp(20px, 8vh, 70px)',
       }}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
@@ -145,38 +140,38 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
       <div
         style={{
           width: '100%',
-          maxWidth: '680px',
-          backgroundColor: '#FFFFFF',
-          borderRadius: '24px',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-          border: '1px solid #F1F5F9',
+          maxWidth: '620px',
+          backgroundColor: '#FAF3E1',
+          borderRadius: '20px',
+          boxShadow: '0 20px 40px -10px rgba(34, 34, 34, 0.3)',
+          border: '1px solid #E8DECA',
           display: 'flex',
           flexDirection: 'column',
-          maxHeight: '82vh',
+          maxHeight: '80vh',
           overflow: 'hidden',
         }}
       >
-        {/* Search Header Input */}
-        <div style={{ padding: '16px 20px', borderBottom: '1px solid #F1F5F9', position: 'relative' }}>
+        {/* Search Header */}
+        <div style={{ padding: '16px 20px', borderBottom: '1px solid #E8DECA', position: 'relative' }}>
           <form onSubmit={handleSearchSubmit} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <Search style={{ width: '20px', height: '20px', color: '#94A3B8', flexShrink: 0 }} />
+            <SearchIcon className="w-5 h-5 text-[#6B6862]" />
             <input
               ref={inputRef}
               type="text"
               value={query}
               onChange={(e) => handleQueryChange(e.target.value)}
-              placeholder="Search places, lists, travelers, or 'best cafes in Kolkata'..."
+              placeholder="Search spots, coffee, food, 'best cafes in Kolkata'..."
               style={{
                 width: '100%',
                 border: 'none',
                 outline: 'none',
                 fontSize: '15px',
-                fontWeight: 500,
-                color: '#0F172A',
+                fontWeight: 600,
+                color: '#222222',
                 backgroundColor: 'transparent',
               }}
             />
-            {loading && <Loader2 style={{ width: '18px', height: '18px', color: '#FF5841', animation: 'spin 1s linear infinite', flexShrink: 0 }} />}
+            {loading && <SpinnerIcon className="w-4 h-4 animate-spin text-[#FA8112]" />}
             {query && !loading && (
               <button
                 type="button"
@@ -188,7 +183,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                   inputRef.current?.focus();
                 }}
                 style={{
-                  background: '#F1F5F9',
+                  background: '#F5E7C6',
                   border: 'none',
                   borderRadius: '50%',
                   width: '24px',
@@ -197,10 +192,10 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                   alignItems: 'center',
                   justifyContent: 'center',
                   cursor: 'pointer',
-                  color: '#64748B',
+                  color: '#222222',
                 }}
               >
-                <X style={{ width: '14px', height: '14px' }} />
+                <CloseIcon className="w-3.5 h-3.5" />
               </button>
             )}
             <button
@@ -208,12 +203,12 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
               onClick={onClose}
               style={{
                 background: 'transparent',
-                border: '1px solid #E2E8F0',
-                borderRadius: '10px',
-                padding: '4px 8px',
-                fontSize: '11px',
-                fontWeight: 700,
-                color: '#64748B',
+                border: '1px solid #E8DECA',
+                borderRadius: '8px',
+                padding: '3px 7px',
+                fontSize: '10px',
+                fontWeight: 800,
+                color: '#6B6862',
                 cursor: 'pointer',
               }}
             >
@@ -223,62 +218,32 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
 
           {/* Smart Intent Badges */}
           {(intentCategory || intentLocation) && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '10px', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '11px', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Detected Intent:
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '10px', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '10px', fontWeight: 800, color: '#6B6862', textTransform: 'uppercase' }}>
+                Detected:
               </span>
               {intentCategory && (
-                <span
-                  style={{
-                    backgroundColor: '#FFEAE6',
-                    border: '1px solid #FFD3CC',
-                    color: '#FF5841',
-                    fontSize: '11px',
-                    fontWeight: 700,
-                    padding: '2px 8px',
-                    borderRadius: '8px',
-                  }}
-                >
-                  Category: {intentCategory}
+                <span style={{ backgroundColor: '#F5E7C6', border: '1px solid #E8DECA', color: '#222222', fontSize: '10px', fontWeight: 800, padding: '2px 8px', borderRadius: '6px' }}>
+                  {intentCategory}
                 </span>
               )}
               {intentLocation && (
-                <span
-                  style={{
-                    backgroundColor: '#F1F5F9',
-                    border: '1px solid #E2E8F0',
-                    color: '#475569',
-                    fontSize: '11px',
-                    fontWeight: 700,
-                    padding: '2px 8px',
-                    borderRadius: '8px',
-                  }}
-                >
-                  Location: {intentLocation}
+                <span style={{ backgroundColor: '#F5E7C6', border: '1px solid #E8DECA', color: '#222222', fontSize: '10px', fontWeight: 800, padding: '2px 8px', borderRadius: '6px' }}>
+                  {intentLocation}
                 </span>
               )}
             </div>
           )}
         </div>
 
-        {/* Tab Filter Bar (When query exists) */}
+        {/* Tab Filter */}
         {query.trim() && hasResults && (
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '8px 20px',
-              borderBottom: '1px solid #F8FAFC',
-              backgroundColor: '#FDFEFE',
-              overflowX: 'auto',
-            }}
-          >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 20px', borderBottom: '1px solid #E8DECA', backgroundColor: '#F5E7C6' }}>
             {[
               { id: 'all', label: `All (${totalResults})` },
               { id: 'places', label: `Places (${places.length})` },
               { id: 'lists', label: `Lists (${lists.length})` },
-              { id: 'users', label: `Travelers (${users.length})` },
+              { id: 'users', label: `People (${users.length})` },
             ].map((tab) => {
               const active = activeTab === tab.id;
               return (
@@ -287,15 +252,14 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                   type="button"
                   onClick={() => setActiveTab(tab.id as TabType)}
                   style={{
-                    padding: '4px 12px',
-                    borderRadius: '12px',
-                    fontSize: '12px',
-                    fontWeight: active ? 800 : 600,
-                    color: active ? '#FFFFFF' : '#64748B',
-                    background: active ? 'linear-gradient(to right, #FF5841, #C53678)' : 'transparent',
-                    border: active ? 'none' : '1px solid #E2E8F0',
+                    padding: '4px 10px',
+                    borderRadius: '8px',
+                    fontSize: '11px',
+                    fontWeight: active ? 900 : 700,
+                    color: active ? '#FFFFFF' : '#222222',
+                    background: active ? '#222222' : 'transparent',
+                    border: 'none',
                     cursor: 'pointer',
-                    transition: 'all 0.15s ease',
                   }}
                 >
                   {tab.label}
@@ -305,367 +269,153 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
           </div>
         )}
 
-        {/* Results / Empty / Trending Body */}
-        <div style={{ padding: '16px 20px', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        {/* Results Body */}
+        <div style={{ padding: '16px 20px', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {!query.trim() ? (
-            /* Trending Searches Default View */
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Sparkles style={{ width: '15px', height: '15px', color: '#FF5841' }} />
-                <span style={{ fontSize: '12px', fontWeight: 800, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  Trending Searches
-                </span>
-              </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <span style={{ fontSize: '11px', fontWeight: 800, color: '#6B6862', textTransform: 'uppercase' }}>
+                Popular Searches
+              </span>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                 {TRENDING_QUERIES.map((tq) => (
                   <button
                     key={tq}
                     type="button"
                     onClick={() => handleTrendingClick(tq)}
                     style={{
-                      padding: '8px 14px',
-                      borderRadius: '14px',
-                      fontSize: '12px',
-                      fontWeight: 600,
-                      color: '#1E293B',
-                      backgroundColor: '#F8FAFC',
-                      border: '1px solid #E2E8F0',
+                      padding: '6px 12px',
+                      borderRadius: '10px',
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      color: '#222222',
+                      backgroundColor: '#FFFFFF',
+                      border: '1px solid #E8DECA',
                       cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor = '#FF5841';
-                      e.currentTarget.style.color = '#FF5841';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = '#E2E8F0';
-                      e.currentTarget.style.color = '#1E293B';
                     }}
                   >
-                    <Search style={{ width: '12px', height: '12px', color: '#94A3B8' }} />
                     {tq}
                   </button>
                 ))}
               </div>
             </div>
           ) : !hasResults && !loading ? (
-            /* No Results Found */
-            <div style={{ textAlign: 'center', padding: '32px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
-              <div
-                style={{
-                  width: '48px',
-                  height: '48px',
-                  borderRadius: '16px',
-                  backgroundColor: '#FFEAE6',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#FF5841',
-                }}
-              >
-                <Compass style={{ width: '24px', height: '24px' }} />
-              </div>
-              <div>
-                <h4 style={{ fontSize: '15px', fontWeight: 800, color: '#0F172A', margin: '0 0 4px 0' }}>No exact matches found</h4>
-                <p style={{ fontSize: '13px', color: '#64748B', margin: 0 }}>
-                  Try searching on the full discover page with broader terms.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={handleSearchSubmit}
-                style={{
-                  marginTop: '6px',
-                  padding: '8px 16px',
-                  borderRadius: '12px',
-                  background: 'linear-gradient(to right, #FF5841, #C53678)',
-                  color: '#FFF',
-                  fontWeight: 700,
-                  fontSize: '12px',
-                  border: 'none',
-                  cursor: 'pointer',
-                }}
-              >
-                Search on Discover Page &rarr;
-              </button>
+            <div style={{ textAlign: 'center', padding: '24px 16px', color: '#6B6862', fontSize: '13px' }}>
+              No exact matches found. Press enter to search across all public guides.
             </div>
           ) : (
-            /* Results Display */
             <>
-              {/* Places Section */}
+              {/* Places */}
               {showPlaces && (
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <span style={{ fontSize: '11px', fontWeight: 800, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                      Places & Spots
-                    </span>
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    {places.map((place) => (
-                      <Link
-                        key={place.id}
-                        href={`/place/${place.slug || place.id}`}
-                        onClick={onClose}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '12px',
-                          padding: '10px 12px',
-                          borderRadius: '14px',
-                          backgroundColor: '#F8FAFC',
-                          border: '1px solid #F1F5F9',
-                          textDecoration: 'none',
-                          color: 'inherit',
-                          transition: 'all 0.15s ease',
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = '#FFF5F3';
-                          e.currentTarget.style.borderColor = '#FFD3CC';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = '#F8FAFC';
-                          e.currentTarget.style.borderColor = '#F1F5F9';
-                        }}
-                      >
-                        <div
-                          style={{
-                            width: '36px',
-                            height: '36px',
-                            borderRadius: '10px',
-                            backgroundColor: '#FFEAE6',
-                            color: '#FF5841',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            flexShrink: 0,
-                          }}
-                        >
-                          <MapPin style={{ width: '18px', height: '18px' }} />
-                        </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: '13px', fontWeight: 800, color: '#0F172A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            {place.name}
-                          </div>
-                          <div style={{ fontSize: '11px', color: '#64748B', display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
-                            {place.city && <span>{place.city}</span>}
-                            {place.city && place.category && <span>•</span>}
-                            {place.category && <span style={{ textTransform: 'capitalize' }}>{place.category}</span>}
-                            {(place.upvotes_count || 0) > 0 && (
-                              <>
-                                <span>•</span>
-                                <span style={{ color: '#FF5841', fontWeight: 700 }}>▲ {place.upvotes_count}</span>
-                              </>
-                            )}
-                          </div>
-                        </div>
-                        <ArrowRight style={{ width: '14px', height: '14px', color: '#94A3B8' }} />
-                      </Link>
-                    ))}
-                  </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <span style={{ fontSize: '10px', fontWeight: 800, color: '#6B6862', textTransform: 'uppercase' }}>
+                    Places
+                  </span>
+                  {places.map((place) => (
+                    <Link
+                      key={place.id}
+                      href={`/place/${place.slug || place.id}`}
+                      onClick={onClose}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '10px 12px',
+                        borderRadius: '12px',
+                        backgroundColor: '#FFFFFF',
+                        border: '1px solid #E8DECA',
+                        textDecoration: 'none',
+                        color: 'inherit',
+                      }}
+                    >
+                      <div>
+                        <div style={{ fontSize: '13px', fontWeight: 800, color: '#222222' }}>{place.name}</div>
+                        <div style={{ fontSize: '11px', color: '#6B6862' }}>{place.city} {place.category && `• ${place.category}`}</div>
+                      </div>
+                      <ArrowRightIcon className="w-3.5 h-3.5 text-[#6B6862]" />
+                    </Link>
+                  ))}
                 </div>
               )}
 
-              {/* Lists Section */}
+              {/* Lists */}
               {showLists && (
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <span style={{ fontSize: '11px', fontWeight: 800, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                      Curated Lists
-                    </span>
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    {lists.map((list) => (
-                      <Link
-                        key={list.id}
-                        href={`/l/${list.slug || list.id}`}
-                        onClick={onClose}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '12px',
-                          padding: '10px 12px',
-                          borderRadius: '14px',
-                          backgroundColor: '#F8FAFC',
-                          border: '1px solid #F1F5F9',
-                          textDecoration: 'none',
-                          color: 'inherit',
-                          transition: 'all 0.15s ease',
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = '#FDF2F8';
-                          e.currentTarget.style.borderColor = '#FBCFE8';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = '#F8FAFC';
-                          e.currentTarget.style.borderColor = '#F1F5F9';
-                        }}
-                      >
-                        <div
-                          style={{
-                            width: '36px',
-                            height: '36px',
-                            borderRadius: '10px',
-                            backgroundColor: '#FCE7F3',
-                            color: '#C53678',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            flexShrink: 0,
-                          }}
-                        >
-                          <Layers style={{ width: '18px', height: '18px' }} />
-                        </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: '13px', fontWeight: 800, color: '#0F172A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            {list.title}
-                          </div>
-                          <div style={{ fontSize: '11px', color: '#64748B', display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
-                            {list.creator && <span>by @{list.creator.username || list.creator.display_name}</span>}
-                            {list.destination && (
-                              <>
-                                <span>•</span>
-                                <span>{list.destination}</span>
-                              </>
-                            )}
-                            {(list.places_count || 0) > 0 && (
-                              <>
-                                <span>•</span>
-                                <span>{list.places_count} places</span>
-                              </>
-                            )}
-                          </div>
-                        </div>
-                        <ArrowRight style={{ width: '14px', height: '14px', color: '#94A3B8' }} />
-                      </Link>
-                    ))}
-                  </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <span style={{ fontSize: '10px', fontWeight: 800, color: '#6B6862', textTransform: 'uppercase' }}>
+                    Lists
+                  </span>
+                  {lists.map((list) => (
+                    <Link
+                      key={list.id}
+                      href={`/l/${list.slug || list.id}`}
+                      onClick={onClose}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '10px 12px',
+                        borderRadius: '12px',
+                        backgroundColor: '#FFFFFF',
+                        border: '1px solid #E8DECA',
+                        textDecoration: 'none',
+                        color: 'inherit',
+                      }}
+                    >
+                      <div>
+                        <div style={{ fontSize: '13px', fontWeight: 800, color: '#222222' }}>{list.title}</div>
+                        <div style={{ fontSize: '11px', color: '#6B6862' }}>{list.destination || 'Travel List'} • {list.places_count || 0} places</div>
+                      </div>
+                      <ArrowRightIcon className="w-3.5 h-3.5 text-[#6B6862]" />
+                    </Link>
+                  ))}
                 </div>
               )}
 
-              {/* Users Section */}
+              {/* Users */}
               {showUsers && (
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <span style={{ fontSize: '11px', fontWeight: 800, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                      Travelers & Creators
-                    </span>
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    {users.map((user) => (
-                      <Link
-                        key={user.id}
-                        href={`/u/${user.username || user.id}`}
-                        onClick={onClose}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '12px',
-                          padding: '10px 12px',
-                          borderRadius: '14px',
-                          backgroundColor: '#F8FAFC',
-                          border: '1px solid #F1F5F9',
-                          textDecoration: 'none',
-                          color: 'inherit',
-                          transition: 'all 0.15s ease',
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = '#F0FDF4';
-                          e.currentTarget.style.borderColor = '#BBF7D0';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = '#F8FAFC';
-                          e.currentTarget.style.borderColor = '#F1F5F9';
-                        }}
-                      >
-                        {user.avatar_url ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={user.avatar_url}
-                            alt={user.display_name || user.username}
-                            style={{ width: '36px', height: '36px', borderRadius: '10px', objectFit: 'cover' }}
-                          />
-                        ) : (
-                          <div
-                            style={{
-                              width: '36px',
-                              height: '36px',
-                              borderRadius: '10px',
-                              background: 'linear-gradient(to bottom right, #FF5841, #C53678)',
-                              color: '#FFF',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              fontSize: '13px',
-                              fontWeight: 800,
-                              flexShrink: 0,
-                            }}
-                          >
-                            {(user.display_name || user.username || 'T').charAt(0).toUpperCase()}
-                          </div>
-                        )}
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: '13px', fontWeight: 800, color: '#0F172A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            {user.display_name || user.username}
-                          </div>
-                          <div style={{ fontSize: '11px', color: '#64748B', display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
-                            <span>@{user.username}</span>
-                            {(user.followers_count || 0) > 0 && (
-                              <>
-                                <span>•</span>
-                                <span>{user.followers_count} followers</span>
-                              </>
-                            )}
-                            {(user.public_lists_count || 0) > 0 && (
-                              <>
-                                <span>•</span>
-                                <span>{user.public_lists_count} lists</span>
-                              </>
-                            )}
-                          </div>
-                        </div>
-                        <ArrowRight style={{ width: '14px', height: '14px', color: '#94A3B8' }} />
-                      </Link>
-                    ))}
-                  </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <span style={{ fontSize: '10px', fontWeight: 800, color: '#6B6862', textTransform: 'uppercase' }}>
+                    People
+                  </span>
+                  {users.map((user) => (
+                    <Link
+                      key={user.id}
+                      href={`/u/${user.username || user.id}`}
+                      onClick={onClose}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '10px 12px',
+                        borderRadius: '12px',
+                        backgroundColor: '#FFFFFF',
+                        border: '1px solid #E8DECA',
+                        textDecoration: 'none',
+                        color: 'inherit',
+                      }}
+                    >
+                      <div>
+                        <div style={{ fontSize: '13px', fontWeight: 800, color: '#222222' }}>{user.display_name || user.username}</div>
+                        <div style={{ fontSize: '11px', color: '#6B6862' }}>@{user.username}</div>
+                      </div>
+                      <ArrowRightIcon className="w-3.5 h-3.5 text-[#6B6862]" />
+                    </Link>
+                  ))}
                 </div>
               )}
             </>
           )}
         </div>
 
-        {/* Footer Actions */}
+        {/* Footer */}
         {query.trim() && (
-          <div
-            style={{
-              padding: '12px 20px',
-              borderTop: '1px solid #F1F5F9',
-              backgroundColor: '#FAFAFA',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-            }}
-          >
-            <span style={{ fontSize: '12px', color: '#64748B' }}>
-              Press <kbd style={{ background: '#E2E8F0', padding: '2px 5px', borderRadius: '4px', fontSize: '10px', fontWeight: 700 }}>Enter</kbd> to see all results
-            </span>
+          <div style={{ padding: '10px 20px', borderTop: '1px solid #E8DECA', backgroundColor: '#F5E7C6', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: '11px', color: '#6B6862' }}>Press Enter to view all results</span>
             <button
               type="button"
               onClick={handleSearchSubmit}
-              style={{
-                fontSize: '12px',
-                fontWeight: 800,
-                color: '#FF5841',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-              }}
+              style={{ fontSize: '11px', fontWeight: 800, color: '#FA8112', background: 'none', border: 'none', cursor: 'pointer' }}
             >
-              View on Discover <ArrowRight style={{ width: '12px', height: '12px' }} />
+              Open in Discover &rarr;
             </button>
           </div>
         )}

@@ -23,15 +23,15 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: 'Trackilio | Collect Places. Plan Trips. Go Explore.',
+    default: 'Trackilio | Find Places. Save Them. Plan Together.',
     template: '%s | Trackilio',
   },
   description:
-    'Trackilio is an editorial travel discovery and list-sharing platform. Collect places, map routes, and curate trip guides.',
+    'Trackilio helps you discover authentic cafes, restaurants, hidden gems, and date spots. Save places into lists and collaborate with friends.',
   openGraph: {
-    title: 'Trackilio | Collect Places. Plan Trips. Go Explore.',
+    title: 'Trackilio | Find Places. Save Them. Plan Together.',
     description:
-      'Trackilio is an editorial travel discovery and list-sharing platform. Collect places, map routes, and curate trip guides.',
+      'Trackilio helps you discover authentic cafes, restaurants, hidden gems, and date spots. Save places into lists and collaborate with friends.',
     url: siteUrl,
     siteName: 'Trackilio',
     locale: 'en_US',
@@ -39,9 +39,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Trackilio | Collect Places. Plan Trips. Go Explore.',
+    title: 'Trackilio | Find Places. Save Them. Plan Together.',
     description:
-      'Trackilio is an editorial travel discovery and list-sharing platform. Collect places, map routes, and curate trip guides.',
+      'Trackilio helps you discover authentic cafes, restaurants, hidden gems, and date spots. Save places into lists and collaborate with friends.',
   },
   robots: {
     index: true,
@@ -56,7 +56,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${plusJakarta.variable} ${newsreader.variable}`}>
-      <body className="flex min-h-screen flex-col bg-[#FAF6F0] text-[#2C2A29] font-sans pb-16 md:pb-0">
+      <body className="flex min-h-screen flex-col bg-[#FAF3E1] text-[#222222] font-sans pb-16 md:pb-0 selection:bg-[#F5E7C6] selection:text-[#222222]">
         <Navbar />
         <main className="flex-1">{children}</main>
         <Footer />

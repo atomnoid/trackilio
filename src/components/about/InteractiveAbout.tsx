@@ -3,23 +3,21 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import {
-  Compass,
-  Sparkles,
-  MapPin,
-  Users,
-  HeartHandshake,
-  CheckCircle2,
-  Plus,
-  ArrowRight,
-  Share2,
-  Sliders,
-  Bookmark,
-  Shuffle,
-  ThumbsUp,
-  MessageSquare,
-  Flame,
-  Search,
-} from 'lucide-react';
+  CompassIcon,
+  SparklesIcon,
+  PinIcon,
+  UsersIcon,
+  HeartHandshakeIcon,
+  CheckCircleIcon,
+  PlusIcon,
+  ArrowRightIcon,
+  ShareIcon,
+  BookmarkIcon,
+  ShuffleIcon,
+  MessageSquareIcon,
+  FlameIcon,
+  SearchIcon,
+} from '@/components/icons/Icons';
 
 export function InteractiveAbout() {
   const [activeStep, setActiveStep] = useState<number>(0);
@@ -109,7 +107,7 @@ export function InteractiveAbout() {
       {/* Hero Header */}
       <section className="relative text-center space-y-6 max-w-4xl mx-auto pt-6 sm:pt-12">
         <div className="inline-flex items-center gap-2 rounded-full bg-[#FFEAE6] border border-[#FFD3CC] px-4 py-1.5 text-xs font-black text-[#FF5841] shadow-2xs">
-          <Sparkles className="h-3.5 w-3.5 animate-spin-slow" />
+          <SparklesIcon className="h-3.5 w-3.5 animate-spin-slow" />
           The Story & Mechanics of Trackilio
         </div>
 
@@ -130,7 +128,7 @@ export function InteractiveAbout() {
             href="/create"
             className="inline-flex items-center gap-2 rounded-2xl bg-[#FF5841] hover:bg-[#E84430] text-white px-7 py-3.5 text-xs font-black shadow-md hover:shadow-lg transition-all active-press"
           >
-            <Plus className="h-4 w-4 stroke-[2.5]" />
+            <PlusIcon className="h-4 w-4 stroke-[2.5]" />
             <span>Create Your First List</span>
           </Link>
 
@@ -138,7 +136,7 @@ export function InteractiveAbout() {
             href="/blend"
             className="inline-flex items-center gap-2 rounded-2xl bg-white border border-[#FFD3CC] hover:border-[#FF5841] text-[#C53678] px-6 py-3.5 text-xs font-black shadow-2xs hover:shadow-xs transition-all active-press"
           >
-            <Sparkles className="h-4 w-4 text-[#FF5841]" />
+            <SparklesIcon className="h-4 w-4 text-[#FF5841]" />
             <span>Try Travel Blend</span>
           </Link>
         </div>
@@ -213,7 +211,7 @@ export function InteractiveAbout() {
                   className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gray-900 hover:bg-black text-white text-xs font-bold transition-all active-press"
                 >
                   <span>Next Step</span>
-                  <ArrowRight className="h-3.5 w-3.5" />
+                  <ArrowRightIcon className="h-3.5 w-3.5" />
                 </button>
               </div>
             </div>
@@ -276,7 +274,7 @@ export function InteractiveAbout() {
                 <div className="rounded-2xl border border-[#F4C5DD] bg-[#FDF4F8] p-5 space-y-4 shadow-xs">
                   <div className="flex items-center justify-between pb-2 border-b border-[#F4C5DD]/60">
                     <div className="flex items-center gap-2">
-                      <Users className="h-4 w-4 text-[#C53678]" />
+                      <UsersIcon className="h-4 w-4 text-[#C53678]" />
                       <span className="text-xs font-black text-gray-900">Collaborative Squad</span>
                     </div>
                     <span className="text-[10px] font-bold text-[#C53678] bg-white px-2 py-0.5 rounded-full border border-[#F4C5DD]">
@@ -309,7 +307,7 @@ export function InteractiveAbout() {
 
                   <div className="p-3 rounded-xl bg-white border border-gray-100 text-xs text-gray-600 space-y-1">
                     <div className="flex items-center gap-1.5 text-[11px] font-bold text-[#C53678]">
-                      <MessageSquare className="h-3 w-3" />
+                      <MessageSquareIcon className="h-3 w-3" />
                       <span>Live Suggestion from @aarav_explores:</span>
                     </div>
                     <p className="text-[11px] italic text-gray-500">
@@ -328,7 +326,7 @@ export function InteractiveAbout() {
                       onClick={handleShuffleBlend}
                       className="inline-flex items-center gap-1 text-[10px] font-bold text-[#FF5841] bg-white px-2.5 py-1 rounded-full border border-[#FFD3CC] shadow-2xs hover:bg-[#FFEAE6] transition-all"
                     >
-                      <Shuffle className="h-3 w-3" />
+                      <ShuffleIcon className="h-3 w-3" />
                       <span>Shuffle Vibes</span>
                     </button>
                   </div>
@@ -360,7 +358,7 @@ export function InteractiveAbout() {
                 <div className="rounded-2xl border border-gray-200 bg-white p-5 space-y-3.5 shadow-xs">
                   <div className="flex items-center justify-between pb-2 border-b border-gray-100">
                     <span className="inline-flex items-center gap-1 text-[11px] font-black uppercase text-[#FF5841]">
-                      <Sparkles className="h-3.5 w-3.5" />
+                      <SparklesIcon className="h-3.5 w-3.5" />
                       Public Guide Card
                     </span>
                     <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
@@ -378,7 +376,7 @@ export function InteractiveAbout() {
 
                   <div className="p-3 rounded-xl bg-gradient-to-r from-[#FFEAE6] to-[#FDF4F8] border border-[#FFD3CC] flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Flame className="h-4 w-4 text-[#FF5841]" />
+                      <FlameIcon className="h-4 w-4 text-[#FF5841]" />
                       <span className="text-xs font-bold text-gray-800">Daily Travel Fact Widget</span>
                     </div>
                     <span className="text-[10px] font-bold text-[#C53678]">Interactive 🎲</span>
@@ -449,7 +447,7 @@ export function InteractiveAbout() {
                 href="/auth/signup"
                 className="inline-flex items-center gap-2 rounded-2xl bg-white text-[#FF5841] px-7 py-3.5 text-xs font-black shadow-md hover:shadow-lg transition-all active-press"
               >
-                <Plus className="h-4 w-4 stroke-[2.5]" />
+                <PlusIcon className="h-4 w-4 stroke-[2.5]" />
                 <span>Get Started Free</span>
               </Link>
               <Link

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { MapPin, ArrowRight, Compass } from 'lucide-react';
+import { PinIcon, ArrowRightIcon, CompassIcon } from '@/components/icons/Icons';
 import Link from 'next/link';
 
 interface DestinationPin {
@@ -97,7 +97,7 @@ export function HeroMap() {
           </span>
         </div>
         <span className="text-xs text-[#78726D] font-semibold flex items-center gap-1">
-          <Compass className="h-3.5 w-3.5 text-[#4A6B5D]" />
+          <CompassIcon className="h-3.5 w-3.5 text-[#4A6B5D]" />
           Tap a destination pin
         </span>
       </div>
@@ -158,7 +158,7 @@ export function HeroMap() {
                 }`}
                 style={{ backgroundColor: pin.color }}
               >
-                <MapPin className="h-4.5 w-4.5 text-white" />
+                <PinIcon className="h-4.5 w-4.5 text-white" />
               </div>
 
               {/* Pin Label */}
@@ -200,7 +200,7 @@ export function HeroMap() {
               href={`/discover?destination=${activePin.name}`}
               className="inline-flex items-center gap-1.5 rounded-xl bg-[#4A6B5D] hover:bg-[#3B594B] px-3 py-1.5 text-xs font-bold text-white active-press transition-colors shrink-0"
             >
-              View <ArrowRight className="h-3.5 w-3.5" />
+              View <ArrowRightIcon className="h-3.5 w-3.5" />
             </Link>
           </div>
         </div>

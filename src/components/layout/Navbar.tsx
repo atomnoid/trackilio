@@ -3,11 +3,11 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { TrackilioLogo } from './TrackilioLogo';
-import { Plus, Search, User, LogOut, Settings, Users, Sparkles } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { SearchOverlay } from '@/components/search/SearchOverlay';
+import { SearchIcon, PlusIcon } from '@/components/icons/Icons';
 
 export function Navbar() {
   const pathname = usePathname();
@@ -49,7 +49,6 @@ export function Navbar() {
       }
     };
 
-    // Fetch initial user auth state
     supabase.auth.getUser().then(({ data }) => {
       setUser(data.user);
       if (data.user) {
@@ -58,7 +57,6 @@ export function Navbar() {
       setLoading(false);
     });
 
-    // Listen to real-time auth state changes
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
       const currentUser = session?.user ?? null;
       setUser(currentUser);
@@ -90,7 +88,7 @@ export function Navbar() {
 
   const navLinks = [
     { href: '/discover', label: 'Discover' },
-    { href: '/blend', label: '✨ Blend' },
+    { href: '/blend', label: 'Blend' },
     { href: '/dashboard', label: 'My Lists' },
     { href: '/about', label: 'About' },
   ];
@@ -102,10 +100,10 @@ export function Navbar() {
   return (
     <>
       <header
-        className={`sticky top-0 z-40 h-16 sm:h-20 flex items-center transition-colors duration-200 ${
+        className={`sticky top-0 z-40 h-16 sm:h-18 flex items-center transition-colors duration-200 ${
           scrolled
-            ? 'bg-white/95 backdrop-blur-md border-b border-gray-100/80 shadow-xs'
-            : 'bg-white/40 backdrop-blur-xs border-b border-transparent'
+            ? 'bg-[#FAF3E1]/95 backdrop-blur-md border-b border-[#E8DECA] shadow-2xs'
+            : 'bg-[#FAF3E1] border-b border-transparent'
         }`}
       >
         <div className="w-full mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -114,17 +112,17 @@ export function Navbar() {
             <TrackilioLogo />
 
             {/* Desktop Navigation Links */}
-            <nav className="hidden md:flex items-center gap-7 text-sm font-semibold">
+            <nav className="hidden md:flex items-center gap-6 text-sm font-semibold">
               {navLinks.map((link) => {
                 const isActive = pathname === link.href;
                 return (
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={`transition-all py-1.5 px-3 rounded-xl ${
+                    className={`transition-colors py-1.5 px-3 rounded-xl ${
                       isActive
-                        ? 'text-[#FF5841] bg-[#FF5841]/10 font-bold'
-                        : 'text-gray-600 hover:text-black hover:bg-gray-100'
+                        ? 'text-[#222222] bg-[#F5E7C6] font-extrabold'
+                        : 'text-[#6B6862] hover:text-[#222222]'
                     }`}
                   >
                     {link.label}
@@ -134,24 +132,23 @@ export function Navbar() {
             </nav>
 
             {/* Actions & Dynamic Auth Button */}
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2 sm:gap-3">
               <button
                 type="button"
                 onClick={() => setSearchOpen(true)}
-                className="p-2 text-gray-500 hover:text-black hover:bg-gray-100 rounded-xl transition-colors cursor-pointer"
+                className="p-2 text-[#6B6862] hover:text-[#222222] hover:bg-[#F5E7C6] rounded-xl transition-colors cursor-pointer"
                 title="Search Places, Lists & Travelers"
               >
-                <Search className="h-4.5 w-4.5" />
+                <SearchIcon className="w-4.5 h-4.5" />
               </button>
 
               {!loading && (
                 <>
                   {user ? (
-                    /* Authenticated User Actions */
                     <div className="flex items-center gap-2">
                       <Link
                         href={profileHref}
-                        className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white border border-gray-200 hover:border-[#FF5841]/40 hover:bg-gray-50 transition-all shadow-2xs"
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white border border-[#E8DECA] hover:border-[#222222] transition-colors"
                         title="View Public Profile"
                       >
                         {avatarUrl ? (
@@ -159,39 +156,37 @@ export function Navbar() {
                           <img
                             src={avatarUrl}
                             alt={nameToShow}
-                            className="h-6 w-6 rounded-lg object-cover border border-gray-200"
+                            className="h-5 w-5 rounded-lg object-cover"
                           />
                         ) : (
-                          <div className="h-6 w-6 rounded-lg bg-gradient-to-br from-[#FF5841] to-[#C53678] text-white font-bold text-[10px] flex items-center justify-center shadow-2xs">
+                          <div className="h-5 w-5 rounded-lg bg-[#FA8112] text-white font-bold text-[10px] flex items-center justify-center">
                             {initialChar}
                           </div>
                         )}
-                        <span className="hidden sm:inline text-xs font-bold text-gray-900 max-w-[110px] truncate">
+                        <span className="hidden sm:inline text-xs font-bold text-[#222222] max-w-[100px] truncate">
                           {nameToShow}
                         </span>
                       </Link>
 
                       <Link
                         href="/settings"
-                        className="p-2 text-gray-500 hover:text-black hover:bg-gray-100 rounded-xl transition-colors"
-                        title="Account & Profile Settings"
+                        className="hidden sm:inline-block px-2.5 py-1.5 text-xs font-bold text-[#6B6862] hover:text-[#222222] transition-colors"
                       >
-                        <Settings className="h-4.5 w-4.5" />
+                        Settings
                       </Link>
 
                       <button
                         onClick={handleSignOut}
-                        className="p-2 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors"
+                        className="px-2 py-1.5 text-xs font-bold text-[#6B6862] hover:text-rose-600 transition-colors"
                         title="Sign Out"
                       >
-                        <LogOut className="h-4.5 w-4.5" />
+                        Exit
                       </button>
                     </div>
                   ) : (
-                    /* Unauthenticated Visitor Actions */
                     <Link
                       href="/auth/login"
-                      className="hidden sm:inline-block text-sm font-bold text-gray-600 hover:text-black px-3.5 py-2 rounded-xl transition-colors"
+                      className="hidden sm:inline-block text-xs font-extrabold text-[#222222] hover:text-[#FA8112] px-3.5 py-2 rounded-xl transition-colors"
                     >
                       Log in
                     </Link>
@@ -201,10 +196,10 @@ export function Navbar() {
 
               <Link
                 href="/create"
-                className="inline-flex items-center gap-2 rounded-xl bg-[#FF5841] hover:bg-[#FF4328] text-white px-4.5 py-2.5 text-xs font-black shadow-xs active-press transition-all hover:scale-102"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-[#FA8112] hover:bg-[#E4720A] text-white px-4 py-2 text-xs font-extrabold active-press transition-colors shadow-xs"
               >
-                <Plus className="h-4 w-4 stroke-[2.5]" />
-                <span>Create list</span>
+                <PlusIcon className="w-3.5 h-3.5" />
+                <span>Create</span>
               </Link>
             </div>
           </div>
@@ -216,4 +211,3 @@ export function Navbar() {
     </>
   );
 }
-

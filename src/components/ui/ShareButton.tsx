@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Share2, Check } from 'lucide-react';
+import { ShareIcon, CheckIcon } from '@/components/icons/Icons';
 
 interface ShareButtonProps {
   title: string;
@@ -40,7 +40,7 @@ export function ShareButton({ title, url }: ShareButtonProps) {
       onClick={handleShare}
       className="inline-flex items-center gap-2 rounded-xl bg-white border border-stone-200 px-4 py-2 text-sm font-semibold text-stone-800 shadow-sm hover:border-stone-300 hover:bg-stone-50 transition-all"
     >
-      {copied ? <Check className="h-4 w-4 text-emerald-600" /> : <Share2 className="h-4 w-4 text-stone-600" />}
+      {copied ? <CheckIcon className="h-4 w-4 text-emerald-600" /> : <ShareIcon className="h-4 w-4 text-stone-600" />}
       <span>{copied ? 'Link Copied!' : 'Share List'}</span>
     </button>
   );

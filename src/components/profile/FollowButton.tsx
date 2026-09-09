@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { UserPlus, UserCheck, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { SpinnerIcon, CheckIcon, PlusIcon } from '@/components/icons/Icons';
 
 interface FollowButtonProps {
   targetUserId: string;
@@ -26,7 +26,6 @@ export function FollowButton({
 
   const toggleFollow = async () => {
     const nextState = !isFollowing;
-    // Optimistic UI update
     setIsFollowing(nextState);
     if (onFollowChange) onFollowChange(nextState);
 
@@ -53,12 +52,10 @@ export function FollowButton({
         router.refresh();
       } catch (err: any) {
         console.error('Follow error:', err?.message || err);
-        // Rollback state on failure
         setIsFollowing(!nextState);
         if (onFollowChange) onFollowChange(!nextState);
       }
     });
-
   };
 
   const isSmall = size === 'sm';
@@ -71,10 +68,10 @@ export function FollowButton({
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         disabled={isPending}
-        className={`inline-flex items-center justify-center gap-1.5 font-extrabold rounded-xl transition-all active-press ${
+        className={`inline-flex items-center justify-center gap-1.5 font-extrabold rounded-xl transition-all active-press cursor-pointer ${
           isHovered
             ? 'bg-rose-50 text-rose-600 border border-rose-200'
-            : 'bg-gray-100 text-gray-800 border border-gray-200 hover:bg-gray-200'
+            : 'bg-[#F5E7C6] text-[#222222] border border-[#E8DECA] hover:bg-[#EFE2C2]'
         } ${
           isSmall
             ? 'px-3 py-1.5 text-xs'
@@ -82,12 +79,12 @@ export function FollowButton({
         } ${className}`}
       >
         {isPending ? (
-          <Loader2 className="h-3.5 w-3.5 animate-spin text-gray-500" />
+          <SpinnerIcon className="w-3.5 h-3.5 animate-spin text-[#222222]" />
         ) : isHovered ? (
           <span>Unfollow</span>
         ) : (
           <>
-            <UserCheck className="h-3.5 w-3.5 text-[#FF5841]" />
+            <CheckIcon className="w-3.5 h-3.5 text-[#FA8112]" />
             <span>Following</span>
           </>
         )}
@@ -100,17 +97,17 @@ export function FollowButton({
       type="button"
       onClick={toggleFollow}
       disabled={isPending}
-      className={`inline-flex items-center justify-center gap-1.5 font-extrabold rounded-xl text-white bg-gradient-to-r from-[#FF5841] to-[#C53678] hover:opacity-95 shadow-xs active-press transition-all ${
+      className={`inline-flex items-center justify-center gap-1.5 font-extrabold rounded-xl text-white bg-[#FA8112] hover:bg-[#E4720A] shadow-xs active-press transition-all cursor-pointer ${
         isSmall
           ? 'px-3 py-1.5 text-xs'
           : 'px-4 py-2.5 text-xs sm:text-sm'
       } ${className}`}
     >
       {isPending ? (
-        <Loader2 className="h-3.5 w-3.5 animate-spin text-white" />
+        <SpinnerIcon className="w-3.5 h-3.5 animate-spin text-white" />
       ) : (
         <>
-          <UserPlus className="h-3.5 w-3.5 stroke-[2.5]" />
+          <PlusIcon className="w-3.5 h-3.5" />
           <span>Follow</span>
         </>
       )}

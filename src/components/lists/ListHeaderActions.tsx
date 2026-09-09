@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { UserPlus, Settings, Share2 } from 'lucide-react';
+import { UserPlusIcon, SettingsIcon } from '@/components/icons/Icons';
 import { SaveListButton } from './SaveListButton';
 import { ShareButton } from '@/components/ui/ShareButton';
 import { QuickInviteModal } from './QuickInviteModal';
@@ -43,7 +43,7 @@ export function ListHeaderActions({
             onClick={() => setInviteModalOpen(true)}
             className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-2xl bg-[#FFEAE6] hover:bg-[#FFDCD6] border border-[#FFD3CC] text-[#FF5841] text-xs font-black shadow-2xs active-press transition-all"
           >
-            <UserPlus className="h-3.5 w-3.5 stroke-[2.5]" />
+            <UserPlusIcon className="h-3.5 w-3.5" />
             <span>+ Add Collaborator</span>
           </button>
         )}
@@ -55,7 +55,7 @@ export function ListHeaderActions({
             title="Edit list details & settings"
             className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-2xl bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 text-xs font-bold shadow-2xs active-press transition-all"
           >
-            <Settings className="h-3.5 w-3.5 text-gray-500" />
+            <SettingsIcon className="h-3.5 w-3.5 text-gray-500" />
             <span>Edit List</span>
           </button>
         )}

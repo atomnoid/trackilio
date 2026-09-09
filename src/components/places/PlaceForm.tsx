@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { PriorityLevel, VisitStatus } from '@/types/database';
-import { PlusCircle, Tag, X } from 'lucide-react';
+import { PlusIcon, TagIcon, CloseIcon } from '@/components/icons/Icons';
 import { useRouter } from 'next/navigation';
 
 interface PlaceFormProps {
@@ -99,7 +99,7 @@ export function PlaceForm({ listId, onSuccess }: PlaceFormProps) {
   return (
     <form onSubmit={handleSubmit} className="bg-white border border-gray-100 rounded-3xl p-6 shadow-xs space-y-4">
       <h3 className="font-sans text-base font-extrabold text-gray-900 flex items-center gap-2">
-        <PlusCircle className="h-4.5 w-4.5 text-[#FF5841]" /> Add a Place to List
+        <PlusIcon className="h-4 w-4 text-[#FA8112]" /> Add a Place to List
       </h3>
 
       {error && (
@@ -153,7 +153,7 @@ export function PlaceForm({ listId, onSuccess }: PlaceFormProps) {
       <div className="space-y-2 pt-1">
         <div className="flex items-center justify-between">
           <label className="text-xs font-bold text-gray-700 flex items-center gap-1.5">
-            <Tag className="h-3.5 w-3.5 text-[#C53678]" />
+            <TagIcon className="h-3.5 w-3.5 text-[#C53678]" />
             <span>Add Tags (Max 3)</span>
           </label>
           <span className="text-[10px] font-bold text-gray-400">
@@ -178,7 +178,7 @@ export function PlaceForm({ listId, onSuccess }: PlaceFormProps) {
               >
                 <span>{t.emoji}</span>
                 <span>{t.label}</span>
-                {isSelected && <X className="h-3 w-3 ml-0.5" />}
+                {isSelected && <CloseIcon className="h-3 w-3 ml-0.5" />}
               </button>
             );
           })}

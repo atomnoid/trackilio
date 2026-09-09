@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Plus, Check, Loader2, FolderHeart, X } from 'lucide-react';
+import { PlusIcon, CheckIcon, SpinnerIcon, FolderHeartIcon, CloseIcon } from '@/components/icons/Icons';
 import { useRouter } from 'next/navigation';
 import { WanderList } from '@/types/database';
 
@@ -83,7 +83,7 @@ export function AddToListModal({
         onClick={openModal}
         className={`inline-flex items-center gap-1.5 rounded-xl bg-white border border-[#E6DFD5] hover:bg-[#F3ECE1] text-[#2C2A29] px-3.5 py-2 text-xs font-bold shadow-2xs active-press transition-colors ${className}`}
       >
-        <Plus className="h-4 w-4 text-[#4A6B5D]" />
+        <PlusIcon className="h-4 w-4 text-[#4A6B5D]" />
         <span>Add to List</span>
       </button>
 
@@ -93,7 +93,7 @@ export function AddToListModal({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <div className="h-8 w-8 rounded-xl bg-[#F0F5F2] text-[#4A6B5D] flex items-center justify-center">
-                  <FolderHeart className="h-4.5 w-4.5" />
+                  <FolderHeartIcon className="h-4 w-4" />
                 </div>
                 <div>
                   <h3 className="font-sans text-base font-black text-[#2C2A29]">
@@ -108,7 +108,7 @@ export function AddToListModal({
                 onClick={() => setIsOpen(false)}
                 className="p-1.5 rounded-lg text-[#78726D] hover:bg-[#F3ECE1] transition-colors"
               >
-                <X className="h-4.5 w-4.5" />
+                <CloseIcon className="h-4 w-4" />
               </button>
             </div>
 
@@ -121,7 +121,7 @@ export function AddToListModal({
             <div className="max-h-60 overflow-y-auto space-y-2 pr-1">
               {loading ? (
                 <div className="py-8 text-center text-xs text-[#78726D] flex items-center justify-center gap-2">
-                  <Loader2 className="h-4 w-4 animate-spin text-[#4A6B5D]" />
+                  <SpinnerIcon className="h-4 w-4 animate-spin text-[#4A6B5D]" />
                   Loading your collections...
                 </div>
               ) : lists.length > 0 ? (
@@ -155,15 +155,15 @@ export function AddToListModal({
                         }`}
                       >
                         {isSubmitting ? (
-                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          <SpinnerIcon className="h-3.5 w-3.5 animate-spin" />
                         ) : isAdded ? (
                           <>
-                            <Check className="h-3.5 w-3.5" />
+                            <CheckIcon className="h-3.5 w-3.5" />
                             Added
                           </>
                         ) : (
                           <>
-                            <Plus className="h-3.5 w-3.5" />
+                            <PlusIcon className="h-3.5 w-3.5" />
                             Add
                           </>
                         )}
@@ -180,7 +180,7 @@ export function AddToListModal({
                     onClick={() => router.push('/create')}
                     className="inline-flex items-center gap-1 text-xs font-bold text-[#4A6B5D] hover:underline"
                   >
-                    <Plus className="h-3.5 w-3.5" /> Create your first list
+                    <PlusIcon className="h-3.5 w-3.5" /> Create your first list
                   </button>
                 </div>
               )}

@@ -3,8 +3,8 @@
 import React from 'react';
 import Link from 'next/link';
 import { Place } from '@/types/database';
-import { MapPin, ArrowRight, Layers, ArrowBigUp } from 'lucide-react';
 import { SavePlaceButton } from './SavePlaceButton';
+import { PinIcon, ArrowRightIcon } from '@/components/icons/Icons';
 
 interface PlaceDiscoveryCardProps {
   place: Place;
@@ -38,17 +38,17 @@ export function PlaceDiscoveryCard({ place, currentUserId, initialSaved }: Place
   const upvotes = place.upvotes_count ?? 0;
 
   return (
-    <div className="group relative block rounded-3xl bg-white border border-gray-100 p-5 hover:-translate-y-1.5 hover:shadow-lg transition-all duration-200 space-y-3.5">
-      {/* Top Header: Category Badge + Tags + Save Button */}
+    <div className="group relative block rounded-2xl bg-white border border-[#E8DECA] p-5 hover:border-[#222222] transition-all duration-200 space-y-3">
+      {/* Top Header: Category Tag + Save Action */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-1.5 overflow-hidden">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FFEAE6] border border-[#FFD3CC] px-3 py-1 text-[11px] font-bold text-[#FF5841]">
+          <span className="inline-flex items-center gap-1 rounded-full bg-[#FAF3E1] border border-[#E8DECA] px-2.5 py-0.5 text-[11px] font-bold text-[#222222]">
             <span>{emoji}</span>
             <span>{category}</span>
           </span>
 
           {place.tags && place.tags.length > 0 && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-[#FDF4F8] border border-[#F4CDDF] px-2.5 py-0.5 text-[10px] font-extrabold text-[#C53678]">
+            <span className="inline-flex items-center rounded-full bg-[#F5E7C6] px-2 py-0.5 text-[10px] font-bold text-[#222222]">
               {place.tags[0]}
             </span>
           )}
@@ -62,47 +62,45 @@ export function PlaceDiscoveryCard({ place, currentUserId, initialSaved }: Place
       </div>
 
       {/* Place Main Info */}
-      <Link href={`/place/${slug}`} className="block space-y-1.5">
-        <h3 className="font-sans text-lg font-black text-gray-900 group-hover:text-[#FF5841] transition-colors line-clamp-1">
+      <Link href={`/place/${slug}`} className="block space-y-1">
+        <h3 className="font-sans text-base font-black text-[#222222] group-hover:text-[#FA8112] transition-colors line-clamp-1">
           {place.name}
         </h3>
 
         {locationText && (
-          <div className="flex items-center gap-1 text-xs font-semibold text-gray-500 truncate">
-            <MapPin className="h-3.5 w-3.5 text-[#FF5841] shrink-0" />
+          <div className="flex items-center gap-1 text-xs font-semibold text-[#6B6862] truncate">
+            <PinIcon className="w-3 h-3 text-[#FA8112] shrink-0" />
             <span className="truncate">{locationText}</span>
           </div>
         )}
 
         {place.description && (
-          <p className="text-xs text-gray-500 font-medium line-clamp-2 leading-relaxed pt-1">
+          <p className="text-xs text-[#6B6862] line-clamp-2 leading-relaxed pt-0.5">
             {place.description}
           </p>
         )}
       </Link>
 
       {/* Card Footer: Real Upvotes Count + Lists Count + Detail CTA */}
-      <div className="pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
+      <div className="pt-3 border-t border-[#E8DECA]/60 flex items-center justify-between text-xs text-[#6B6862]">
         <div className="flex items-center gap-3">
-          <span className="inline-flex items-center gap-1 font-bold text-gray-600">
-            <ArrowBigUp className="h-4 w-4 text-[#FF5841] fill-[#FF5841]" />
-            <span className="font-mono font-black text-gray-900">{upvotes}</span>
-            <span className="text-[11px] text-gray-400">upvote{upvotes !== 1 ? 's' : ''}</span>
+          <span className="inline-flex items-center gap-1 font-bold text-[#222222]">
+            <span className="text-[#FA8112]">▲</span>
+            <span className="font-mono font-black">{upvotes}</span>
           </span>
 
           {(place.lists_count ?? 0) > 0 && (
-            <span className="inline-flex items-center gap-1 font-semibold text-gray-400">
-              <Layers className="h-3.5 w-3.5 text-[#C53678]" />
-              <span>In {place.lists_count} list{place.lists_count !== 1 ? 's' : ''}</span>
+            <span className="text-[11px]">
+              In {place.lists_count} list{place.lists_count !== 1 ? 's' : ''}
             </span>
           )}
         </div>
 
         <Link
           href={`/place/${slug}`}
-          className="font-extrabold text-[#C53678] group-hover:translate-x-0.5 transition-transform inline-flex items-center gap-1 hover:text-[#FF5841] ml-auto"
+          className="font-extrabold text-[#222222] inline-flex items-center gap-1 hover:text-[#FA8112] transition-colors ml-auto"
         >
-          View <ArrowRight className="h-3 w-3" />
+          View <ArrowRightIcon className="w-3 h-3" />
         </Link>
       </div>
     </div>

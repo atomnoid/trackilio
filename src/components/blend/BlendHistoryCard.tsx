@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Sparkles, ArrowRight, MapPin, Calendar, HeartHandshake } from 'lucide-react';
+import { SparklesIcon, ArrowRightIcon, HeartHandshakeIcon } from '@/components/icons/Icons';
 import { BlendSession, Profile } from '@/types/database';
 import { getBlendInterpretation } from '@/lib/blend.utils';
 
@@ -55,7 +55,7 @@ export function BlendHistoryCard({ blend }: BlendHistoryCardProps) {
         {/* Score Ring / Pill */}
         <div className="shrink-0 text-right">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-[#FFEAE6] to-[#F9E2EE] border border-[#FFD3CC] text-[#FF5841] text-xs font-black">
-            <Sparkles className="h-3 w-3" />
+            <SparklesIcon className="h-3 w-3" />
             <span>{blend.score}% Match</span>
           </div>
         </div>
@@ -65,7 +65,7 @@ export function BlendHistoryCard({ blend }: BlendHistoryCardProps) {
       <div className="mt-4 pt-3.5 border-t border-gray-100 flex flex-wrap items-center justify-between gap-2 text-xs">
         <div className="flex items-center gap-2 text-gray-600 font-medium">
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-gray-50 border border-gray-200 text-[11px] font-semibold text-gray-600">
-            <HeartHandshake className="h-3 w-3 text-[#C53678]" />
+            <HeartHandshakeIcon className="h-3 w-3 text-[#C53678]" />
             {label}
           </span>
           {sharedPlacesCount > 0 && (
@@ -76,7 +76,7 @@ export function BlendHistoryCard({ blend }: BlendHistoryCardProps) {
         </div>
 
         <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#C53678] group-hover:translate-x-0.5 transition-transform">
-          View Blend <ArrowRight className="h-3 w-3" />
+          View Blend <ArrowRightIcon className="h-3 w-3" />
         </span>
       </div>
     </Link>

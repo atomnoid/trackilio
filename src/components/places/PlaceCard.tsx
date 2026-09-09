@@ -2,15 +2,7 @@
 
 import React, { useState } from 'react';
 import { ListPlace, VoteType } from '@/types/database';
-import {
-  MapPin,
-  ExternalLink,
-  ArrowBigUp,
-  ArrowBigDown,
-  Sparkles,
-  Compass,
-  Edit3,
-} from 'lucide-react';
+import { PinIcon, ExternalLinkIcon, ArrowUpBigIcon, ArrowDownBigIcon, SparklesIcon, CompassIcon, EditIcon } from '@/components/icons/Icons';
 import { EditPlaceModal } from './EditPlaceModal';
 
 interface PlaceCardProps {
@@ -88,13 +80,13 @@ export function PlaceCard({ listPlace, currentUserId, canEdit = false }: PlaceCa
       case 'must_visit':
         return (
           <span className="inline-flex items-center gap-1 rounded-full bg-[#FFEAE6] text-[#FF5841] px-2.5 py-0.5 text-[11px] font-extrabold border border-[#FFD3CC]">
-            <Sparkles className="h-3 w-3" /> Must Visit
+            <SparklesIcon className="h-3 w-3" /> Must Visit
           </span>
         );
       case 'want_to_visit':
         return (
           <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 text-amber-800 px-2.5 py-0.5 text-[11px] font-bold border border-amber-200">
-            <Compass className="h-3 w-3" /> Want to Visit
+            <CompassIcon className="h-3 w-3" /> Want to Visit
           </span>
         );
       default:
@@ -139,7 +131,7 @@ export function PlaceCard({ listPlace, currentUserId, canEdit = false }: PlaceCa
 
             {place?.location && (
               <p className="flex items-center gap-1 text-xs text-gray-500 font-medium">
-                <MapPin className="h-3.5 w-3.5 text-[#FF5841]" />
+                <PinIcon className="h-3.5 w-3.5 text-[#FA8112]" />
                 {place.location}
                 {place.country ? `, ${place.country}` : ''}
               </p>
@@ -153,7 +145,7 @@ export function PlaceCard({ listPlace, currentUserId, canEdit = false }: PlaceCa
                 title="Edit place details or notes"
                 className="inline-flex items-center gap-1 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 hover:border-[#FF5841]/40 px-3 py-1.5 text-xs font-bold text-gray-700 active-press transition-colors"
               >
-                <Edit3 className="h-3 w-3 text-gray-500" />
+                <EditIcon className="h-3 w-3 text-gray-500" />
                 <span>Edit</span>
               </button>
             )}
@@ -166,7 +158,7 @@ export function PlaceCard({ listPlace, currentUserId, canEdit = false }: PlaceCa
                 className="inline-flex items-center gap-1 rounded-xl border border-gray-200 bg-gray-50 hover:bg-white hover:border-[#FF5841]/40 px-3 py-1.5 text-xs font-bold text-gray-800 active-press transition-colors"
               >
                 <span>Maps</span>
-                <ExternalLink className="h-3 w-3" />
+                <ExternalLinkIcon className="h-3 w-3" />
               </a>
             )}
           </div>
@@ -199,7 +191,7 @@ export function PlaceCard({ listPlace, currentUserId, canEdit = false }: PlaceCa
                   : 'text-gray-500 hover:text-[#FF5841] hover:bg-white'
               } ${animateVote === 'up' ? 'scale-110' : ''}`}
             >
-              <ArrowBigUp className={`h-4 w-4 ${userVote === 'up' ? 'fill-current' : ''}`} />
+              <ArrowUpBigIcon className={`h-4 w-4 ${userVote === 'up' ? 'fill-current' : ''}`} filled={userVote === 'up'} />
               <span className="text-[11px] hidden sm:inline">Upvote</span>
             </button>
 
@@ -227,7 +219,7 @@ export function PlaceCard({ listPlace, currentUserId, canEdit = false }: PlaceCa
                   : 'text-gray-400 hover:text-gray-700 hover:bg-white'
               } ${animateVote === 'down' ? 'scale-110' : ''}`}
             >
-              <ArrowBigDown className={`h-4 w-4 ${userVote === 'down' ? 'fill-current' : ''}`} />
+              <ArrowDownBigIcon className={`h-4 w-4 ${userVote === 'down' ? 'fill-current' : ''}`} filled={userVote === 'down'} />
               <span className="text-[11px] hidden sm:inline">Downvote</span>
             </button>
           </div>

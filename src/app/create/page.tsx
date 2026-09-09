@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { createWanderList } from '@/services/lists';
-import { PlusCircle, Globe, Lock, MapPin } from 'lucide-react';
+import { PlusIcon, GlobeIcon, LockIcon, PinIcon } from '@/components/icons/Icons';
 
 export const metadata: Metadata = {
   title: 'Create a Trackilio List',
@@ -88,7 +88,7 @@ export default async function CreatePage() {
             Destination / Region
           </label>
           <div className="relative">
-            <MapPin className="absolute left-4 top-3.5 h-4 w-4 text-[#E0533C]" />
+            <PinIcon className="absolute left-4 top-3.5 h-4 w-4 text-[#E0533C]" />
             <input
               type="text"
               name="destination"
@@ -128,7 +128,7 @@ export default async function CreatePage() {
               />
               <div>
                 <span className="flex items-center gap-1.5 text-xs font-extrabold text-[#18181B]">
-                  <Globe className="h-4 w-4 text-[#2E7D32]" /> Public List
+                  <GlobeIcon className="h-4 w-4 text-[#2E7D32]" /> Public List
                 </span>
                 <p className="text-[11px] text-[#71717A] mt-1 font-medium leading-relaxed">
                   Anyone can discover this list on Discover & search engines.
@@ -145,7 +145,7 @@ export default async function CreatePage() {
               />
               <div>
                 <span className="flex items-center gap-1.5 text-xs font-extrabold text-[#18181B]">
-                  <Lock className="h-4 w-4 text-[#71717A]" /> Private List
+                  <LockIcon className="h-4 w-4 text-[#71717A]" /> Private List
                 </span>
                 <p className="text-[11px] text-[#71717A] mt-1 font-medium leading-relaxed">
                   Only accessible by you and invited collaborators.
@@ -160,7 +160,7 @@ export default async function CreatePage() {
           type="submit"
           className="w-full rounded-xl bg-[#18181B] hover:bg-[#C8422C] text-white font-bold py-3.5 text-xs shadow-2xs active-press transition-all flex items-center justify-center gap-2"
         >
-          <PlusCircle className="h-4.5 w-4.5 stroke-[2.2]" /> Create Trackilio List
+          <PlusIcon className="h-4 w-4" /> Create Trackilio List
         </button>
       </form>
     </div>

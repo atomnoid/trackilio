@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { Users } from 'lucide-react';
 import { FollowListModal } from './FollowListModal';
 
 interface FollowStatsProps {
@@ -25,19 +24,19 @@ export function FollowStats({
         <button
           type="button"
           onClick={() => setModalType('followers')}
-          className="inline-flex items-center gap-1.5 rounded-xl bg-gray-50 hover:bg-gray-100 border border-gray-200 px-3 py-1 text-gray-700 font-bold text-xs transition-colors cursor-pointer"
+          className="inline-flex items-center gap-1.5 rounded-xl bg-white hover:bg-[#F5E7C6] border border-[#E8DECA] px-3 py-1 text-[#222222] font-bold text-xs transition-colors cursor-pointer"
         >
-          <span className="text-gray-900 font-black">{initialFollowersCount}</span>
-          <span className="text-gray-500 font-medium">Followers</span>
+          <span className="text-[#222222] font-black">{initialFollowersCount}</span>
+          <span className="text-[#6B6862] font-medium">Followers</span>
         </button>
 
         <button
           type="button"
           onClick={() => setModalType('following')}
-          className="inline-flex items-center gap-1.5 rounded-xl bg-gray-50 hover:bg-gray-100 border border-gray-200 px-3 py-1 text-gray-700 font-bold text-xs transition-colors cursor-pointer"
+          className="inline-flex items-center gap-1.5 rounded-xl bg-white hover:bg-[#F5E7C6] border border-[#E8DECA] px-3 py-1 text-[#222222] font-bold text-xs transition-colors cursor-pointer"
         >
-          <span className="text-gray-900 font-black">{initialFollowingCount}</span>
-          <span className="text-gray-500 font-medium">Following</span>
+          <span className="text-[#222222] font-black">{initialFollowingCount}</span>
+          <span className="text-[#6B6862] font-medium">Following</span>
         </button>
       </div>
 

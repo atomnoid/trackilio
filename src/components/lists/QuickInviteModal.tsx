@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { UserPlus, X, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { UserPlusIcon, CloseIcon, SpinnerIcon, CheckCircleIcon, XCircleIcon } from '@/components/icons/Icons';
 import { sanitizeUsername } from '@/lib/username';
 
 interface QuickInviteModalProps {
@@ -135,7 +135,7 @@ export function QuickInviteModal({
             (e.currentTarget as HTMLButtonElement).style.color = '#9ca3af';
           }}
         >
-          <X style={{ width: '1.25rem', height: '1.25rem' }} />
+          <CloseIcon style={{ width: '1.25rem', height: '1.25rem' }} />
         </button>
 
         {/* Header */}
@@ -154,7 +154,7 @@ export function QuickInviteModal({
               marginBottom: '0.75rem',
             }}
           >
-            <UserPlus style={{ width: '0.875rem', height: '0.875rem' }} />
+            <UserPlusIcon style={{ width: '0.875rem', height: '0.875rem' }} />
             <span>List Collaboration</span>
           </div>
           <h2
@@ -190,7 +190,7 @@ export function QuickInviteModal({
               gap: '0.5rem',
             }}
           >
-            <AlertCircle style={{ width: '1rem', height: '1rem', flexShrink: 0, color: '#dc2626' }} />
+            <XCircleIcon style={{ width: '1rem', height: '1rem', flexShrink: 0, color: '#dc2626' }} />
             <span>{error}</span>
           </div>
         )}
@@ -212,7 +212,7 @@ export function QuickInviteModal({
               gap: '0.5rem',
             }}
           >
-            <CheckCircle2 style={{ width: '1rem', height: '1rem', flexShrink: 0, color: '#16a34a' }} />
+            <CheckCircleIcon style={{ width: '1rem', height: '1rem', flexShrink: 0, color: '#16a34a' }} />
             <span>{success}</span>
           </div>
         )}
@@ -336,12 +336,12 @@ export function QuickInviteModal({
             >
               {inviting ? (
                 <>
-                  <Loader2 style={{ width: '1rem', height: '1rem', animation: 'spin 1s linear infinite' }} />
+                  <SpinnerIcon style={{ width: '1rem', height: '1rem', animation: 'spin 1s linear infinite' }} />
                   <span>Inviting…</span>
                 </>
               ) : (
                 <>
-                  <UserPlus style={{ width: '1rem', height: '1rem' }} />
+                  <UserPlusIcon style={{ width: '1rem', height: '1rem' }} />
                   <span>Send Invite</span>
                 </>
               )}

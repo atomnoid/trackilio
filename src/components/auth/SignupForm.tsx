@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Loader2, CheckCircle2, XCircle, AtSign, User, Mail, Lock, ArrowRight } from 'lucide-react';
+import { SpinnerIcon, CheckCircleIcon, XCircleIcon, AtSignIcon, UserIcon, MailIcon, LockIcon, ArrowRightIcon } from '@/components/icons/Icons';
 import { validateUsernameFormat } from '@/lib/username';
 
 export function SignupForm() {
@@ -68,7 +68,7 @@ export function SignupForm() {
           Display Name <span className="text-rose-400">*</span>
         </label>
         <div className="relative">
-          <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <UserIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <input
             type="text"
             name="displayName"
@@ -90,7 +90,7 @@ export function SignupForm() {
           <span className="text-[11px] font-semibold text-gray-400">Unique @username</span>
         </div>
         <div className="relative">
-          <AtSign className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#FF5841]" />
+          <AtSignIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#FF5841]" />
           <input
             type="text"
             name="username"
@@ -109,10 +109,10 @@ export function SignupForm() {
             }`}
           />
           <div className="absolute right-3.5 top-1/2 -translate-y-1/2">
-            {usernameStatus === 'checking' && <Loader2 className="h-4 w-4 animate-spin text-gray-400" />}
-            {usernameStatus === 'available' && <CheckCircle2 className="h-4 w-4 text-emerald-600" />}
+            {usernameStatus === 'checking' && <SpinnerIcon className="h-4 w-4 animate-spin text-gray-400" />}
+            {usernameStatus === 'available' && <CheckCircleIcon className="h-4 w-4 text-emerald-600" />}
             {(usernameStatus === 'taken' || usernameStatus === 'invalid') && (
-              <XCircle className="h-4 w-4 text-rose-500" />
+              <XCircleIcon className="h-4 w-4 text-rose-500" />
             )}
           </div>
         </div>
@@ -143,7 +143,7 @@ export function SignupForm() {
           Email Address <span className="text-rose-400">*</span>
         </label>
         <div className="relative">
-          <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <MailIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <input
             type="email"
             name="email"
@@ -163,7 +163,7 @@ export function SignupForm() {
           Password <span className="text-rose-400">*</span>
         </label>
         <div className="relative">
-          <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <LockIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <input
             type="password"
             name="password"
@@ -181,11 +181,11 @@ export function SignupForm() {
       {/* Submit Button */}
       <button
         type="submit"
-        disabled={!isFormValid || usernameStatus === 'invalid' || usernameStatus === 'taken'}
+        disabled={!isFormValid}
         className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-[#FF5841] hover:bg-[#E84430] disabled:opacity-50 disabled:cursor-not-allowed text-white font-black py-3.5 text-sm shadow-sm active-press transition-all mt-2"
       >
         <span>Create Account</span>
-        <ArrowRight className="h-4 w-4" />
+        <ArrowRightIcon className="h-4 w-4" />
       </button>
     </form>
   );

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
-import { Edit3, Trash2, X, Loader2, AlertTriangle } from 'lucide-react';
+import { EditIcon, TrashIcon, CloseIcon, SpinnerIcon, AlertTriangleIcon } from '@/components/icons/Icons';
 
 interface EditListModalProps {
   listId: string;
@@ -174,7 +174,7 @@ export function EditListModal({
             (e.currentTarget as HTMLButtonElement).style.color = '#9ca3af';
           }}
         >
-          <X style={{ width: '1.25rem', height: '1.25rem' }} />
+          <CloseIcon style={{ width: '1.25rem', height: '1.25rem' }} />
         </button>
 
         {/* Header */}
@@ -193,7 +193,7 @@ export function EditListModal({
               marginBottom: '0.75rem',
             }}
           >
-            <Edit3 style={{ width: '0.875rem', height: '0.875rem' }} />
+            <EditIcon style={{ width: '0.875rem', height: '0.875rem' }} />
             <span>List Settings</span>
           </div>
           <h2
@@ -237,7 +237,7 @@ export function EditListModal({
             }}
           >
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', marginBottom: '1rem' }}>
-              <AlertTriangle style={{ width: '1.25rem', height: '1.25rem', color: '#dc2626', flexShrink: 0, marginTop: '0.125rem' }} />
+              <AlertTriangleIcon style={{ width: '1.25rem', height: '1.25rem', color: '#dc2626', flexShrink: 0, marginTop: '0.125rem' }} />
               <div>
                 <h4 style={{ fontSize: '0.875rem', fontWeight: 900, color: '#7f1d1d', margin: '0 0 0.25rem 0' }}>
                   Are you sure you want to delete this list?
@@ -287,7 +287,7 @@ export function EditListModal({
                   opacity: deleting ? 0.6 : 1,
                 }}
               >
-                {deleting ? <Loader2 style={{ width: '0.875rem', height: '0.875rem', animation: 'spin 1s linear infinite' }} /> : <Trash2 style={{ width: '0.875rem', height: '0.875rem' }} />}
+                {deleting ? <SpinnerIcon style={{ width: '0.875rem', height: '0.875rem', animation: 'spin 1s linear infinite' }} /> : <TrashIcon style={{ width: '0.875rem', height: '0.875rem' }} />}
                 <span>{deleting ? 'Deleting…' : 'Yes, Delete Permanently'}</span>
               </button>
             </div>
@@ -416,7 +416,7 @@ export function EditListModal({
                   cursor: 'pointer',
                 }}
               >
-                <Trash2 style={{ width: '1rem', height: '1rem' }} />
+                <TrashIcon style={{ width: '1rem', height: '1rem' }} />
                 <span>Delete</span>
               </button>
 
@@ -457,7 +457,7 @@ export function EditListModal({
                     opacity: loading || !title.trim() ? 0.6 : 1,
                   }}
                 >
-                  {loading ? <Loader2 style={{ width: '1rem', height: '1rem', animation: 'spin 1s linear infinite' }} /> : null}
+                  {loading ? <SpinnerIcon style={{ width: '1rem', height: '1rem', animation: 'spin 1s linear infinite' }} /> : null}
                   <span>{loading ? 'Saving…' : 'Save Changes'}</span>
                 </button>
               </div>
