@@ -12,7 +12,7 @@ import {
   MapPin,
   Globe,
   ExternalLink,
-  Flame,
+  ArrowBigUp,
   Layers,
   Sparkles,
   ArrowRight,
@@ -114,8 +114,8 @@ export default async function PlaceDetailPage({ params }: PlaceDetailPageProps) 
             </span>
 
             {upvotes > 0 && (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FFF5F3] border border-[#FFEAE6] px-3 py-1 text-xs font-extrabold text-[#FF5841]">
-                <Flame className="h-3.5 w-3.5 fill-current" />
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FFEAE6] border border-[#FFD3CC] px-3.5 py-1 text-xs font-black text-[#FF5841]">
+                <ArrowBigUp className="h-4 w-4 fill-[#FF5841]" />
                 <span>{upvotes} Upvote{upvotes !== 1 ? 's' : ''}</span>
               </span>
             )}

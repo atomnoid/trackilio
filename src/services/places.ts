@@ -139,6 +139,90 @@ export async function addExistingPlaceToList(params: {
 }
 
 /**
+ * Helper to batch enrich Places with upvotes and list counts
+ */
+async function enrichPlacesWithStats(
+  supabase: any,
+  rawPlaces: Place[],
+  currentUserId?: string
+): Promise<Place[]> {
+  if (rawPlaces.length === 0) return [];
+  const placeIds = rawPlaces.map((p) => p.id);
+
+  try {
+    const [listPlacesRes, savedRes] = await Promise.all([
+      (supabase as any)
+        .from('list_places')
+        .select(`
+          place_id,
+          list:wander_lists(is_public),
+          votes(vote_type)
+        `)
+        .in('place_id', placeIds),
+      currentUserId
+        ? (supabase as any)
+            .from('saved_places')
+            .select('place_id')
+            .eq('user_id', currentUserId)
+            .in('place_id', placeIds)
+        : Promise.resolve({ data: [] }),
+    ]);
+
+    const userSavedSet = new Set((savedRes.data ?? []).map((s: any) => s.place_id));
+
+    const statsMap = new Map<
+      string,
+      { upvotes: number; downvotes: number; lists: number }
+    >();
+
+    (listPlacesRes.data ?? []).forEach((lp: any) => {
+      const current = statsMap.get(lp.place_id) || {
+        upvotes: 0,
+        downvotes: 0,
+        lists: 0,
+      };
+
+      if (lp.list?.is_public) {
+        current.lists += 1;
+      }
+
+      const votes = lp.votes || [];
+      const up = votes.filter((v: any) => v.vote_type !== 'down').length;
+      const down = votes.filter((v: any) => v.vote_type === 'down').length;
+      current.upvotes += up;
+      current.downvotes += down;
+
+      statsMap.set(lp.place_id, current);
+    });
+
+    return rawPlaces.map((p) => {
+      const stats = statsMap.get(p.id) || { upvotes: 0, downvotes: 0, lists: 0 };
+      const communityScore = stats.upvotes - stats.downvotes + stats.lists * 3;
+      const slug = p.slug || generatePlaceSlug(p.name, p.location || p.city);
+
+      return {
+        ...p,
+        slug,
+        upvotes_count: stats.upvotes,
+        downvotes_count: stats.downvotes,
+        community_score: communityScore,
+        lists_count: stats.lists,
+        is_saved: userSavedSet.has(p.id),
+      };
+    });
+  } catch (err: any) {
+    console.warn('Error enriching places with stats:', err?.message || err);
+    return rawPlaces.map((p) => ({
+      ...p,
+      upvotes_count: 0,
+      downvotes_count: 0,
+      lists_count: 0,
+      is_saved: false,
+    }));
+  }
+}
+
+/**
  * Fetch public places with rich filtering, search, and engagement scoring
  */
 export async function getPublicPlaces(params?: {
@@ -174,7 +258,6 @@ export async function getPublicPlaces(params?: {
       q = q.contains('tags', [params.tag]);
     }
 
-    // Fetch batch of places
     q = q.order('created_at', { ascending: false }).limit(100);
 
     const { data: rawPlaces, error } = await q;
@@ -186,70 +269,7 @@ export async function getPublicPlaces(params?: {
 
     if (rawPlaces.length === 0) return [];
 
-    const placeIds = rawPlaces.map((p) => p.id);
-
-    // Batch fetch list_places links to calculate list appearances and votes
-    const [listPlacesRes, savedRes] = await Promise.all([
-      (supabase as any)
-        .from('list_places')
-        .select(`
-          place_id,
-          list:wander_lists(is_public),
-          votes(vote_type)
-        `)
-        .in('place_id', placeIds),
-      params?.currentUserId
-        ? (supabase as any)
-            .from('saved_places')
-            .select('place_id')
-            .eq('user_id', params.currentUserId)
-            .in('place_id', placeIds)
-        : Promise.resolve({ data: [] }),
-    ]);
-
-    const userSavedSet = new Set((savedRes.data ?? []).map((s: any) => s.place_id));
-
-    // Aggregate engagement per place
-    const statsMap = new Map<
-      string,
-      { upvotes: number; downvotes: number; lists: number }
-    >();
-
-    (listPlacesRes.data ?? []).forEach((lp: any) => {
-      const current = statsMap.get(lp.place_id) || {
-        upvotes: 0,
-        downvotes: 0,
-        lists: 0,
-      };
-
-      if (lp.list?.is_public) {
-        current.lists += 1;
-      }
-
-      const votes = lp.votes || [];
-      const up = votes.filter((v: any) => v.vote_type !== 'down').length;
-      const down = votes.filter((v: any) => v.vote_type === 'down').length;
-      current.upvotes += up;
-      current.downvotes += down;
-
-      statsMap.set(lp.place_id, current);
-    });
-
-    const enriched = rawPlaces.map((p) => {
-      const stats = statsMap.get(p.id) || { upvotes: 0, downvotes: 0, lists: 0 };
-      const communityScore = stats.upvotes - stats.downvotes + stats.lists * 3;
-      const slug = p.slug || generatePlaceSlug(p.name, p.location || p.city);
-
-      return {
-        ...p,
-        slug,
-        upvotes_count: stats.upvotes,
-        downvotes_count: stats.downvotes,
-        community_score: communityScore,
-        lists_count: stats.lists,
-        is_saved: userSavedSet.has(p.id),
-      };
-    });
+    const enriched = await enrichPlacesWithStats(supabase, rawPlaces as Place[], params?.currentUserId);
 
     // Sort by requested ranking
     const sort = params?.sort ?? 'trending';
@@ -359,6 +379,9 @@ export async function getPlaceBySlugOrId(
 
     const communityScore = upvotes - downvotes + relatedLists.length * 3;
 
+    const rawRelated = (relatedRes.data ?? []) as Place[];
+    const enrichedRelated = await enrichPlacesWithStats(supabase, rawRelated, currentUserId);
+
     return {
       place: {
         ...place,
@@ -371,7 +394,7 @@ export async function getPlaceBySlugOrId(
         user_vote_type: userVoteType,
       },
       relatedLists,
-      relatedPlaces: (relatedRes.data ?? []) as Place[],
+      relatedPlaces: enrichedRelated,
     };
   } catch (err: any) {
     console.warn('Error fetching place by slug:', err?.message || err);
@@ -433,7 +456,7 @@ export async function isPlaceSaved(userId: string, placeId: string): Promise<boo
 }
 
 /**
- * Fetch all places saved by a user
+ * Fetch all places saved by a user (with upvotes and list counts populated)
  */
 export async function getUserSavedPlaces(userId: string): Promise<SavedPlace[]> {
   try {
@@ -446,7 +469,16 @@ export async function getUserSavedPlaces(userId: string): Promise<SavedPlace[]> 
       .order('created_at', { ascending: false });
 
     if (error || !data) return [];
-    return data as SavedPlace[];
+    const savedPlaces = data as SavedPlace[];
+
+    const rawPlaces = savedPlaces.map((sp) => sp.place).filter(Boolean) as Place[];
+    const enrichedPlaces = await enrichPlacesWithStats(supabase, rawPlaces, userId);
+    const enrichedMap = new Map(enrichedPlaces.map((p) => [p.id, p]));
+
+    return savedPlaces.map((sp) => ({
+      ...sp,
+      place: sp.place ? enrichedMap.get(sp.place.id) || sp.place : undefined,
+    }));
   } catch {
     return [];
   }

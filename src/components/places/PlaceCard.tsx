@@ -7,7 +7,7 @@ import {
   ExternalLink,
   ArrowBigUp,
   ArrowBigDown,
-  Flame,
+  Sparkles,
   Compass,
 } from 'lucide-react';
 
@@ -85,7 +85,7 @@ export function PlaceCard({ listPlace, currentUserId }: PlaceCardProps) {
       case 'must_visit':
         return (
           <span className="inline-flex items-center gap-1 rounded-full bg-[#FFEAE6] text-[#FF5841] px-2.5 py-0.5 text-[11px] font-extrabold border border-[#FFD3CC]">
-            <Flame className="h-3 w-3 fill-[#FF5841]" /> Must Visit
+            <Sparkles className="h-3 w-3" /> Must Visit
           </span>
         );
       case 'want_to_visit':

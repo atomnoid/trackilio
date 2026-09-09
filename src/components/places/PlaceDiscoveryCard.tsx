@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Place } from '@/types/database';
-import { MapPin, Flame, ArrowRight, Layers } from 'lucide-react';
+import { MapPin, ArrowRight, Layers, ArrowBigUp } from 'lucide-react';
 import { SavePlaceButton } from './SavePlaceButton';
 
 interface PlaceDiscoveryCardProps {
@@ -84,17 +84,11 @@ export function PlaceDiscoveryCard({ place, currentUserId, initialSaved }: Place
       {/* Card Footer: Real Upvotes Count + Lists Count + Detail CTA */}
       <div className="pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
         <div className="flex items-center gap-3">
-          {upvotes > 0 ? (
-            <span className="inline-flex items-center gap-1 font-extrabold text-[#FF5841]" title={`${upvotes} upvotes`}>
-              <Flame className="h-3.5 w-3.5 fill-current" />
-              <span>{upvotes} upvote{upvotes !== 1 ? 's' : ''}</span>
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1 font-bold text-gray-400">
-              <Flame className="h-3.5 w-3.5" />
-              <span>0 upvotes</span>
-            </span>
-          )}
+          <span className="inline-flex items-center gap-1 font-bold text-gray-600">
+            <ArrowBigUp className="h-4 w-4 text-[#FF5841] fill-[#FF5841]" />
+            <span className="font-mono font-black text-gray-900">{upvotes}</span>
+            <span className="text-[11px] text-gray-400">upvote{upvotes !== 1 ? 's' : ''}</span>
+          </span>
 
           {(place.lists_count ?? 0) > 0 && (
             <span className="inline-flex items-center gap-1 font-semibold text-gray-400">

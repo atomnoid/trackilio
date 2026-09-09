@@ -193,7 +193,7 @@ export function PlaceForm({ listId, onSuccess }: PlaceFormProps) {
             onChange={(e) => setPriority(e.target.value as PriorityLevel)}
             className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-xs font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#FF5841]/20 focus:border-[#FF5841]"
           >
-            <option value="must_visit">🔥 Must Visit</option>
+            <option value="must_visit">✨ Must Visit</option>
             <option value="want_to_visit">🧭 Want to Visit</option>
             <option value="maybe">Maybe</option>
           </select>
