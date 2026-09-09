@@ -1,14 +1,26 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { ArrowRight, Compass, Plus, Users, Sparkles, MapPin } from 'lucide-react';
+import { createClient } from '@/lib/supabase/server';
 import { getPublicWanderLists } from '@/services/lists';
 import { getTodaysFact } from '@/services/dailyFacts';
 import { WanderList } from '@/types/database';
 import { WanderListCard } from '@/components/lists/WanderListCard';
 import { FunFactWidget } from '@/components/daily-fact/DailyFactCard';
 
-export const revalidate = 60; // Refresh public landing every 60s
+export const revalidate = 0; // Dynamic check for user auth state
 
 export default async function HomePage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // If user is already signed in, immediately redirect to their dashboard / travel lists
+  if (user) {
+    redirect('/dashboard');
+  }
+
   const [featuredLists, todaysFact] = await Promise.all([
     getPublicWanderLists({ limit: 6 }),
     getTodaysFact(),
