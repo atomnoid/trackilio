@@ -17,52 +17,52 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   return (
     <div className="mx-auto max-w-md px-4 py-16 space-y-6">
       <div className="text-center space-y-2">
-        <h1 className="font-sans text-3xl font-black text-[#2C2A29]">Welcome Back 👋</h1>
-        <p className="text-sm text-[#78726D] font-normal">Sign in to your Trackilio account</p>
+        <h1 className="font-sans text-3xl font-black text-gray-900">Welcome Back 👋</h1>
+        <p className="text-sm text-gray-500 font-normal">Sign in to your Trackilio account</p>
       </div>
 
       {resolvedParams.error && (
-        <div className="rounded-2xl bg-[#FBF0F0] border border-[#F2D5D5] p-4 text-xs font-semibold text-[#C87A7A] text-center">
+        <div className="rounded-2xl bg-rose-50 border border-rose-200 p-4 text-xs font-semibold text-rose-700 text-center">
           {resolvedParams.error}
         </div>
       )}
 
-      <form action="/auth/login/action" method="POST" className="bg-white border border-[#E6DFD5] rounded-3xl p-8 shadow-xs space-y-5">
+      <form action="/auth/login/action" method="POST" className="bg-white border border-gray-100 rounded-3xl p-8 shadow-sm space-y-5">
         <input type="hidden" name="redirectUrl" value={resolvedParams.redirect || '/dashboard'} />
 
-        <div className="space-y-1">
-          <label className="block text-xs font-bold text-[#2C2A29]">Email Address</label>
+        <div className="space-y-1.5">
+          <label className="block text-xs font-bold text-gray-800">Email Address</label>
           <input
             type="email"
             name="email"
             required
             placeholder="you@example.com"
-            className="w-full rounded-2xl border border-[#E6DFD5] bg-[#FAF6F0] px-4 py-3 text-sm font-medium text-[#2C2A29] focus:outline-none focus:ring-1 focus:ring-[#2C2A29] focus:bg-white transition-all"
+            className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#FF5841]/40 focus:border-[#FF5841]/50 focus:bg-white transition-all"
           />
         </div>
 
-        <div className="space-y-1">
-          <label className="block text-xs font-bold text-[#2C2A29]">Password</label>
+        <div className="space-y-1.5">
+          <label className="block text-xs font-bold text-gray-800">Password</label>
           <input
             type="password"
             name="password"
             required
             placeholder="••••••••"
-            className="w-full rounded-2xl border border-[#E6DFD5] bg-[#FAF6F0] px-4 py-3 text-sm font-medium text-[#2C2A29] focus:outline-none focus:ring-1 focus:ring-[#2C2A29] focus:bg-white transition-all"
+            className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#FF5841]/40 focus:border-[#FF5841]/50 focus:bg-white transition-all"
           />
         </div>
 
         <button
           type="submit"
-          className="w-full rounded-2xl bg-[#4A6B5D] hover:bg-[#3B594B] text-white font-extrabold py-3.5 text-sm shadow-2xs active-press transition-all"
+          className="w-full rounded-2xl bg-[#FF5841] hover:bg-[#E84430] text-white font-black py-3.5 text-sm shadow-sm active-press transition-all"
         >
           Log In
         </button>
       </form>
 
-      <p className="text-center text-xs text-[#78726D] font-medium">
-        Don't have an account?{' '}
-        <Link href="/auth/signup" className="font-extrabold text-[#4A6B5D] hover:underline">
+      <p className="text-center text-xs text-gray-500 font-medium">
+        Don&apos;t have an account?{' '}
+        <Link href="/auth/signup" className="font-extrabold text-[#C53678] hover:text-[#FF5841] transition-colors">
           Sign up
         </Link>
       </p>

@@ -61,8 +61,8 @@ export function SavePlaceButton({
       disabled={loading}
       className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition-all active-press ${
         saved
-          ? 'bg-[#4A6B5D] text-white shadow-2xs hover:bg-[#3B594B]'
-          : 'bg-[#F0F5F2] hover:bg-[#E2EFE9] text-[#3B594B] border border-[#D5E3DC]'
+          ? 'bg-[#FF5841] text-white shadow-sm hover:bg-[#E84430]'
+          : 'bg-[#FFEAE6] hover:bg-[#FFDCD6] text-[#FF5841] border border-[#FFD3CC]'
       } ${className}`}
       title={saved ? 'Saved in your places' : 'Save place'}
     >

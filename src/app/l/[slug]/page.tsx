@@ -1,17 +1,17 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getWanderListBySlug } from '@/services/lists';
+import Link from 'next/link';
+import { getWanderListBySlug, isListSaved } from '@/services/lists';
 import { getPlacesForList } from '@/services/places';
 import { getListMembers } from '@/services/members';
 import { createClient } from '@/lib/supabase/server';
 import { PlaceCard } from '@/components/places/PlaceCard';
 import { PlaceForm } from '@/components/places/PlaceForm';
-import { ShareButton } from '@/components/ui/ShareButton';
 import { WanderListJsonLd } from '@/components/seo/WanderListJsonLd';
 import { MembersPanel } from '@/components/lists/MembersPanel';
-import { MapPin, Globe, Lock, Calendar } from 'lucide-react';
+import { ListHeaderActions } from '@/components/lists/ListHeaderActions';
+import { MapPin, Globe, Lock, Calendar, Users, Sparkles } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
-import { ListCover } from '@/components/lists/ListCover';
 
 export const revalidate = 10;
 
@@ -76,70 +76,96 @@ export default async function PublicWanderListPage({ params }: WanderListPagePro
     notFound();
   }
 
-  const [places, members] = await Promise.all([
+  const [places, members, savedStatus] = await Promise.all([
     getPlacesForList(list.id, user?.id),
-    isOwner ? getListMembers(list.id) : Promise.resolve([]),
+    getListMembers(list.id),
+    user ? isListSaved(user.id, list.id) : Promise.resolve(false),
   ]);
 
+  const hasCollaborators = members.length > 1;
+
   return (
-    <div className="pb-24 space-y-12">
+    <div className="pb-24 space-y-10">
       {/* JSON-LD Structured Data */}
       {list.is_public && <WanderListJsonLd list={list} places={places} />}
 
-      {/* Hero Header with Vector Cover */}
-      <section className="relative bg-[#18181B] text-white overflow-hidden pb-12">
-        <ListCover
-          title={list.title}
-          destination={list.destination || ''}
-          variant="hero"
-        />
+      {/* Modern Flat Design List Header (No Black Theme, Compact & Beautiful) */}
+      <section className="relative bg-white/95 backdrop-blur-md border-b border-[#EFE9EC] py-8 sm:py-12">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 space-y-6">
+          {/* Top Status & Actions Row */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <span
+                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-black shadow-2xs ${
+                  list.is_public
+                    ? 'bg-[#FFEAE6] text-[#FF5841] border border-[#FFD3CC]'
+                    : 'bg-[#F6F4F8] text-[#4F4B5E] border border-[#EFE9EC]'
+                }`}
+              >
+                {list.is_public ? <Globe className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
+                <span>{list.is_public ? 'Public Guide' : 'Private Itinerary'}</span>
+              </span>
 
-        <div className="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 pt-8 space-y-5">
-          <div className="flex items-center justify-between gap-4">
-            <span
-              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-extrabold shadow-2xs ${
-                list.is_public
-                  ? 'bg-[#E8F5E9] text-[#2E7D32]'
-                  : 'bg-white/10 text-white'
-              }`}
-            >
-              {list.is_public ? <Globe className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
-              {list.is_public ? 'Public Trackilio List' : 'Private Trackilio List'}
-            </span>
+              {hasCollaborators && (
+                <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-black bg-[#F9E2EE] text-[#C53678] border border-[#F4CDDF]">
+                  <Users className="h-3.5 w-3.5" />
+                  <span>{members.length} Collaborators</span>
+                </span>
+              )}
+            </div>
 
-            {list.is_public && <ShareButton title={list.title} />}
+            {/* Save List, Add Collaborator & Share Buttons at Top Header */}
+            <ListHeaderActions
+              listId={list.id}
+              listTitle={list.title}
+              isOwner={isOwner}
+              isPublic={list.is_public}
+              initialSaved={savedStatus}
+            />
           </div>
 
-          <div className="space-y-2">
+          {/* Title & Description */}
+          <div className="space-y-3">
             {list.destination && (
-              <div className="flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-amber-300">
-                <MapPin className="h-4 w-4" />
+              <div className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-[#FF5841] bg-[#FFF5F3] px-3 py-1 rounded-xl border border-[#FFEAE6]">
+                <MapPin className="h-3.5 w-3.5" />
                 <span>{list.destination}</span>
               </div>
             )}
-            <h1 className="font-sans text-3xl sm:text-5xl font-black tracking-tight text-white">
+            <h1 className="font-sans text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[#1A1723]">
               {list.title}
             </h1>
             {list.description && (
-              <p className="text-base sm:text-lg text-slate-300 max-w-3xl leading-relaxed font-normal">
+              <p className="text-sm sm:text-base text-[#4F4B5E] max-w-3xl leading-relaxed font-normal">
                 {list.description}
               </p>
             )}
           </div>
 
-          <div className="flex flex-wrap items-center gap-6 pt-4 border-t border-white/10 text-xs text-slate-400 font-medium">
-            <div className="flex items-center gap-2">
-              <div className="h-6 w-6 rounded-md bg-[#E0533C] text-white font-bold flex items-center justify-center text-[10px]">
+          {/* Metadata Meta Bar */}
+          <div className="flex flex-wrap items-center gap-5 pt-4 border-t border-[#EFE9EC] text-xs text-[#7E7890] font-medium">
+            <Link
+              href={list.owner?.username ? `/u/${list.owner.username}` : '#'}
+              className="flex items-center gap-2 group hover:opacity-85 transition-opacity"
+            >
+              <div className="h-6 w-6 rounded-lg bg-gradient-to-br from-[#FF5841] to-[#C53678] text-white font-bold flex items-center justify-center text-[10px] shadow-2xs">
                 {list.owner?.display_name?.charAt(0).toUpperCase() || 'T'}
               </div>
-              <span>Created by <strong className="text-white">{list.owner?.display_name || 'Traveler'}</strong></span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-slate-400" />
+              <span className="text-[#1A1723] font-bold group-hover:text-[#FF5841] transition-colors">
+                {list.owner?.display_name || 'Traveler'}
+                {list.owner?.username && (
+                  <span className="text-[#7E7890] font-normal ml-1">@{list.owner.username}</span>
+                )}
+              </span>
+            </Link>
+
+            <div className="flex items-center gap-1.5">
+              <Calendar className="h-3.5 w-3.5 text-[#7E7890]" />
               <span>Updated {formatDate(list.updated_at)}</span>
             </div>
+
             <div>
-              <strong className="text-white font-bold">{places.length}</strong> Places Saved
+              <strong className="text-[#1A1723] font-bold">{places.length}</strong> Places Saved
             </div>
           </div>
         </div>
@@ -150,9 +176,11 @@ export default async function PublicWanderListPage({ params }: WanderListPagePro
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           {/* Places List */}
           <div className="lg:col-span-7 space-y-6">
-            <h2 className="font-sans text-2xl font-black text-[#18181B] border-b border-[#E8E3D8] pb-3">
-              Saved Places ({places.length})
-            </h2>
+            <div className="flex items-center justify-between pb-3 border-b border-[#EFE9EC]">
+              <h2 className="font-sans text-xl font-black text-[#1A1723]">
+                Saved Places ({places.length})
+              </h2>
+            </div>
 
             {places.length > 0 ? (
               <div className="space-y-4">
@@ -166,11 +194,11 @@ export default async function PublicWanderListPage({ params }: WanderListPagePro
                 ))}
               </div>
             ) : (
-              <div className="rounded-3xl bg-white border border-[#E8E3D8] p-10 text-center space-y-3 shadow-2xs">
-                <MapPin className="mx-auto h-9 w-9 text-[#E0533C] stroke-[1.8]" />
-                <h3 className="font-sans text-lg font-bold text-[#18181B]">No places added yet</h3>
-                <p className="text-xs text-[#71717A] max-w-sm mx-auto font-medium">
-                  Add your favorite cafes, hotels, sights, and hidden gems to this Trackilio List.
+              <div className="rounded-3xl bg-white border border-[#EFE9EC] p-10 text-center space-y-3 shadow-2xs">
+                <MapPin className="mx-auto h-9 w-9 text-[#FF5841] stroke-[1.8]" />
+                <h3 className="font-sans text-base font-bold text-[#1A1723]">No places added yet</h3>
+                <p className="text-xs text-[#7E7890] max-w-sm mx-auto font-medium">
+                  Add your favorite cafes, hotels, sights, and hidden gems to this itinerary.
                 </p>
               </div>
             )}
@@ -190,10 +218,10 @@ export default async function PublicWanderListPage({ params }: WanderListPagePro
               </div>
             ) : (
               <div className="space-y-4">
-                <div className="rounded-3xl bg-[#F5F1E8] border border-[#E2DAC8] p-6 space-y-2.5">
-                  <h3 className="font-sans text-base font-bold text-[#18181B]">About this list</h3>
-                  <p className="text-xs text-[#71717A] leading-relaxed font-medium">
-                    This list was created by {list.owner?.display_name || 'a traveler'} for {list.destination || 'exploring places'}. Upvote your favorite spots or add a recommendation comment!
+                <div className="rounded-3xl bg-white border border-[#EFE9EC] p-6 space-y-2.5 shadow-2xs">
+                  <h3 className="font-sans text-sm font-bold text-[#1A1723]">About this guide</h3>
+                  <p className="text-xs text-[#4F4B5E] leading-relaxed font-medium">
+                    This travel list was created by {list.owner?.display_name || 'a traveler'} for {list.destination || 'exploring places'}. Bookmark it to save it in your travel dashboard!
                   </p>
                 </div>
                 {user && (

@@ -1,0 +1,56 @@
+'use client';
+
+import React, { useState } from 'react';
+import { UserPlus, Share2 } from 'lucide-react';
+import { SaveListButton } from './SaveListButton';
+import { ShareButton } from '@/components/ui/ShareButton';
+import { QuickInviteModal } from './QuickInviteModal';
+
+interface ListHeaderActionsProps {
+  listId: string;
+  listTitle: string;
+  isOwner: boolean;
+  isPublic: boolean;
+  initialSaved?: boolean;
+}
+
+export function ListHeaderActions({
+  listId,
+  listTitle,
+  isOwner,
+  isPublic,
+  initialSaved = false,
+}: ListHeaderActionsProps) {
+  const [inviteModalOpen, setInviteModalOpen] = useState(false);
+
+  return (
+    <>
+      <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+        {/* Save List Button — Prominent and accessible */}
+        <SaveListButton listId={listId} initialSaved={initialSaved} />
+
+        {/* Top Add Collaborator Button (For List Owners) */}
+        {isOwner && (
+          <button
+            onClick={() => setInviteModalOpen(true)}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-[#FFEAE6] hover:bg-[#FFDCD6] border border-[#FFD3CC] text-[#FF5841] text-xs font-black shadow-2xs active-press transition-all"
+          >
+            <UserPlus className="h-3.5 w-3.5 stroke-[2.5]" />
+            <span>+ Add Collaborator</span>
+          </button>
+        )}
+
+        {/* Share Button */}
+        {isPublic && <ShareButton title={listTitle} />}
+      </div>
+
+      {isOwner && (
+        <QuickInviteModal
+          listId={listId}
+          isOpen={inviteModalOpen}
+          onClose={() => setInviteModalOpen(false)}
+        />
+      )}
+    </>
+  );
+}

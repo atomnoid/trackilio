@@ -101,7 +101,7 @@ export function Navbar() {
     <header
       className={`sticky top-0 z-40 transition-all duration-300 ${
         scrolled
-          ? 'bg-[#FAF9FC]/90 backdrop-blur-md border-b border-[#E7E0EE] shadow-xs py-3'
+          ? 'bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-xs py-3'
           : 'bg-transparent py-5'
       }`}
     >
@@ -118,10 +118,10 @@ export function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`transition-colors py-1 px-2.5 rounded-xl ${
+                  className={`transition-all py-1.5 px-3 rounded-xl ${
                     isActive
-                      ? 'text-[#6469AC] bg-[#F1F3FB] font-bold shadow-2xs'
-                      : 'text-[#595567] hover:text-[#2A2735] hover:bg-[#F6F1F6]'
+                      ? 'text-[#FF5841] bg-[#FF5841]/10 font-bold'
+                      : 'text-gray-600 hover:text-black hover:bg-gray-100'
                   }`}
                 >
                   {link.label}
@@ -134,7 +134,7 @@ export function Navbar() {
           <div className="flex items-center gap-2.5">
             <Link
               href="/discover"
-              className="p-2 text-[#847F95] hover:text-[#2A2735] hover:bg-[#F6F1F6] rounded-xl transition-colors"
+              className="p-2 text-gray-500 hover:text-black hover:bg-gray-100 rounded-xl transition-colors"
               title="Search Places & Lists"
             >
               <Search className="h-4.5 w-4.5" />
@@ -147,7 +147,7 @@ export function Navbar() {
                   <div className="flex items-center gap-2">
                     <Link
                       href={profileHref}
-                      className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/90 border border-[#E7E0EE] hover:border-[#C5ADC5] hover:bg-[#F6F1F6] transition-all shadow-2xs"
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white border border-gray-200 hover:border-[#FF5841]/40 hover:bg-gray-50 transition-all shadow-2xs"
                       title="View Public Profile"
                     >
                       {avatarUrl ? (
@@ -155,21 +155,21 @@ export function Navbar() {
                         <img
                           src={avatarUrl}
                           alt={nameToShow}
-                          className="h-6 w-6 rounded-lg object-cover border border-[#E7E0EE]"
+                          className="h-6 w-6 rounded-lg object-cover border border-gray-200"
                         />
                       ) : (
-                        <div className="h-6 w-6 rounded-lg bg-gradient-to-br from-[#C5ADC5] to-[#B2B5E0] text-white font-bold text-[10px] flex items-center justify-center shadow-2xs">
+                        <div className="h-6 w-6 rounded-lg bg-gradient-to-br from-[#FF5841] to-[#C53678] text-white font-bold text-[10px] flex items-center justify-center shadow-2xs">
                           {initialChar}
                         </div>
                       )}
-                      <span className="hidden sm:inline text-xs font-bold text-[#2A2735] max-w-[110px] truncate">
+                      <span className="hidden sm:inline text-xs font-bold text-gray-900 max-w-[110px] truncate">
                         {nameToShow}
                       </span>
                     </Link>
 
                     <Link
                       href="/settings"
-                      className="p-2 text-[#847F95] hover:text-[#2A2735] hover:bg-[#F6F1F6] rounded-xl transition-colors"
+                      className="p-2 text-gray-500 hover:text-black hover:bg-gray-100 rounded-xl transition-colors"
                       title="Account & Profile Settings"
                     >
                       <Settings className="h-4.5 w-4.5" />
@@ -177,7 +177,7 @@ export function Navbar() {
 
                     <button
                       onClick={handleSignOut}
-                      className="p-2 text-[#847F95] hover:text-[#E2A1A1] hover:bg-rose-50 rounded-xl transition-colors"
+                      className="p-2 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors"
                       title="Sign Out"
                     >
                       <LogOut className="h-4.5 w-4.5" />
@@ -187,7 +187,7 @@ export function Navbar() {
                   /* Unauthenticated Visitor Actions */
                   <Link
                     href="/auth/login"
-                    className="hidden sm:inline-block text-sm font-bold text-[#595567] hover:text-[#2A2735] px-3.5 py-2 rounded-xl transition-colors"
+                    className="hidden sm:inline-block text-sm font-bold text-gray-600 hover:text-black px-3.5 py-2 rounded-xl transition-colors"
                   >
                     Log in
                   </Link>
@@ -197,7 +197,7 @@ export function Navbar() {
 
             <Link
               href="/create"
-              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#C5ADC5] to-[#B2B5E0] hover:opacity-95 text-white px-4.5 py-2.5 text-xs font-extrabold shadow-xs active-press transition-all"
+              className="inline-flex items-center gap-2 rounded-xl bg-[#FF5841] hover:bg-[#FF4328] text-white px-4.5 py-2.5 text-xs font-black shadow-xs active-press transition-all hover:scale-102"
             >
               <Plus className="h-4 w-4 stroke-[2.5]" />
               <span>Create list</span>

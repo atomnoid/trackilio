@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Loader2, CheckCircle2, XCircle, AtSign, User, Mail, Lock, Sparkles, ArrowRight } from 'lucide-react';
+import { Loader2, CheckCircle2, XCircle, AtSign, User, Mail, Lock, ArrowRight } from 'lucide-react';
 import { validateUsernameFormat } from '@/lib/username';
 
 export function SignupForm() {
@@ -57,15 +57,18 @@ export function SignupForm() {
     password.length >= 6 &&
     (usernameStatus === 'available' || (username.trim() && usernameStatus !== 'invalid' && usernameStatus !== 'taken'));
 
+  const inputBase = "w-full rounded-2xl border bg-gray-50 pl-10 pr-4 py-3 text-sm font-medium text-gray-900 focus:outline-none focus:bg-white transition-all";
+  const inputNormal = `${inputBase} border-gray-200 focus:ring-2 focus:ring-[#FF5841]/40 focus:border-[#FF5841]/50`;
+
   return (
-    <form action="/auth/signup/action" method="POST" className="bg-white/95 backdrop-blur-md border border-[#E7E0EE] rounded-3xl p-6 sm:p-8 shadow-xs space-y-5">
+    <form action="/auth/signup/action" method="POST" className="bg-white border border-gray-100 rounded-3xl p-6 sm:p-8 shadow-sm space-y-5">
       {/* Display Name */}
       <div className="space-y-1.5">
-        <label className="block text-xs font-bold text-[#2A2735]">
+        <label className="block text-xs font-bold text-gray-800">
           Display Name <span className="text-rose-400">*</span>
         </label>
         <div className="relative">
-          <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#847F95]" />
+          <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <input
             type="text"
             name="displayName"
@@ -73,7 +76,7 @@ export function SignupForm() {
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
             placeholder="e.g. Elena Rostova"
-            className="w-full rounded-2xl border border-[#E7E0EE] bg-[#FAF9FC] pl-10 pr-4 py-3 text-sm font-medium text-[#2A2735] focus:outline-none focus:ring-2 focus:ring-[#C5ADC5] focus:bg-white transition-all"
+            className={inputNormal}
           />
         </div>
       </div>
@@ -81,13 +84,13 @@ export function SignupForm() {
       {/* Unique Username */}
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">
-          <label className="block text-xs font-bold text-[#2A2735]">
+          <label className="block text-xs font-bold text-gray-800">
             Choose Handle <span className="text-rose-400">*</span>
           </label>
-          <span className="text-[11px] font-semibold text-[#847F95]">Unique @username</span>
+          <span className="text-[11px] font-semibold text-gray-400">Unique @username</span>
         </div>
         <div className="relative">
-          <AtSign className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#847F95]" />
+          <AtSign className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#FF5841]" />
           <input
             type="text"
             name="username"
@@ -97,16 +100,16 @@ export function SignupForm() {
             placeholder="e.g. elena_travels"
             autoComplete="username"
             spellCheck={false}
-            className={`w-full rounded-2xl border pl-10 pr-10 py-3 text-sm font-medium text-[#2A2735] focus:outline-none focus:bg-white transition-all ${
+            className={`w-full rounded-2xl border pl-10 pr-10 py-3 text-sm font-medium text-gray-900 focus:outline-none focus:bg-white transition-all ${
               usernameStatus === 'available'
-                ? 'border-emerald-400 bg-emerald-50/30 focus:ring-2 focus:ring-emerald-500'
+                ? 'border-emerald-400 bg-emerald-50/40 focus:ring-2 focus:ring-emerald-500'
                 : usernameStatus === 'taken' || usernameStatus === 'invalid'
                 ? 'border-rose-300 bg-rose-50/40 focus:ring-2 focus:ring-rose-400'
-                : 'border-[#E7E0EE] bg-[#FAF9FC] focus:ring-2 focus:ring-[#C5ADC5]'
+                : 'border-gray-200 bg-gray-50 focus:ring-2 focus:ring-[#FF5841]/40 focus:border-[#FF5841]/50'
             }`}
           />
           <div className="absolute right-3.5 top-1/2 -translate-y-1/2">
-            {usernameStatus === 'checking' && <Loader2 className="h-4 w-4 animate-spin text-[#847F95]" />}
+            {usernameStatus === 'checking' && <Loader2 className="h-4 w-4 animate-spin text-gray-400" />}
             {usernameStatus === 'available' && <CheckCircle2 className="h-4 w-4 text-emerald-600" />}
             {(usernameStatus === 'taken' || usernameStatus === 'invalid') && (
               <XCircle className="h-4 w-4 text-rose-500" />
@@ -121,14 +124,14 @@ export function SignupForm() {
               usernameStatus === 'available'
                 ? 'text-emerald-600'
                 : usernameStatus === 'checking'
-                ? 'text-[#847F95]'
+                ? 'text-gray-400'
                 : 'text-rose-500'
             }`}
           >
             {usernameMessage}
           </p>
         ) : (
-          <p className="text-[11px] text-[#847F95] font-medium">
+          <p className="text-[11px] text-gray-400 font-medium">
             Letters, numbers, periods (.), and underscores (_). Used for your public link, Blend matches, and list invites.
           </p>
         )}
@@ -136,11 +139,11 @@ export function SignupForm() {
 
       {/* Email Address */}
       <div className="space-y-1.5">
-        <label className="block text-xs font-bold text-[#2A2735]">
+        <label className="block text-xs font-bold text-gray-800">
           Email Address <span className="text-rose-400">*</span>
         </label>
         <div className="relative">
-          <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#847F95]" />
+          <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <input
             type="email"
             name="email"
@@ -149,18 +152,18 @@ export function SignupForm() {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
             autoComplete="email"
-            className="w-full rounded-2xl border border-[#E7E0EE] bg-[#FAF9FC] pl-10 pr-4 py-3 text-sm font-medium text-[#2A2735] focus:outline-none focus:ring-2 focus:ring-[#C5ADC5] focus:bg-white transition-all"
+            className={inputNormal}
           />
         </div>
       </div>
 
       {/* Password */}
       <div className="space-y-1.5">
-        <label className="block text-xs font-bold text-[#2A2735]">
+        <label className="block text-xs font-bold text-gray-800">
           Password <span className="text-rose-400">*</span>
         </label>
         <div className="relative">
-          <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#847F95]" />
+          <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <input
             type="password"
             name="password"
@@ -170,7 +173,7 @@ export function SignupForm() {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Minimum 6 characters"
             autoComplete="new-password"
-            className="w-full rounded-2xl border border-[#E7E0EE] bg-[#FAF9FC] pl-10 pr-4 py-3 text-sm font-medium text-[#2A2735] focus:outline-none focus:ring-2 focus:ring-[#C5ADC5] focus:bg-white transition-all"
+            className={inputNormal}
           />
         </div>
       </div>
@@ -179,9 +182,8 @@ export function SignupForm() {
       <button
         type="submit"
         disabled={!isFormValid || usernameStatus === 'invalid' || usernameStatus === 'taken'}
-        className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#C5ADC5] to-[#B2B5E0] hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed text-white font-extrabold py-3.5 text-sm shadow-xs active-press transition-all mt-2"
+        className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-[#FF5841] hover:bg-[#E84430] disabled:opacity-50 disabled:cursor-not-allowed text-white font-black py-3.5 text-sm shadow-sm active-press transition-all mt-2"
       >
-        <Sparkles className="h-4 w-4" />
         <span>Create Account</span>
         <ArrowRight className="h-4 w-4" />
       </button>

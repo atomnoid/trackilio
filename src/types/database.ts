@@ -32,6 +32,7 @@ export interface WanderList {
   owner?: Profile;
   places_count?: number;
   votes_count?: number;
+  is_saved?: boolean;
 }
 
 export interface ListMember {
@@ -41,6 +42,14 @@ export interface ListMember {
   role: MemberRole;
   created_at: string;
   profile?: Profile;
+}
+
+export interface SavedList {
+  id: string;
+  user_id: string;
+  list_id: string;
+  created_at: string;
+  list?: WanderList;
 }
 
 export interface Place {

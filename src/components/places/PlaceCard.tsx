@@ -247,8 +247,8 @@ export function PlaceCard({ listPlace, currentUserId }: PlaceCardProps) {
             aria-label="Upvote"
             className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg font-extrabold transition-all active-press ${
               userVote === 'up'
-                ? 'bg-[#4A6B5D] text-white shadow-xs'
-                : 'text-[#5C5652] hover:text-[#4A6B5D] hover:bg-white/60'
+                ? 'bg-[#FF5841] text-white shadow-xs'
+                : 'text-gray-500 hover:text-[#FF5841] hover:bg-white/60'
             } ${animateVote === 'up' ? 'scale-110' : ''}`}
           >
             <ArrowBigUp className={`h-4 w-4 ${userVote === 'up' ? 'fill-current' : ''}`} />
@@ -259,10 +259,10 @@ export function PlaceCard({ listPlace, currentUserId }: PlaceCardProps) {
           <span
             className={`px-2 py-1 font-mono font-black text-xs ${
               votesCount > 0
-                ? 'text-[#4A6B5D]'
+                ? 'text-[#FF5841]'
                 : votesCount < 0
                 ? 'text-[#E0533C]'
-                : 'text-[#78726D]'
+                : 'text-gray-400'
             }`}
           >
             {votesCount > 0 ? `+${votesCount}` : votesCount}
@@ -286,7 +286,7 @@ export function PlaceCard({ listPlace, currentUserId }: PlaceCardProps) {
 
         <button
           onClick={() => setShowComments(!showComments)}
-          className="inline-flex items-center gap-1.5 text-[#78726D] hover:text-[#2C2A29] font-bold px-2.5 py-1.5 rounded-lg hover:bg-[#F5F1E8] transition-colors"
+          className="inline-flex items-center gap-1.5 text-gray-500 hover:text-gray-800 font-bold px-2.5 py-1.5 rounded-lg hover:bg-gray-100 transition-colors"
         >
           <MessageSquare className="h-3.5 w-3.5" />
           <span>{comments.length} {comments.length === 1 ? 'Comment' : 'Comments'}</span>

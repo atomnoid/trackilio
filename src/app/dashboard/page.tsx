@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { getUserWanderLists, getUserCollaboratedLists } from '@/services/lists';
+import { getUserWanderLists, getUserCollaboratedLists, getUserSavedLists } from '@/services/lists';
 import { getUserSavedPlaces } from '@/services/places';
 import { getProfile } from '@/services/profiles';
 import { getUserBlendSessions } from '@/services/blend';
@@ -23,10 +23,11 @@ export default async function DashboardPage() {
     redirect('/auth/login?redirect=/dashboard');
   }
 
-  const [profile, ownedLists, collabLists, savedPlaces, blendSessions] = await Promise.all([
+  const [profile, ownedLists, collabLists, savedLists, savedPlaces, blendSessions] = await Promise.all([
     getProfile(user.id),
     getUserWanderLists(user.id),
     getUserCollaboratedLists(user.id),
+    getUserSavedLists(user.id),
     getUserSavedPlaces(user.id),
     getUserBlendSessions(user.id),
   ]);
@@ -39,6 +40,7 @@ export default async function DashboardPage() {
         userDisplayName={displayName}
         initialLists={ownedLists}
         initialCollabLists={collabLists}
+        initialSavedLists={savedLists}
         initialSavedPlaces={savedPlaces}
         initialBlendSessions={blendSessions}
         userId={user.id}

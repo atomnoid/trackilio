@@ -8,8 +8,8 @@ interface TrackilioLogoProps {
 export function TrackilioLogo({ className = '', showText = true }: TrackilioLogoProps) {
   return (
     <Link href="/" className={`inline-flex items-center gap-2.5 group ${className}`}>
-      {/* Serene Pastel Gradient Marker Badge */}
-      <div className="relative flex items-center justify-center h-9 w-9 rounded-2xl bg-gradient-to-br from-[#C5ADC5] to-[#B2B5E0] text-white shadow-xs group-hover:scale-105 transition-all duration-300">
+      {/* Vibrant Sunset Orange & Red-Violet Badge */}
+      <div className="relative flex items-center justify-center h-9 w-9 rounded-2xl bg-gradient-to-br from-[#FF5841] to-[#C53678] text-white shadow-sm group-hover:scale-105 transition-all duration-300">
         <svg
           viewBox="0 0 24 24"
           fill="none"
@@ -26,7 +26,7 @@ export function TrackilioLogo({ className = '', showText = true }: TrackilioLogo
       </div>
 
       {showText && (
-        <span className="font-sans text-xl font-black tracking-tight text-[#2A2735] group-hover:text-[#8E6D8E] transition-colors">
+        <span className="font-sans text-xl font-black tracking-tight text-[#1A1A1A] group-hover:text-[#FF5841] transition-colors">
           Trackilio
         </span>
       )}

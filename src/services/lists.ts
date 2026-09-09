@@ -184,19 +184,21 @@ export async function getUserCollaboratedLists(userId: string): Promise<WanderLi
   try {
     const supabase = await createClient();
 
-    // Fetch lists where user is a member
+    // 1. Lists where user is invited as a collaborator (not the owner)
     const { data: memberRows } = await (supabase as any)
       .from('list_members')
-      .select('list_id')
-      .eq('user_id', userId);
+      .select('list_id, wander_lists!inner(owner_id)')
+      .eq('user_id', userId)
+      .neq('wander_lists.owner_id', userId);
 
     const memberListIds = (memberRows ?? []).map((m: any) => m.list_id);
 
-    // Fetch lists owned by user that have at least one member
+    // 2. Lists owned by user that have at least one OTHER collaborator member
     const { data: ownedMemberRows } = await (supabase as any)
       .from('list_members')
       .select('list_id, wander_lists!inner(owner_id)')
-      .eq('wander_lists.owner_id', userId);
+      .eq('wander_lists.owner_id', userId)
+      .neq('user_id', userId);
 
     const ownedCollabIds = (ownedMemberRows ?? []).map((m: any) => m.list_id);
     const combinedIds = Array.from(new Set([...memberListIds, ...ownedCollabIds]));
@@ -213,6 +215,76 @@ export async function getUserCollaboratedLists(userId: string): Promise<WanderLi
     return lists as WanderList[];
   } catch (err: any) {
     console.warn('Error fetching collaborated lists:', err?.message || err);
+    return [];
+  }
+}
+
+export async function isListSaved(userId: string, listId: string): Promise<boolean> {
+  try {
+    const supabase = await createClient();
+    const { data } = await (supabase as any)
+      .from('saved_lists')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('list_id', listId)
+      .maybeSingle();
+
+    return !!data;
+  } catch {
+    return false;
+  }
+}
+
+export async function toggleSaveList(
+  userId: string,
+  listId: string
+): Promise<{ saved: boolean; error?: string }> {
+  try {
+    const supabase = await createClient();
+
+    const { data: existing } = await (supabase as any)
+      .from('saved_lists')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('list_id', listId)
+      .maybeSingle();
+
+    if (existing) {
+      const { error } = await (supabase as any)
+        .from('saved_lists')
+        .delete()
+        .eq('id', existing.id);
+
+      if (error) return { saved: true, error: error.message };
+      return { saved: false };
+    } else {
+      const { error } = await (supabase as any)
+        .from('saved_lists')
+        .insert({
+          user_id: userId,
+          list_id: listId,
+        });
+
+      if (error) return { saved: false, error: error.message };
+      return { saved: true };
+    }
+  } catch (err: any) {
+    return { saved: false, error: err?.message || 'Failed to toggle save list' };
+  }
+}
+
+export async function getUserSavedLists(userId: string): Promise<WanderList[]> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await (supabase as any)
+      .from('saved_lists')
+      .select('list_id, wander_lists(*, owner:profiles(*))')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (error || !data) return [];
+    return data.map((d: any) => d.wander_lists).filter(Boolean) as WanderList[];
+  } catch {
     return [];
   }
 }
