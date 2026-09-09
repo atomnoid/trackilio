@@ -233,19 +233,28 @@ ALTER TABLE public.votes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.comments ENABLE ROW LEVEL SECURITY;
 
 --------------------------------------------------------------------------------
--- RLS POLICIES
+-- RLS POLICIES (Idempotent: drops policy if exists before creating)
 --------------------------------------------------------------------------------
 
 -- Profiles Policies
+DROP POLICY IF EXISTS "Profiles are publicly readable" ON public.profiles;
 CREATE POLICY "Profiles are publicly readable"
   ON public.profiles FOR SELECT
   USING (true);
 
+DROP POLICY IF EXISTS "Users can insert their own profile" ON public.profiles;
+CREATE POLICY "Users can insert their own profile"
+  ON public.profiles FOR INSERT
+  WITH CHECK (auth.uid() = id);
+
+DROP POLICY IF EXISTS "Users can update their own profile" ON public.profiles;
 CREATE POLICY "Users can update their own profile"
   ON public.profiles FOR UPDATE
-  USING (auth.uid() = id);
+  USING (auth.uid() = id)
+  WITH CHECK (auth.uid() = id);
 
 -- WanderLists Policies
+DROP POLICY IF EXISTS "Public lists readable by anyone, private by members" ON public.wander_lists;
 CREATE POLICY "Public lists readable by anyone, private by members"
   ON public.wander_lists FOR SELECT
   USING (
@@ -254,19 +263,23 @@ CREATE POLICY "Public lists readable by anyone, private by members"
     OR (auth.uid() IS NOT NULL AND public.can_read_list(id, auth.uid()))
   );
 
+DROP POLICY IF EXISTS "Authenticated users can create lists" ON public.wander_lists;
 CREATE POLICY "Authenticated users can create lists"
   ON public.wander_lists FOR INSERT
   WITH CHECK (auth.uid() IS NOT NULL AND owner_id = auth.uid());
 
+DROP POLICY IF EXISTS "Owners and editors can update lists" ON public.wander_lists;
 CREATE POLICY "Owners and editors can update lists"
   ON public.wander_lists FOR UPDATE
   USING (auth.uid() IS NOT NULL AND public.can_write_list(id, auth.uid()));
 
+DROP POLICY IF EXISTS "Only owners can delete lists" ON public.wander_lists;
 CREATE POLICY "Only owners can delete lists"
   ON public.wander_lists FOR DELETE
   USING (auth.uid() IS NOT NULL AND owner_id = auth.uid());
 
 -- List Members Policies
+DROP POLICY IF EXISTS "Members readable for public lists or by list members" ON public.list_members;
 CREATE POLICY "Members readable for public lists or by list members"
   ON public.list_members FOR SELECT
   USING (
@@ -274,6 +287,7 @@ CREATE POLICY "Members readable for public lists or by list members"
     OR (auth.uid() IS NOT NULL AND public.can_read_list(list_id, auth.uid()))
   );
 
+DROP POLICY IF EXISTS "Only list owner can manage members" ON public.list_members;
 CREATE POLICY "Only list owner can manage members"
   ON public.list_members FOR ALL
   USING (
@@ -284,6 +298,7 @@ CREATE POLICY "Only list owner can manage members"
   );
 
 -- Places Policies
+DROP POLICY IF EXISTS "Places readable if attached to a readable list" ON public.places;
 CREATE POLICY "Places readable if attached to a readable list"
   ON public.places FOR SELECT
   USING (
@@ -294,32 +309,39 @@ CREATE POLICY "Places readable if attached to a readable list"
     OR auth.uid() IS NOT NULL
   );
 
+DROP POLICY IF EXISTS "Authenticated users can create places" ON public.places;
 CREATE POLICY "Authenticated users can create places"
   ON public.places FOR INSERT
   WITH CHECK (auth.uid() IS NOT NULL);
 
+DROP POLICY IF EXISTS "Authenticated users can update places" ON public.places;
 CREATE POLICY "Authenticated users can update places"
   ON public.places FOR UPDATE
   USING (auth.uid() IS NOT NULL);
 
 -- List Places Policies
+DROP POLICY IF EXISTS "List places readable if list is readable" ON public.list_places;
 CREATE POLICY "List places readable if list is readable"
   ON public.list_places FOR SELECT
   USING (public.can_read_list(list_id, auth.uid()));
 
+DROP POLICY IF EXISTS "Editors and owners can insert list places" ON public.list_places;
 CREATE POLICY "Editors and owners can insert list places"
   ON public.list_places FOR INSERT
   WITH CHECK (auth.uid() IS NOT NULL AND public.can_write_list(list_id, auth.uid()));
 
+DROP POLICY IF EXISTS "Editors and owners can update list places" ON public.list_places;
 CREATE POLICY "Editors and owners can update list places"
   ON public.list_places FOR UPDATE
   USING (auth.uid() IS NOT NULL AND public.can_write_list(list_id, auth.uid()));
 
+DROP POLICY IF EXISTS "Editors and owners can delete list places" ON public.list_places;
 CREATE POLICY "Editors and owners can delete list places"
   ON public.list_places FOR DELETE
   USING (auth.uid() IS NOT NULL AND public.can_write_list(list_id, auth.uid()));
 
 -- Votes Policies
+DROP POLICY IF EXISTS "Votes readable if list is readable" ON public.votes;
 CREATE POLICY "Votes readable if list is readable"
   ON public.votes FOR SELECT
   USING (
@@ -329,6 +351,7 @@ CREATE POLICY "Votes readable if list is readable"
     )
   );
 
+DROP POLICY IF EXISTS "Authenticated list members can vote" ON public.votes;
 CREATE POLICY "Authenticated list members can vote"
   ON public.votes FOR INSERT
   WITH CHECK (
@@ -340,11 +363,13 @@ CREATE POLICY "Authenticated list members can vote"
     )
   );
 
+DROP POLICY IF EXISTS "Users can remove their own votes" ON public.votes;
 CREATE POLICY "Users can remove their own votes"
   ON public.votes FOR DELETE
   USING (auth.uid() IS NOT NULL AND user_id = auth.uid());
 
 -- Comments Policies
+DROP POLICY IF EXISTS "Comments readable if list is readable" ON public.comments;
 CREATE POLICY "Comments readable if list is readable"
   ON public.comments FOR SELECT
   USING (
@@ -354,6 +379,7 @@ CREATE POLICY "Comments readable if list is readable"
     )
   );
 
+DROP POLICY IF EXISTS "Authenticated list members can comment" ON public.comments;
 CREATE POLICY "Authenticated list members can comment"
   ON public.comments FOR INSERT
   WITH CHECK (
@@ -365,10 +391,12 @@ CREATE POLICY "Authenticated list members can comment"
     )
   );
 
+DROP POLICY IF EXISTS "Users can update their own comments" ON public.comments;
 CREATE POLICY "Users can update their own comments"
   ON public.comments FOR UPDATE
   USING (auth.uid() IS NOT NULL AND user_id = auth.uid());
 
+DROP POLICY IF EXISTS "Users can delete their own comments" ON public.comments;
 CREATE POLICY "Users can delete their own comments"
   ON public.comments FOR DELETE
   USING (auth.uid() IS NOT NULL AND user_id = auth.uid());

@@ -38,21 +38,5 @@ export async function POST(request: Request) {
     redirect(`/auth/signup?error=${encodeURIComponent(error.message)}`);
   }
 
-  // Ensure profile has username immediately if user was created
-  if (authData.user) {
-    try {
-      await (supabase as any)
-        .from('profiles')
-        .upsert({
-          id: authData.user.id,
-          display_name: displayName,
-          username: cleanUser,
-          updated_at: new Date().toISOString(),
-        });
-    } catch {
-      // Handled by handle_new_user trigger fallback
-    }
-  }
-
   redirect('/dashboard');
 }

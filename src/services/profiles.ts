@@ -133,8 +133,7 @@ export async function updateProfile(
 
     const { error } = await (supabase as any)
       .from('profiles')
-      .upsert({
-        id: userId,
+      .update({
         ...updates,
         updated_at: new Date().toISOString(),
       })
