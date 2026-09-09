@@ -318,7 +318,14 @@ CREATE POLICY "Places readable if attached to a readable list"
   USING (
     EXISTS (
       SELECT 1 FROM public.list_places lp
-      WHERE lp.place_id = id AND public.can_read_list(lp.list_id, auth.uid())
+      JOIN public.wander_lists wl ON wl.id = lp.list_id
+      WHERE lp.place_id = places.id AND wl.is_public = true
+    )
+    OR (
+      auth.uid() IS NOT NULL AND EXISTS (
+        SELECT 1 FROM public.list_places lp
+        WHERE lp.place_id = places.id AND public.can_read_list(lp.list_id, auth.uid())
+      )
     )
     OR auth.uid() IS NOT NULL
   );
@@ -337,7 +344,13 @@ CREATE POLICY "Authenticated users can update places"
 DROP POLICY IF EXISTS "List places readable if list is readable" ON public.list_places;
 CREATE POLICY "List places readable if list is readable"
   ON public.list_places FOR SELECT
-  USING (public.can_read_list(list_id, auth.uid()));
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.wander_lists wl
+      WHERE wl.id = list_places.list_id AND wl.is_public = true
+    )
+    OR public.can_read_list(list_id, auth.uid())
+  );
 
 DROP POLICY IF EXISTS "Editors and owners can insert list places" ON public.list_places;
 CREATE POLICY "Editors and owners can insert list places"

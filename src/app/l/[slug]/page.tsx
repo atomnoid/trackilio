@@ -82,7 +82,8 @@ export default async function PublicWanderListPage({ params }: WanderListPagePro
     user ? isListSaved(user.id, list.id) : Promise.resolve(false),
   ]);
 
-  const hasCollaborators = members.length > 1;
+  const currentMember = members.find((m) => m.user_id === user?.id);
+  const canEdit = isOwner || currentMember?.role === 'editor';
 
   return (
     <div className="pb-24 space-y-10">
@@ -114,11 +115,14 @@ export default async function PublicWanderListPage({ params }: WanderListPagePro
               )}
             </div>
 
-            {/* Save List, Add Collaborator & Share Buttons at Top Header */}
+            {/* Save List, Add Collaborator, Edit List & Share Buttons at Top Header */}
             <ListHeaderActions
               listId={list.id}
               listTitle={list.title}
+              listDescription={list.description}
+              listDestination={list.destination}
               isOwner={isOwner}
+              canEdit={canEdit}
               isPublic={list.is_public}
               initialSaved={savedStatus}
             />

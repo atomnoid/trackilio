@@ -61,22 +61,28 @@ export function QuickInviteModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="relative w-full max-w-md bg-white rounded-3xl border border-[#EFE9EC] p-6 sm:p-8 shadow-xl space-y-5">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className="relative w-full max-w-md my-auto bg-white rounded-3xl border border-gray-100 p-6 sm:p-8 shadow-2xl space-y-5 animate-in zoom-in-95 duration-200">
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 text-[#7E7890] hover:text-[#1A1723] hover:bg-[#F6F4F8] rounded-xl transition-colors"
+          aria-label="Close modal"
+          className="absolute top-5 right-5 p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-2xl transition-colors"
         >
-          <X className="h-4.5 w-4.5" />
+          <X className="h-5 w-5" />
         </button>
 
-        <div className="space-y-1">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FFEAE6] text-[#FF5841] text-xs font-bold">
-            <UserPlus className="h-3.5 w-3.5" />
+        <div className="space-y-1.5 pr-8">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FFEAE6] text-[#FF5841] text-xs font-black">
+            <UserPlus className="h-3.5 w-3.5 stroke-[2.5]" />
             <span>List Collaboration</span>
           </div>
-          <h2 className="font-sans text-xl font-black text-[#1A1723]">Invite Collaborator</h2>
-          <p className="text-xs text-[#4F4B5E] font-medium">
+          <h2 className="font-sans text-2xl font-black text-gray-900 tracking-tight">Invite Collaborator</h2>
+          <p className="text-xs text-gray-500 font-medium leading-relaxed">
             Collaborate on this trip in real-time. Invite any traveler by @username.
           </p>
         </div>
@@ -97,28 +103,31 @@ export function QuickInviteModal({
 
         <form onSubmit={handleInvite} className="space-y-4">
           <div className="space-y-1.5">
-            <label className="block text-xs font-bold text-[#1A1723]">Traveler Username</label>
-            <input
-              type="text"
-              required
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="e.g. sara_travels"
-              autoComplete="off"
-              spellCheck={false}
-              className="w-full rounded-2xl border border-[#EFE9EC] bg-[#FAFAFC] px-4 py-3 text-sm font-medium text-[#1A1723] focus:outline-none focus:ring-2 focus:ring-[#FF5841] focus:bg-white transition-all"
-            />
+            <label className="block text-xs font-bold text-gray-700">Traveler Username</label>
+            <div className="relative">
+              <span className="absolute left-4 top-3.5 text-xs font-black text-gray-400">@</span>
+              <input
+                type="text"
+                required
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="sara_travels"
+                autoComplete="off"
+                spellCheck={false}
+                className="w-full rounded-2xl border border-gray-200 bg-gray-50 pl-8 pr-4 py-3 text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#FF5841]/20 focus:bg-white focus:border-[#FF5841] transition-all"
+              />
+            </div>
           </div>
 
           <div className="space-y-1.5">
-            <label className="block text-xs font-bold text-[#1A1723]">Permission Role</label>
+            <label className="block text-xs font-bold text-gray-700">Permission Role</label>
             <select
               value={role}
               onChange={(e) => setRole(e.target.value as 'editor' | 'viewer')}
-              className="w-full rounded-2xl border border-[#EFE9EC] bg-[#FAFAFC] px-4 py-3 text-xs font-bold text-[#1A1723] focus:outline-none focus:ring-2 focus:ring-[#FF5841] cursor-pointer"
+              className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-xs font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#FF5841]/20 focus:border-[#FF5841] cursor-pointer"
             >
               <option value="editor">Editor — Can add, edit, and organize places</option>
-              <option value="viewer">Viewer — Can view, upvote, and comment only</option>
+              <option value="viewer">Viewer — Can view and explore only</option>
             </select>
           </div>
 
@@ -126,14 +135,14 @@ export function QuickInviteModal({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-3 px-4 rounded-2xl border border-[#EFE9EC] text-xs font-bold text-[#4F4B5E] hover:bg-[#F6F4F8] transition-colors"
+              className="flex-1 py-3 px-4 rounded-2xl border border-gray-200 text-xs font-bold text-gray-600 hover:bg-gray-50 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={inviting || !username.trim()}
-              className="flex-1 inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#FF5841] to-[#C53678] hover:opacity-95 disabled:opacity-50 text-white font-extrabold py-3 px-4 text-xs shadow-xs active-press transition-all"
+              className="flex-1 inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#FF5841] to-[#C53678] hover:opacity-95 disabled:opacity-50 text-white font-black py-3 px-4 text-xs shadow-xs active-press transition-all"
             >
               {inviting ? (
                 <>
