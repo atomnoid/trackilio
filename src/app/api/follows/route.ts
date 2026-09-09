@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { followUser, unfollowUser } from '@/services/follows';
+import { followUser, unfollowUser, getFollowers, getFollowing } from '@/services/follows';
 
 export const dynamic = 'force-dynamic';
 
@@ -79,6 +79,13 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: result.error }, { status: 400 });
     }
 
+    return NextResponse.json({ following: false });
+  } catch (err: any) {
+    console.error('Follow API DELETE error:', err?.message);
+    return NextResponse.json({ error: 'Failed to unfollow user.' }, { status: 500 });
+  }
+}
+
 // GET /api/follows?userId=...&type=followers|following
 export async function GET(request: Request) {
   try {
@@ -94,7 +101,6 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'type must be followers or following.' }, { status: 400 });
     }
 
-    const { getFollowers, getFollowing } = await import('@/services/follows');
     const profiles = type === 'followers'
       ? await getFollowers(userId)
       : await getFollowing(userId);
@@ -105,4 +111,3 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Failed to fetch follow list.' }, { status: 500 });
   }
 }
-

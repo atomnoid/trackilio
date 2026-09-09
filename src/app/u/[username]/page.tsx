@@ -7,7 +7,7 @@ import { WanderListCard } from '@/components/lists/WanderListCard';
 import { ProfileJsonLd } from '@/components/seo/ProfileJsonLd';
 import { FollowButton } from '@/components/profile/FollowButton';
 import { FollowStats } from '@/components/profile/FollowStats';
-import { MapPin, Globe, Layers, ArrowRight, User, Settings, Sparkles } from 'lucide-react';
+import { MapPin, Globe, Layers, ArrowRight, User, Settings } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 
 export const revalidate = 60;
@@ -150,7 +150,7 @@ export default async function PublicProfilePage({ params }: ProfilePageProps) {
             </div>
           </div>
 
-          {/* Actions: Edit Profile (if self) or Follow + Blend Taste */}
+          {/* Actions: Edit Profile (if self) or Follow */}
           <div className="pt-2 sm:pt-0 w-full sm:w-auto flex flex-wrap sm:flex-nowrap gap-2 shrink-0">
             {isSelf ? (
               <Link
@@ -161,24 +161,14 @@ export default async function PublicProfilePage({ params }: ProfilePageProps) {
                 <span>Edit Settings</span>
               </Link>
             ) : (
-              <>
-                <FollowButton
-                  targetUserId={profile.id}
-                  initialIsFollowing={initialIsFollowing}
-                  className="w-full sm:w-auto"
-                />
-                {profile.username && (
-                  <Link
-                    href={`/blend?with=${encodeURIComponent(profile.username)}`}
-                    className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold px-4 py-2.5 text-xs sm:text-sm active-press transition-all border border-gray-200 shadow-2xs"
-                  >
-                    <Sparkles className="h-4 w-4 text-[#FF5841]" />
-                    <span>Blend Taste</span>
-                  </Link>
-                )}
-              </>
+              <FollowButton
+                targetUserId={profile.id}
+                initialIsFollowing={initialIsFollowing}
+                className="w-full sm:w-auto"
+              />
             )}
           </div>
+
         </div>
       </header>
 
