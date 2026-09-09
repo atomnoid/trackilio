@@ -62,28 +62,32 @@ export function QuickInviteModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs"
+      onClick={onClose}
     >
-      <div className="relative w-full max-w-md my-auto bg-white rounded-3xl border border-gray-100 p-6 sm:p-8 shadow-2xl space-y-5 animate-in zoom-in-95 duration-200">
+      <div
+        className="relative w-full max-w-md bg-white rounded-3xl border border-gray-100 p-6 sm:p-8 shadow-2xl space-y-6"
+        onClick={(e) => e.stopPropagation()}
+      >
         <button
+          type="button"
           onClick={onClose}
           aria-label="Close modal"
-          className="absolute top-5 right-5 p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-2xl transition-colors"
+          className="absolute top-5 right-5 p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors cursor-pointer"
         >
           <X className="h-5 w-5" />
         </button>
 
-        <div className="space-y-1.5 pr-8">
+        <div className="space-y-1.5 pr-6">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FFEAE6] text-[#FF5841] text-xs font-black">
             <UserPlus className="h-3.5 w-3.5 stroke-[2.5]" />
             <span>List Collaboration</span>
           </div>
-          <h2 className="font-sans text-2xl font-black text-gray-900 tracking-tight">Invite Collaborator</h2>
+          <h2 className="font-sans text-2xl font-black text-gray-900 tracking-tight">
+            Invite Collaborator
+          </h2>
           <p className="text-xs text-gray-500 font-medium leading-relaxed">
-            Collaborate on this trip in real-time. Invite any traveler by @username.
+            Invite friends by @username to co-curate and plan this itinerary together.
           </p>
         </div>
 
@@ -103,7 +107,9 @@ export function QuickInviteModal({
 
         <form onSubmit={handleInvite} className="space-y-4">
           <div className="space-y-1.5">
-            <label className="block text-xs font-bold text-gray-700">Traveler Username</label>
+            <label className="block text-xs font-bold text-gray-700">
+              Traveler Username
+            </label>
             <div className="relative">
               <span className="absolute left-4 top-3.5 text-xs font-black text-gray-400">@</span>
               <input
@@ -114,13 +120,16 @@ export function QuickInviteModal({
                 placeholder="sara_travels"
                 autoComplete="off"
                 spellCheck={false}
+                autoFocus
                 className="w-full rounded-2xl border border-gray-200 bg-gray-50 pl-8 pr-4 py-3 text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#FF5841]/20 focus:bg-white focus:border-[#FF5841] transition-all"
               />
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <label className="block text-xs font-bold text-gray-700">Permission Role</label>
+            <label className="block text-xs font-bold text-gray-700">
+              Permission Role
+            </label>
             <select
               value={role}
               onChange={(e) => setRole(e.target.value as 'editor' | 'viewer')}
@@ -131,18 +140,18 @@ export function QuickInviteModal({
             </select>
           </div>
 
-          <div className="pt-2 flex gap-3">
+          <div className="pt-2 flex items-center gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-3 px-4 rounded-2xl border border-gray-200 text-xs font-bold text-gray-600 hover:bg-gray-50 transition-colors"
+              className="flex-1 py-3 px-4 rounded-2xl border border-gray-200 text-xs font-bold text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={inviting || !username.trim()}
-              className="flex-1 inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#FF5841] to-[#C53678] hover:opacity-95 disabled:opacity-50 text-white font-black py-3 px-4 text-xs shadow-xs active-press transition-all"
+              className="flex-1 inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#FF5841] to-[#C53678] hover:opacity-95 disabled:opacity-50 text-white font-black py-3 px-4 text-xs shadow-md active-press transition-all cursor-pointer"
             >
               {inviting ? (
                 <>

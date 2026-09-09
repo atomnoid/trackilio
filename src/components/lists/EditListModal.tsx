@@ -99,21 +99,23 @@ export function EditListModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs"
+      onClick={onClose}
     >
-      <div className="relative w-full max-w-lg my-auto bg-white rounded-3xl border border-gray-100 p-6 sm:p-8 shadow-2xl space-y-6 animate-in zoom-in-95 duration-200">
+      <div
+        className="relative w-full max-w-lg bg-white rounded-3xl border border-gray-100 p-6 sm:p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto no-scrollbar"
+        onClick={(e) => e.stopPropagation()}
+      >
         <button
+          type="button"
           onClick={onClose}
           aria-label="Close modal"
-          className="absolute top-5 right-5 p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-2xl transition-colors"
+          className="absolute top-5 right-5 p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors cursor-pointer"
         >
           <X className="h-5 w-5" />
         </button>
 
-        <div className="space-y-1 pr-8">
+        <div className="space-y-1 pr-6">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FFEAE6] text-[#FF5841] text-xs font-black">
             <Edit3 className="h-3.5 w-3.5" />
             <span>List Settings</span>
@@ -148,7 +150,7 @@ export function EditListModal({
                 type="button"
                 onClick={() => setShowDeleteConfirm(false)}
                 disabled={deleting}
-                className="flex-1 py-2.5 px-4 rounded-xl border border-rose-200 bg-white text-xs font-bold text-gray-700 hover:bg-gray-50 transition-colors"
+                className="flex-1 py-2.5 px-4 rounded-xl border border-rose-200 bg-white text-xs font-bold text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
               >
                 Keep List
               </button>
@@ -156,7 +158,7 @@ export function EditListModal({
                 type="button"
                 onClick={handleDelete}
                 disabled={deleting}
-                className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-black py-2.5 px-4 transition-colors disabled:opacity-50"
+                className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-black py-2.5 px-4 transition-colors disabled:opacity-50 cursor-pointer"
               >
                 {deleting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
                 <span>{deleting ? 'Deleting…' : 'Yes, Delete Permanently'}</span>
@@ -216,7 +218,7 @@ export function EditListModal({
               <button
                 type="button"
                 onClick={() => setShowDeleteConfirm(true)}
-                className="inline-flex items-center gap-1.5 px-3.5 py-3 rounded-2xl text-rose-600 hover:bg-rose-50 text-xs font-bold transition-colors"
+                className="inline-flex items-center gap-1.5 px-3.5 py-3 rounded-2xl text-rose-600 hover:bg-rose-50 text-xs font-bold transition-colors cursor-pointer"
               >
                 <Trash2 className="h-4 w-4" />
                 <span>Delete</span>
@@ -226,14 +228,14 @@ export function EditListModal({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="py-3 px-4 rounded-2xl border border-gray-200 text-xs font-bold text-gray-600 hover:bg-gray-50 transition-colors"
+                  className="py-3 px-4 rounded-2xl border border-gray-200 text-xs font-bold text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loading || !title.trim()}
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#FF5841] to-[#C53678] hover:opacity-95 disabled:opacity-50 text-white font-black py-3 px-5 text-xs shadow-xs active-press transition-all"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#FF5841] to-[#C53678] hover:opacity-95 disabled:opacity-50 text-white font-black py-3 px-5 text-xs shadow-md active-press transition-all cursor-pointer"
                 >
                   {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
                   <span>{loading ? 'Saving…' : 'Save Changes'}</span>
