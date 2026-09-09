@@ -146,22 +146,40 @@ export async function getPublicWanderLists(params?: {
   }
 }
 
-export async function getWanderListBySlug(slug: string): Promise<WanderList | null> {
+export async function getWanderListBySlug(slugOrId: string): Promise<WanderList | null> {
   try {
     const supabase = await createClient();
-    const { data, error } = await (supabase as any)
+    const cleanParam = decodeURIComponent(slugOrId).trim();
+
+    // 1. Try matching by slug
+    let { data, error } = await (supabase as any)
       .from('wander_lists')
       .select('*, owner:profiles(*)')
-      .eq('slug', slug)
+      .eq('slug', cleanParam)
       .maybeSingle();
+
+    // 2. If not found and input looks like a UUID or ID fallback, try matching by id
+    if (!data) {
+      const { data: byIdData, error: idError } = await (supabase as any)
+        .from('wander_lists')
+        .select('*, owner:profiles(*)')
+        .eq('id', cleanParam)
+        .maybeSingle();
+
+      if (!idError && byIdData) {
+        data = byIdData;
+      }
+    }
 
     if (error || !data) return null;
     const enriched = await enrichListsWithCounts(supabase, [data as WanderList]);
     return enriched[0] || null;
-  } catch {
+  } catch (err: any) {
+    console.error('getWanderListBySlug error:', err?.message || err);
     return null;
   }
 }
+
 
 export async function getUserWanderLists(userId: string): Promise<WanderList[]> {
   try {

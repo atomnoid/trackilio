@@ -69,22 +69,24 @@ export default async function PublicWanderListPage({ params }: WanderListPagePro
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isOwner = user?.id === list.owner_id;
-
-  // Private list security boundary
-  if (!list.is_public && !isOwner) {
-    notFound();
-  }
-
   const [places, members, savedStatus] = await Promise.all([
     getPlacesForList(list.id, user?.id),
     getListMembers(list.id),
     user ? isListSaved(user.id, list.id) : Promise.resolve(false),
   ]);
 
+  const isOwner = user?.id === list.owner_id;
   const currentMember = members.find((m) => m.user_id === user?.id);
+  const isMember = !!currentMember;
+
+  // Private list security boundary: only owner and collaborators can view
+  if (!list.is_public && !isOwner && !isMember) {
+    notFound();
+  }
+
   const canEdit = isOwner || currentMember?.role === 'editor';
   const hasCollaborators = members.length > 1;
+
 
   return (
     <div className="pb-24 space-y-10">
