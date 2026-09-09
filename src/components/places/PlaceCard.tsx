@@ -7,20 +7,9 @@ import {
   ExternalLink,
   ArrowBigUp,
   ArrowBigDown,
-  MessageSquare,
   Flame,
   Compass,
-  Send,
-  Trash2,
 } from 'lucide-react';
-
-interface CommentShape {
-  id: string;
-  content: string;
-  created_at: string;
-  user_id?: string;
-  profile?: { display_name?: string } | null;
-}
 
 interface PlaceCardProps {
   listPlace: ListPlace;
@@ -34,16 +23,8 @@ export function PlaceCard({ listPlace, currentUserId }: PlaceCardProps) {
   const [userVote, setUserVote] = useState<VoteType | null>(
     listPlace.user_vote_type ?? (listPlace.user_has_voted ? 'up' : null)
   );
-  const [comments, setComments] = useState<CommentShape[]>(
-    (listPlace.comments ?? []) as CommentShape[]
-  );
-  const [newComment, setNewComment] = useState('');
-  const [showComments, setShowComments] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [deletingCommentId, setDeletingCommentId] = useState<string | null>(null);
   const [animateVote, setAnimateVote] = useState<'up' | 'down' | null>(null);
   const [voteError, setVoteError] = useState<string | null>(null);
-  const [commentError, setCommentError] = useState<string | null>(null);
 
   const handleVote = async (targetType: VoteType) => {
     if (!currentUserId) {
@@ -99,75 +80,12 @@ export function PlaceCard({ listPlace, currentUserId }: PlaceCardProps) {
     }
   };
 
-  const handleAddComment = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!currentUserId) {
-      setCommentError('Please log in to leave a comment.');
-      setTimeout(() => setCommentError(null), 3000);
-      return;
-    }
-    if (!newComment.trim()) return;
-
-    setIsSubmitting(true);
-    setCommentError(null);
-
-    try {
-      const res = await fetch('/api/comments', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ listPlaceId: listPlace.id, content: newComment }),
-      });
-      const data = await res.json();
-
-      if (res.ok && data.comment) {
-        setComments((prev) => [...prev, data.comment]);
-        setNewComment('');
-      } else {
-        setCommentError(data.error || 'Failed to post comment. Please try again.');
-      }
-    } catch {
-      setCommentError('Network error. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleDeleteComment = async (commentId: string) => {
-    if (deletingCommentId) return; // Prevent duplicate delete
-
-    const prevComments = comments;
-    // Optimistic remove
-    setDeletingCommentId(commentId);
-    setComments((prev) => prev.filter((c) => c.id !== commentId));
-
-    try {
-      const res = await fetch('/api/comments', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ commentId }),
-      });
-
-      if (!res.ok) {
-        // Rollback
-        setComments(prevComments);
-        setCommentError('Could not delete comment. Please try again.');
-        setTimeout(() => setCommentError(null), 3000);
-      }
-    } catch {
-      setComments(prevComments);
-      setCommentError('Network error. Please try again.');
-      setTimeout(() => setCommentError(null), 3000);
-    } finally {
-      setDeletingCommentId(null);
-    }
-  };
-
   const getPriorityBadge = (priority: string) => {
     switch (priority) {
       case 'must_visit':
         return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-[#FDF3F1] text-[#E0533C] px-2.5 py-0.5 text-[11px] font-extrabold border border-[#F0D5D5]">
-            <Flame className="h-3 w-3 fill-[#E0533C]" /> Must Visit
+          <span className="inline-flex items-center gap-1 rounded-full bg-[#FFEAE6] text-[#FF5841] px-2.5 py-0.5 text-[11px] font-extrabold border border-[#FFD3CC]">
+            <Flame className="h-3 w-3 fill-[#FF5841]" /> Must Visit
           </span>
         );
       case 'want_to_visit':
@@ -178,7 +96,7 @@ export function PlaceCard({ listPlace, currentUserId }: PlaceCardProps) {
         );
       default:
         return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 text-[#71717A] px-2.5 py-0.5 text-[11px] font-bold">
+          <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 text-gray-600 px-2.5 py-0.5 text-[11px] font-bold">
             Maybe
           </span>
         );
@@ -186,25 +104,38 @@ export function PlaceCard({ listPlace, currentUserId }: PlaceCardProps) {
   };
 
   return (
-    <div className="editorial-card p-5 space-y-3">
+    <div className="rounded-3xl bg-white border border-gray-100 p-5 sm:p-6 space-y-3.5 shadow-2xs hover:border-[#FF5841]/20 transition-all">
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
         <div className="space-y-1.5">
           <div className="flex flex-wrap items-center gap-2">
             {getPriorityBadge(listPlace.priority)}
             {place?.category && (
-              <span className="rounded-md bg-[#F3EFE6] text-[#18181B] px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider">
+              <span className="rounded-full bg-[#F6F4F8] text-[#1A1723] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider">
                 {place.category}
               </span>
             )}
+            {/* Place Tags */}
+            {place?.tags && place.tags.length > 0 && (
+              <div className="flex flex-wrap items-center gap-1.5">
+                {place.tags.slice(0, 3).map((tag) => (
+                  <span
+                    key={tag}
+                    className="inline-flex items-center gap-1 rounded-full bg-[#FDF4F8] border border-[#F4CDDF] px-2.5 py-0.5 text-[10px] font-extrabold text-[#C53678]"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
 
-          <h4 className="font-sans text-xl font-extrabold text-[#18181B]">
+          <h4 className="font-sans text-xl font-extrabold text-gray-900">
             {place?.name || 'Unnamed Place'}
           </h4>
 
           {place?.location && (
-            <p className="flex items-center gap-1 text-xs text-[#71717A] font-medium">
-              <MapPin className="h-3.5 w-3.5 text-[#E0533C]" />
+            <p className="flex items-center gap-1 text-xs text-gray-500 font-medium">
+              <MapPin className="h-3.5 w-3.5 text-[#FF5841]" />
               {place.location}
               {place.country ? `, ${place.country}` : ''}
             </p>
@@ -216,7 +147,7 @@ export function PlaceCard({ listPlace, currentUserId }: PlaceCardProps) {
             href={place.maps_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 rounded-lg border border-[#E8E3D8] bg-[#FAF8F3] px-3 py-1.5 text-xs font-bold text-[#18181B] hover:border-[#18181B] active-press transition-colors self-start shrink-0"
+            className="inline-flex items-center gap-1 rounded-xl border border-gray-200 bg-gray-50 hover:bg-white hover:border-[#FF5841]/40 px-3 py-1.5 text-xs font-bold text-gray-800 active-press transition-colors self-start shrink-0"
           >
             Open in Maps
             <ExternalLink className="h-3 w-3" />
@@ -225,21 +156,21 @@ export function PlaceCard({ listPlace, currentUserId }: PlaceCardProps) {
       </div>
 
       {listPlace.note && (
-        <p className="text-xs text-[#18181B] font-medium italic border-l-2 border-[#E0533C] pl-3 py-1 bg-[#FDF3F1]/60 rounded-r-md">
+        <p className="text-xs text-gray-700 font-medium italic border-l-2 border-[#FF5841] pl-3 py-1 bg-[#FFF5F3] rounded-r-xl">
           &ldquo;{listPlace.note}&rdquo;
         </p>
       )}
 
       {/* Vote error message */}
       {voteError && (
-        <p className="text-[11px] text-[#E0533C] font-bold bg-[#FDF3F1] border border-[#F0D5D5] rounded-lg px-3 py-1.5">
+        <p className="text-[11px] text-[#FF5841] font-bold bg-[#FFEAE6] border border-[#FFD3CC] rounded-xl px-3 py-1.5">
           {voteError}
         </p>
       )}
 
       {/* Action Footer */}
-      <div className="pt-3 border-t border-[#E8E3D8] flex items-center justify-between gap-4 text-xs">
-        <div className="inline-flex items-center rounded-xl bg-[#F5F1E8] border border-[#E6DFD5] p-0.5 shadow-2xs">
+      <div className="pt-3 border-t border-gray-100 flex items-center justify-between gap-4 text-xs">
+        <div className="inline-flex items-center rounded-xl bg-gray-50 border border-gray-200 p-0.5 shadow-2xs">
           {/* Upvote Button */}
           <button
             onClick={() => handleVote('up')}
@@ -248,7 +179,7 @@ export function PlaceCard({ listPlace, currentUserId }: PlaceCardProps) {
             className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg font-extrabold transition-all active-press ${
               userVote === 'up'
                 ? 'bg-[#FF5841] text-white shadow-xs'
-                : 'text-gray-500 hover:text-[#FF5841] hover:bg-white/60'
+                : 'text-gray-500 hover:text-[#FF5841] hover:bg-white'
             } ${animateVote === 'up' ? 'scale-110' : ''}`}
           >
             <ArrowBigUp className={`h-4 w-4 ${userVote === 'up' ? 'fill-current' : ''}`} />
@@ -261,7 +192,7 @@ export function PlaceCard({ listPlace, currentUserId }: PlaceCardProps) {
               votesCount > 0
                 ? 'text-[#FF5841]'
                 : votesCount < 0
-                ? 'text-[#E0533C]'
+                ? 'text-gray-400'
                 : 'text-gray-400'
             }`}
           >
@@ -275,93 +206,15 @@ export function PlaceCard({ listPlace, currentUserId }: PlaceCardProps) {
             aria-label="Downvote"
             className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg font-extrabold transition-all active-press ${
               userVote === 'down'
-                ? 'bg-[#E0533C] text-white shadow-xs'
-                : 'text-[#5C5652] hover:text-[#E0533C] hover:bg-white/60'
+                ? 'bg-gray-800 text-white shadow-xs'
+                : 'text-gray-400 hover:text-gray-700 hover:bg-white'
             } ${animateVote === 'down' ? 'scale-110' : ''}`}
           >
             <ArrowBigDown className={`h-4 w-4 ${userVote === 'down' ? 'fill-current' : ''}`} />
             <span className="text-[11px] hidden sm:inline">Downvote</span>
           </button>
         </div>
-
-        <button
-          onClick={() => setShowComments(!showComments)}
-          className="inline-flex items-center gap-1.5 text-gray-500 hover:text-gray-800 font-bold px-2.5 py-1.5 rounded-lg hover:bg-gray-100 transition-colors"
-        >
-          <MessageSquare className="h-3.5 w-3.5" />
-          <span>{comments.length} {comments.length === 1 ? 'Comment' : 'Comments'}</span>
-        </button>
       </div>
-
-      {/* Comments Drawer */}
-      {showComments && (
-        <div className="pt-3 border-t border-[#E8E3D8] space-y-2.5">
-          {comments.length > 0 ? (
-            comments.map((c) => {
-              const isOwn = currentUserId && c.user_id === currentUserId;
-              return (
-                <div
-                  key={c.id}
-                  className={`bg-[#FAF8F3] p-3 rounded-xl text-xs space-y-0.5 border border-[#E8E3D8] transition-opacity ${
-                    deletingCommentId === c.id ? 'opacity-40' : ''
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center justify-between flex-1 font-bold text-[#18181B]">
-                      <span>{c.profile?.display_name || 'Traveler'}</span>
-                      <span className="text-[10px] text-[#71717A] font-normal">
-                        {new Date(c.created_at).toLocaleDateString()}
-                      </span>
-                    </div>
-                    {isOwn && (
-                      <button
-                        onClick={() => handleDeleteComment(c.id)}
-                        disabled={deletingCommentId === c.id}
-                        title="Delete your comment"
-                        aria-label="Delete comment"
-                        className="shrink-0 p-1 rounded-md text-[#C09090] hover:text-[#E0533C] hover:bg-[#FDF3F1] disabled:opacity-40 transition-colors"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </button>
-                    )}
-                  </div>
-                  <p className="text-[#3F3F46] font-medium">{c.content}</p>
-                </div>
-              );
-            })
-          ) : (
-            <p className="text-[11px] text-[#71717A] text-center py-1 font-medium">
-              No comments yet. Leave a recommendation!
-            </p>
-          )}
-
-          {/* Comment error */}
-          {commentError && (
-            <p className="text-[11px] text-[#E0533C] font-bold bg-[#FDF3F1] border border-[#F0D5D5] rounded-lg px-3 py-1.5">
-              {commentError}
-            </p>
-          )}
-
-          {currentUserId && (
-            <form onSubmit={handleAddComment} className="flex items-center gap-2 pt-1">
-              <input
-                type="text"
-                placeholder="Add a travel tip or note..."
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                className="flex-1 rounded-xl border border-[#E8E3D8] bg-[#FAF8F3] px-3.5 py-1.5 text-xs font-medium text-[#18181B] focus:outline-none focus:ring-1 focus:ring-[#18181B] focus:bg-white transition-all"
-              />
-              <button
-                type="submit"
-                disabled={isSubmitting || !newComment.trim()}
-                className="rounded-xl bg-[#18181B] text-white p-2 text-xs font-bold hover:bg-[#C8422C] disabled:opacity-50 active-press transition-colors shrink-0"
-              >
-                <Send className="h-3.5 w-3.5" />
-              </button>
-            </form>
-          )}
-        </div>
-      )}
     </div>
   );
 }

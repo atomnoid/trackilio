@@ -27,8 +27,7 @@ export async function getPlacesForList(
     .select(`
       *,
       place:places(*),
-      votes(id, user_id, vote_type),
-      comments(*, profile:profiles(*))
+      votes(id, user_id, vote_type)
     `)
     .eq('list_id', listId)
     .order('created_at', { ascending: true });
@@ -51,7 +50,6 @@ export async function getPlacesForList(
       downvotes_count: downvotes,
       user_has_voted: !!userVote,
       user_vote_type: userVote ? (userVote.vote_type || 'up') : null,
-      comments: lp.comments || [],
     };
   }) as ListPlace[];
 }
@@ -66,6 +64,7 @@ export async function addPlaceToList(params: {
   city?: string;
   country?: string;
   category?: string;
+  tags?: string[];
   mapsUrl?: string;
   note?: string;
   priority?: PriorityLevel;
@@ -84,6 +83,7 @@ export async function addPlaceToList(params: {
       city: params.city || params.location || null,
       country: params.country || null,
       category: params.category || 'Sight',
+      tags: params.tags || [],
       maps_url: params.mapsUrl || null,
     })
     .select('id')
@@ -138,68 +138,64 @@ export async function addExistingPlaceToList(params: {
   return { success: true };
 }
 
-export async function removePlaceFromList(
-  listPlaceId: string
-): Promise<{ success: boolean; error?: string }> {
-  const supabase = await createClient();
-  const { error } = await (supabase as any)
-    .from('list_places')
-    .delete()
-    .eq('id', listPlaceId);
-  if (error) return { success: false, error: error.message };
-  return { success: true };
-}
-
 /**
- * Public Place Discovery Search & Ranking
+ * Fetch public places with rich filtering, search, and engagement scoring
  */
 export async function getPublicPlaces(params?: {
-  category?: string;
-  city?: string;
   query?: string;
-  sort?: 'trending' | 'popular' | 'recent' | 'rated';
+  city?: string;
+  category?: string;
+  tag?: string;
+  sort?: 'recent' | 'trending' | 'popular' | 'rated';
   limit?: number;
   offset?: number;
   currentUserId?: string;
 }): Promise<Place[]> {
   try {
     const supabase = await createClient();
-    const limit = params?.limit ?? 24;
+    const limit = params?.limit ?? 30;
     const offset = params?.offset ?? 0;
 
     let q = (supabase as any).from('places').select('*');
+
+    if (params?.query) {
+      q = q.or(`name.ilike.%${params.query}%,location.ilike.%${params.query}%,category.ilike.%${params.query}%`);
+    }
+
+    if (params?.city) {
+      q = q.or(`city.ilike.%${params.city}%,location.ilike.%${params.city}%`);
+    }
 
     if (params?.category && params.category !== 'All') {
       q = q.ilike('category', `%${params.category}%`);
     }
 
-    if (params?.city) {
-      q = q.or(`city.ilike.%${params.city}%,location.ilike.%${params.city}%,country.ilike.%${params.city}%`);
+    if (params?.tag) {
+      q = q.contains('tags', [params.tag]);
     }
 
-    if (params?.query) {
-      q = q.or(`name.ilike.%${params.query}%,location.ilike.%${params.query}%,category.ilike.%${params.query}%,description.ilike.%${params.query}%`);
-    }
-
+    // Fetch batch of places
     q = q.order('created_at', { ascending: false }).limit(100);
 
-    const { data, error } = await q;
-    if (error || !data) return [];
+    const { data: rawPlaces, error } = await q;
 
-    const rawPlaces = data as Place[];
+    if (error || !rawPlaces) {
+      console.warn('Unable to query places from Supabase:', error?.message || error);
+      return [];
+    }
+
     if (rawPlaces.length === 0) return [];
 
     const placeIds = rawPlaces.map((p) => p.id);
 
-    // Batch fetch list_places links to calculate list appearances, votes, and comments
+    // Batch fetch list_places links to calculate list appearances and votes
     const [listPlacesRes, savedRes] = await Promise.all([
       (supabase as any)
         .from('list_places')
         .select(`
           place_id,
           list:wander_lists(is_public),
-          votes(vote_type),
-          comments(id)
+          votes(vote_type)
         `)
         .in('place_id', placeIds),
       params?.currentUserId
@@ -216,14 +212,13 @@ export async function getPublicPlaces(params?: {
     // Aggregate engagement per place
     const statsMap = new Map<
       string,
-      { upvotes: number; downvotes: number; comments: number; lists: number }
+      { upvotes: number; downvotes: number; lists: number }
     >();
 
     (listPlacesRes.data ?? []).forEach((lp: any) => {
       const current = statsMap.get(lp.place_id) || {
         upvotes: 0,
         downvotes: 0,
-        comments: 0,
         lists: 0,
       };
 
@@ -236,14 +231,13 @@ export async function getPublicPlaces(params?: {
       const down = votes.filter((v: any) => v.vote_type === 'down').length;
       current.upvotes += up;
       current.downvotes += down;
-      current.comments += (lp.comments || []).length;
 
       statsMap.set(lp.place_id, current);
     });
 
     const enriched = rawPlaces.map((p) => {
-      const stats = statsMap.get(p.id) || { upvotes: 0, downvotes: 0, comments: 0, lists: 0 };
-      const communityScore = stats.upvotes - stats.downvotes + stats.comments * 2 + stats.lists * 3;
+      const stats = statsMap.get(p.id) || { upvotes: 0, downvotes: 0, lists: 0 };
+      const communityScore = stats.upvotes - stats.downvotes + stats.lists * 3;
       const slug = p.slug || generatePlaceSlug(p.name, p.location || p.city);
 
       return {
@@ -260,7 +254,7 @@ export async function getPublicPlaces(params?: {
     // Sort by requested ranking
     const sort = params?.sort ?? 'trending';
     if (sort === 'popular' || sort === 'trending') {
-      enriched.sort((a, b) => (b.community_score ?? 0) - (a.community_score ?? 0));
+      enriched.sort((a, b) => (b.upvotes_count ?? 0) - (a.upvotes_count ?? 0));
     } else if (sort === 'rated') {
       enriched.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
     }
@@ -282,7 +276,6 @@ export async function getPlaceBySlugOrId(
   place: Place;
   relatedLists: Array<{ id: string; title: string; slug: string; destination: string | null; owner_name: string }>;
   relatedPlaces: Place[];
-  comments: Array<{ id: string; content: string; created_at: string; user_id: string; profile?: { display_name: string; username?: string | null } }>;
 } | null> {
   try {
     const supabase = await createClient();
@@ -308,15 +301,14 @@ export async function getPlaceBySlugOrId(
 
     const slug = place.slug || generatePlaceSlug(place.name, place.location || place.city);
 
-    // Fetch lists containing this place, votes, and comments
+    // Fetch lists containing this place and votes
     const [listPlacesRes, savedRes, relatedRes] = await Promise.all([
       (supabase as any)
         .from('list_places')
         .select(`
           id,
           list:wander_lists(id, title, slug, destination, is_public, owner:profiles(display_name, username)),
-          votes(id, user_id, vote_type),
-          comments(id, content, created_at, user_id, profile:profiles(display_name, username))
+          votes(id, user_id, vote_type)
         `)
         .eq('place_id', place.id),
       currentUserId
@@ -343,7 +335,6 @@ export async function getPlaceBySlugOrId(
     let downvotes = 0;
     let userVoteType: VoteType | null = null;
     const relatedLists: Array<{ id: string; title: string; slug: string; destination: string | null; owner_name: string }> = [];
-    const allComments: any[] = [];
 
     (listPlacesRes.data ?? []).forEach((lp: any) => {
       if (lp.list && lp.list.is_public) {
@@ -364,13 +355,9 @@ export async function getPlaceBySlugOrId(
         const myVote = votes.find((v: any) => v.user_id === currentUserId);
         if (myVote) userVoteType = myVote.vote_type || 'up';
       }
-
-      (lp.comments || []).forEach((c: any) => {
-        allComments.push(c);
-      });
     });
 
-    const communityScore = upvotes - downvotes + allComments.length * 2 + relatedLists.length * 3;
+    const communityScore = upvotes - downvotes + relatedLists.length * 3;
 
     return {
       place: {
@@ -385,7 +372,6 @@ export async function getPlaceBySlugOrId(
       },
       relatedLists,
       relatedPlaces: (relatedRes.data ?? []) as Place[],
-      comments: allComments,
     };
   } catch (err: any) {
     console.warn('Error fetching place by slug:', err?.message || err);
@@ -400,51 +386,59 @@ export async function savePlace(
   userId: string,
   placeId: string
 ): Promise<{ success: boolean; error?: string }> {
-  try {
-    const supabase = await createClient();
-    const { error } = await (supabase as any).from('saved_places').insert({
-      user_id: userId,
-      place_id: placeId,
-    });
+  const supabase = await createClient();
 
-    if (error) {
-      if (error.code === '23505') return { success: true }; // Already saved
-      return { success: false, error: error.message };
-    }
-    return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err?.message || 'Failed to save place' };
-  }
+  const { error } = await (supabase as any).from('saved_places').insert({
+    user_id: userId,
+    place_id: placeId,
+  });
+
+  if (error) return { success: false, error: error.message };
+  return { success: true };
 }
 
 /**
- * Unsave a place for a user
+ * Remove a saved place
  */
 export async function unsavePlace(
   userId: string,
   placeId: string
 ): Promise<{ success: boolean; error?: string }> {
-  try {
-    const supabase = await createClient();
-    const { error } = await (supabase as any)
-      .from('saved_places')
-      .delete()
-      .eq('user_id', userId)
-      .eq('place_id', placeId);
+  const supabase = await createClient();
 
-    if (error) return { success: false, error: error.message };
-    return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err?.message || 'Failed to remove saved place' };
-  }
+  const { error } = await (supabase as any)
+    .from('saved_places')
+    .delete()
+    .eq('user_id', userId)
+    .eq('place_id', placeId);
+
+  if (error) return { success: false, error: error.message };
+  return { success: true };
 }
 
 /**
- * Get all saved places for a specific user
+ * Check if a place is saved by a user
+ */
+export async function isPlaceSaved(userId: string, placeId: string): Promise<boolean> {
+  const supabase = await createClient();
+
+  const { data } = await (supabase as any)
+    .from('saved_places')
+    .select('id')
+    .eq('user_id', userId)
+    .eq('place_id', placeId)
+    .maybeSingle();
+
+  return !!data;
+}
+
+/**
+ * Fetch all places saved by a user
  */
 export async function getUserSavedPlaces(userId: string): Promise<SavedPlace[]> {
   try {
     const supabase = await createClient();
+
     const { data, error } = await (supabase as any)
       .from('saved_places')
       .select('*, place:places(*)')

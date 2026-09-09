@@ -37,11 +37,6 @@ export function AddToListModal({
     setError(null);
 
     try {
-      // Fetch user lists from dashboard quick lists or client query
-      const res = await fetch('/api/members?listId=placeholder'); // trigger or fetch user lists
-      // Better: fetch user lists via quick query or api
-      const listRes = await fetch('/api/comments'); // fallback probe
-      // We can also fetch user lists via a lightweight client helper
       const { createClient } = await import('@/lib/supabase/client');
       const supabase = createClient();
       const { data } = await (supabase as any)

@@ -63,10 +63,13 @@ CREATE TABLE IF NOT EXISTS public.places (
   location TEXT,
   country TEXT,
   category TEXT,
+  tags TEXT[] DEFAULT '{}'::TEXT[],
   maps_url TEXT CHECK (maps_url IS NULL OR maps_url ~* '^https?://'),
   created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
+
+CREATE INDEX IF NOT EXISTS idx_places_tags ON public.places USING GIN (tags);
 
 -- 5. LIST_PLACES
 CREATE TABLE IF NOT EXISTS public.list_places (

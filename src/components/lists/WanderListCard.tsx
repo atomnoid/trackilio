@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { WanderList } from '@/types/database';
-import { MapPin, Globe, Lock, ArrowRight, Users } from 'lucide-react';
+import { MapPin, Globe, Lock, ArrowRight, Users, Compass } from 'lucide-react';
 import { ListCover } from './ListCover';
 
 interface WanderListCardProps {
@@ -12,6 +12,7 @@ interface WanderListCardProps {
 export function WanderListCard({ list, showCollabBadge = false }: WanderListCardProps) {
   const profileIdentifier = list.owner?.username || list.owner_id;
   const profileUrl = profileIdentifier ? `/u/${profileIdentifier}` : null;
+  const placesCount = list.places_count ?? 0;
 
   return (
     <div className="group relative block bg-white rounded-3xl border border-gray-100 hover:border-[#FF5841]/30 overflow-hidden hover:-translate-y-1.5 hover:shadow-lg transition-all duration-300">
@@ -41,6 +42,14 @@ export function WanderListCard({ list, showCollabBadge = false }: WanderListCard
           >
             {list.is_public ? <Globe className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
             {list.is_public ? 'Public' : 'Private'}
+          </span>
+        </div>
+
+        {/* Places & Sights Count Badge on Cover */}
+        <div className="absolute bottom-3 left-3 z-20">
+          <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-extrabold bg-black/60 backdrop-blur-md text-white border border-white/20 shadow-sm">
+            <Compass className="h-3 w-3 text-[#FF5841]" />
+            <span>{placesCount} {placesCount === 1 ? 'place / sight' : 'places & sights'}</span>
           </span>
         </div>
       </Link>

@@ -60,6 +60,7 @@ export interface Place {
   city?: string | null;
   country: string | null;
   category: string | null;
+  tags?: string[] | null;
   address?: string | null;
   description?: string | null;
   website?: string | null;
@@ -78,7 +79,6 @@ export interface Place {
   lists_count?: number;
   is_saved?: boolean;
   user_vote_type?: VoteType | null;
-  comments?: Comment[];
 }
 
 export interface SavedPlace {
@@ -106,7 +106,6 @@ export interface ListPlace {
   downvotes_count?: number;
   user_has_voted?: boolean;
   user_vote_type?: VoteType | null;
-  comments?: Comment[];
 }
 
 export interface Vote {

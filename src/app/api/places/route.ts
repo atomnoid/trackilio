@@ -11,11 +11,14 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json();
-  const { listId, name, location, country, category, mapsUrl, note, priority, status } = body;
+  const { listId, name, location, country, category, tags, mapsUrl, note, priority, status } = body;
 
   if (!listId || !name?.trim()) {
     return NextResponse.json({ error: 'listId and name are required' }, { status: 400 });
   }
+
+  // Ensure tags is an array of max 3 items
+  const validTags = Array.isArray(tags) ? tags.slice(0, 3) : [];
 
   const result = await addPlaceToList({
     listId,
@@ -23,6 +26,7 @@ export async function POST(request: Request) {
     location: location?.trim(),
     country: country?.trim(),
     category: category || 'Sight',
+    tags: validTags,
     mapsUrl: mapsUrl?.trim(),
     note: note?.trim(),
     priority,
@@ -34,5 +38,5 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: result.error }, { status: 500 });
   }
 
-  return NextResponse.json({ success: true });
+  return NextResponse.json({ success: true, placeId: result.placeId });
 }

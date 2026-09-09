@@ -97,13 +97,13 @@ export default async function DiscoverPage({ searchParams }: DiscoverPageProps) 
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8 sm:space-y-10">
       {/* Header */}
       <div className="space-y-2">
-        <span className="text-xs font-extrabold tracking-widest uppercase text-[#4A6B5D]">
+        <span className="text-xs font-black tracking-widest uppercase text-[#FF5841]">
           Community Discovery
         </span>
-        <h1 className="font-sans text-3xl sm:text-5xl font-black text-[#2C2A29] tracking-tight">
+        <h1 className="font-sans text-3xl sm:text-5xl font-black text-[#1A1723] tracking-tight">
           Discover Places & Experiences.
         </h1>
-        <p className="text-sm sm:text-base text-[#78726D] max-w-2xl font-normal">
+        <p className="text-sm sm:text-base text-[#4F4B5E] max-w-2xl font-normal">
           Explore authentic cafés, restaurants, hidden gems, and itineraries curated by travelers and locals.
         </p>
       </div>
@@ -113,31 +113,31 @@ export default async function DiscoverPage({ searchParams }: DiscoverPageProps) 
         <form
           action="/discover"
           method="GET"
-          className="bg-white p-3 sm:p-4 rounded-3xl border border-[#E6DFD5] shadow-2xs flex flex-col sm:flex-row gap-3"
+          className="bg-white p-3 sm:p-4 rounded-3xl border border-gray-100 shadow-xs flex flex-col sm:flex-row gap-3"
         >
           {currentTab !== 'places' && (
             <input type="hidden" name="tab" value={currentTab} />
           )}
 
           <div className="relative flex-1">
-            <Search className="absolute left-4 top-3.5 h-4.5 w-4.5 text-[#78726D]" />
+            <Search className="absolute left-4 top-3.5 h-4.5 w-4.5 text-gray-400" />
             <input
               type="text"
               name="query"
               defaultValue={resolvedParams.query || ''}
               placeholder="Search spots, coffee, food, parks, activities..."
-              className="w-full rounded-xl border border-[#E6DFD5] bg-[#FAF6F0] pl-11 pr-4 py-3 text-xs font-medium text-[#2C2A29] focus:outline-none focus:ring-1 focus:ring-[#2C2A29] focus:bg-white transition-all"
+              className="w-full rounded-2xl border border-gray-200 bg-gray-50 pl-11 pr-4 py-3 text-xs font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#FF5841]/20 focus:bg-white focus:border-[#FF5841] transition-all"
             />
           </div>
 
           <div className="relative sm:w-64">
-            <MapPin className="absolute left-4 top-3.5 h-4.5 w-4.5 text-[#4A6B5D]" />
+            <MapPin className="absolute left-4 top-3.5 h-4.5 w-4.5 text-[#FF5841]" />
             <input
               type="text"
               name="city"
               defaultValue={cityQuery}
               placeholder="City or location (e.g. Kolkata)"
-              className="w-full rounded-xl border border-[#E6DFD5] bg-[#FAF6F0] pl-11 pr-4 py-3 text-xs font-medium text-[#2C2A29] focus:outline-none focus:ring-1 focus:ring-[#2C2A29] focus:bg-white transition-all"
+              className="w-full rounded-2xl border border-gray-200 bg-gray-50 pl-11 pr-4 py-3 text-xs font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#FF5841]/20 focus:bg-white focus:border-[#FF5841] transition-all"
             />
           </div>
 
@@ -147,7 +147,7 @@ export default async function DiscoverPage({ searchParams }: DiscoverPageProps) 
 
           <button
             type="submit"
-            className="rounded-xl bg-[#4A6B5D] hover:bg-[#3B594B] text-white font-bold px-6 py-3 text-xs shadow-2xs active-press transition-colors"
+            className="rounded-2xl bg-gradient-to-r from-[#FF5841] to-[#C53678] hover:opacity-95 text-white font-black px-6 py-3 text-xs shadow-xs active-press transition-all"
           >
             Search
           </button>
@@ -155,7 +155,7 @@ export default async function DiscoverPage({ searchParams }: DiscoverPageProps) 
 
         {/* Quick City Filter Chips */}
         <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 text-xs">
-          <span className="text-[11px] font-bold text-[#9E968F] uppercase tracking-wider shrink-0">
+          <span className="text-[11px] font-extrabold text-gray-400 uppercase tracking-wider shrink-0">
             Popular Cities:
           </span>
           {popularCities.map((city) => {
@@ -164,10 +164,10 @@ export default async function DiscoverPage({ searchParams }: DiscoverPageProps) 
               <Link
                 key={city}
                 href={buildUrl({ city: isSelected ? '' : city })}
-                className={`whitespace-nowrap rounded-lg px-2.5 py-1 text-xs font-bold transition-colors ${
+                className={`whitespace-nowrap rounded-xl px-3 py-1 text-xs font-extrabold transition-all ${
                   isSelected
-                    ? 'bg-[#4A6B5D] text-white shadow-2xs'
-                    : 'bg-[#F8F6F0] border border-[#EAE4D9] text-[#78726D] hover:text-[#2C2A29]'
+                    ? 'bg-[#FF5841] text-white shadow-xs'
+                    : 'bg-white border border-gray-200 text-gray-600 hover:text-black hover:border-gray-300'
                 }`}
               >
                 {city}
@@ -194,8 +194,8 @@ export default async function DiscoverPage({ searchParams }: DiscoverPageProps) 
                   href={href}
                   className={`whitespace-nowrap rounded-full px-4 py-1.5 text-xs font-extrabold transition-all flex items-center gap-1.5 ${
                     isSelected
-                      ? 'bg-[#4A6B5D] text-white shadow-2xs'
-                      : 'bg-white text-[#78726D] border border-[#E6DFD5] hover:border-[#2C2A29] hover:text-[#2C2A29]'
+                      ? 'bg-gradient-to-r from-[#FF5841] to-[#C53678] text-white shadow-xs'
+                      : 'bg-white text-gray-600 border border-gray-200 hover:border-[#FF5841]/40 hover:text-black'
                   }`}
                 >
                   <span>{cat.emoji}</span>
@@ -206,8 +206,8 @@ export default async function DiscoverPage({ searchParams }: DiscoverPageProps) 
           </div>
 
           {/* Sort Tabs */}
-          <div className="flex items-center gap-1 self-start md:self-auto bg-white border border-[#E6DFD5] p-1 rounded-xl shadow-2xs shrink-0">
-            <span className="text-[11px] font-bold text-[#9E968F] px-2 uppercase tracking-wider hidden sm:inline">
+          <div className="flex items-center gap-1 self-start md:self-auto bg-white border border-gray-200 p-1 rounded-2xl shadow-2xs shrink-0">
+            <span className="text-[11px] font-extrabold text-gray-400 px-2 uppercase tracking-wider hidden sm:inline">
               Sort:
             </span>
             {[
@@ -221,10 +221,10 @@ export default async function DiscoverPage({ searchParams }: DiscoverPageProps) 
                 <Link
                   key={tab.id}
                   href={buildUrl({ sort: tab.id })}
-                  className={`px-3 py-1 text-xs font-extrabold rounded-lg transition-all ${
+                  className={`px-3 py-1 text-xs font-black rounded-xl transition-all ${
                     isActive
-                      ? 'bg-[#2C2A29] text-white shadow-xs'
-                      : 'text-[#78726D] hover:text-[#2C2A29] hover:bg-[#FAF6F0]'
+                      ? 'bg-gray-900 text-white shadow-xs'
+                      : 'text-gray-600 hover:text-black hover:bg-gray-100'
                   }`}
                 >
                   {tab.label}
@@ -235,13 +235,13 @@ export default async function DiscoverPage({ searchParams }: DiscoverPageProps) 
         </div>
 
         {/* Discovery Tab Selector: Places vs Lists */}
-        <div className="flex items-center gap-2 pt-2 border-b border-[#E6DFD5] pb-3">
+        <div className="flex items-center gap-2 pt-2 border-b border-gray-200 pb-3">
           <Link
             href={buildUrl({ tab: 'places' })}
-            className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-extrabold transition-all ${
+            className={`inline-flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-black transition-all ${
               currentTab === 'places'
-                ? 'bg-[#4A6B5D] text-white shadow-2xs'
-                : 'bg-white border border-[#E6DFD5] text-[#78726D] hover:text-[#2C2A29]'
+                ? 'bg-gradient-to-r from-[#FF5841] to-[#C53678] text-white shadow-xs'
+                : 'bg-white border border-gray-200 text-gray-600 hover:text-black'
             }`}
           >
             <Map className="h-4 w-4" />
@@ -250,10 +250,10 @@ export default async function DiscoverPage({ searchParams }: DiscoverPageProps) 
 
           <Link
             href={buildUrl({ tab: 'lists' })}
-            className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-extrabold transition-all ${
+            className={`inline-flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-black transition-all ${
               currentTab === 'lists'
-                ? 'bg-[#4A6B5D] text-white shadow-2xs'
-                : 'bg-white border border-[#E6DFD5] text-[#78726D] hover:text-[#2C2A29]'
+                ? 'bg-gradient-to-r from-[#FF5841] to-[#C53678] text-white shadow-xs'
+                : 'bg-white border border-gray-200 text-gray-600 hover:text-black'
             }`}
           >
             <Layers className="h-4 w-4" />
@@ -261,7 +261,7 @@ export default async function DiscoverPage({ searchParams }: DiscoverPageProps) 
           </Link>
 
           {(resolvedParams.query || cityQuery || resolvedParams.category) && (
-            <Link href="/discover" className="text-xs font-bold text-[#4A6B5D] hover:underline ml-auto">
+            <Link href="/discover" className="text-xs font-extrabold text-[#FF5841] hover:underline ml-auto">
               Clear filters
             </Link>
           )}
@@ -283,15 +283,15 @@ export default async function DiscoverPage({ searchParams }: DiscoverPageProps) 
               ))}
             </div>
           ) : (
-            <div className="rounded-3xl bg-white border border-[#E6DFD5] p-12 text-center space-y-4 shadow-2xs max-w-lg mx-auto">
-              <div className="h-14 w-14 rounded-2xl bg-[#F0F5F2] text-[#4A6B5D] flex items-center justify-center mx-auto">
+            <div className="rounded-3xl bg-white border border-gray-100 p-12 text-center space-y-4 shadow-2xs max-w-lg mx-auto">
+              <div className="h-14 w-14 rounded-2xl bg-[#FFEAE6] text-[#FF5841] flex items-center justify-center mx-auto">
                 <Compass className="h-7 w-7 stroke-[2]" />
               </div>
               <div className="space-y-1">
-                <h3 className="font-sans text-xl font-bold text-[#2C2A29]">
+                <h3 className="font-sans text-xl font-bold text-gray-900">
                   No places found yet
                 </h3>
-                <p className="text-[#78726D] text-xs font-medium">
+                <p className="text-gray-500 text-xs font-medium">
                   We couldn&apos;t find any places matching your filter. Try searching for a different city or category!
                 </p>
               </div>
@@ -306,21 +306,21 @@ export default async function DiscoverPage({ searchParams }: DiscoverPageProps) 
               ))}
             </div>
           ) : (
-            <div className="rounded-3xl bg-white border border-[#E6DFD5] p-12 text-center space-y-4 shadow-2xs max-w-lg mx-auto">
-              <div className="h-14 w-14 rounded-2xl bg-[#F3ECE1] text-[#2C2A29] flex items-center justify-center mx-auto">
+            <div className="rounded-3xl bg-white border border-gray-100 p-12 text-center space-y-4 shadow-2xs max-w-lg mx-auto">
+              <div className="h-14 w-14 rounded-2xl bg-[#FFEAE6] text-[#FF5841] flex items-center justify-center mx-auto">
                 <Compass className="h-7 w-7 stroke-[2]" />
               </div>
               <div className="space-y-1">
-                <h3 className="font-sans text-xl font-bold text-[#2C2A29]">
+                <h3 className="font-sans text-xl font-bold text-gray-900">
                   No lists found
                 </h3>
-                <p className="text-[#78726D] text-xs font-medium">
+                <p className="text-gray-500 text-xs font-medium">
                   Be the first traveler to share a list in this destination!
                 </p>
               </div>
               <Link
                 href="/create"
-                className="inline-flex items-center gap-2 rounded-xl bg-[#4A6B5D] text-white font-extrabold px-5 py-2.5 text-xs shadow-2xs hover:bg-[#3B594B] active-press transition-colors"
+                className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#FF5841] to-[#C53678] text-white font-black px-5 py-2.5 text-xs shadow-xs hover:opacity-95 active-press transition-all"
               >
                 <PlusCircle className="h-4 w-4" /> Create a list
               </Link>
@@ -331,4 +331,3 @@ export default async function DiscoverPage({ searchParams }: DiscoverPageProps) 
     </div>
   );
 }
-

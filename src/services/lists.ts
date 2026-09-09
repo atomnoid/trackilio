@@ -33,6 +33,36 @@ export async function getUniqueSlug(baseTitle: string): Promise<string> {
   return slug;
 }
 
+/**
+ * Helper to enrich WanderLists with places_count
+ */
+async function enrichListsWithCounts(
+  supabase: any,
+  lists: WanderList[]
+): Promise<WanderList[]> {
+  if (lists.length === 0) return [];
+  const listIds = lists.map((l) => l.id);
+
+  try {
+    const { data: lpData } = await supabase
+      .from('list_places')
+      .select('list_id')
+      .in('list_id', listIds);
+
+    const countMap = new Map<string, number>();
+    (lpData ?? []).forEach((row: { list_id: string }) => {
+      countMap.set(row.list_id, (countMap.get(row.list_id) ?? 0) + 1);
+    });
+
+    return lists.map((l) => ({
+      ...l,
+      places_count: countMap.get(l.id) ?? 0,
+    }));
+  } catch {
+    return lists;
+  }
+}
+
 export async function getPublicWanderLists(params?: {
   destination?: string;
   query?: string;
@@ -58,8 +88,7 @@ export async function getPublicWanderLists(params?: {
     }
 
     if (params?.sort === 'popular') {
-      // Popular: rank by net engagement (upvotes - downvotes + comments).
-      // Fetch a larger window then sort client-side using batch aggregate queries.
+      // Popular: rank by net engagement (upvotes - downvotes)
       q = q.order('created_at', { ascending: false }).limit(200);
       const { data, error } = await q;
       if (error) {
@@ -70,23 +99,14 @@ export async function getPublicWanderLists(params?: {
       const lists = (data ?? []) as WanderList[];
       if (lists.length === 0) return [];
 
-      // Batch-fetch engagement for all candidate list IDs
       const listIds = lists.map((l: WanderList) => l.id);
 
-      const [voteResult, commentResult] = await Promise.all([
-        (supabase as any)
-          .from('list_places')
-          .select('list_id, votes(vote_type)')
-          .in('list_id', listIds),
-        (supabase as any)
-          .from('list_places')
-          .select('list_id, comments(id)')
-          .in('list_id', listIds),
-      ]);
+      const voteResult = await (supabase as any)
+        .from('list_places')
+        .select('list_id, votes(vote_type)')
+        .in('list_id', listIds);
 
-      // Build engagement score map: listId -> engagement_score
       const engagementMap = new Map<string, number>();
-
       (voteResult.data ?? []).forEach((lp: any) => {
         const votes: any[] = lp.votes || [];
         const net =
@@ -95,23 +115,15 @@ export async function getPublicWanderLists(params?: {
         engagementMap.set(lp.list_id, (engagementMap.get(lp.list_id) ?? 0) + net);
       });
 
-      (commentResult.data ?? []).forEach((lp: any) => {
-        const count = (lp.comments || []).length;
-        engagementMap.set(lp.list_id, (engagementMap.get(lp.list_id) ?? 0) + count);
-      });
+      const sorted = [...lists].sort(
+        (a: WanderList, b: WanderList) =>
+          (engagementMap.get(b.id) ?? 0) - (engagementMap.get(a.id) ?? 0)
+      ).slice(offset, offset + limit);
 
-      // Sort descending by engagement, then slice for pagination
-      return [...lists]
-        .sort(
-          (a: WanderList, b: WanderList) =>
-            (engagementMap.get(b.id) ?? 0) - (engagementMap.get(a.id) ?? 0)
-        )
-        .slice(offset, offset + limit);
+      return await enrichListsWithCounts(supabase, sorted);
     } else if (params?.sort === 'trending') {
-      // Trending: most-recently updated lists (actively maintained content)
       q = q.order('updated_at', { ascending: false });
     } else {
-      // 'recent' or default
       q = q.order('created_at', { ascending: false });
     }
 
@@ -122,19 +134,12 @@ export async function getPublicWanderLists(params?: {
 
     const { data, error } = await q;
     if (error) {
-      const detail =
-        error.message ||
-        error.details ||
-        error.hint ||
-        (typeof error === 'object' && Object.keys(error).length > 0
-          ? JSON.stringify(error)
-          : null);
-      if (detail) {
-        console.warn('Unable to fetch public WanderLists from Supabase:', detail);
-      }
+      console.warn('Unable to fetch public WanderLists from Supabase:', error.message || error);
       return [];
     }
-    return (data ?? []) as WanderList[];
+
+    const lists = (data ?? []) as WanderList[];
+    return await enrichListsWithCounts(supabase, lists);
   } catch (err: any) {
     console.warn('Error connecting to Supabase for WanderLists:', err?.message || err);
     return [];
@@ -151,7 +156,8 @@ export async function getWanderListBySlug(slug: string): Promise<WanderList | nu
       .maybeSingle();
 
     if (error || !data) return null;
-    return data as WanderList;
+    const enriched = await enrichListsWithCounts(supabase, [data as WanderList]);
+    return enriched[0] || null;
   } catch {
     return null;
   }
@@ -167,13 +173,11 @@ export async function getUserWanderLists(userId: string): Promise<WanderList[]> 
       .order('updated_at', { ascending: false });
 
     if (error) {
-      const detail = error.message || error.details || error.hint;
-      if (detail) {
-        console.warn('Unable to fetch user WanderLists:', detail);
-      }
+      console.warn('Unable to fetch user WanderLists:', error.message || error);
       return [];
     }
-    return (data ?? []) as WanderList[];
+    const lists = (data ?? []) as WanderList[];
+    return await enrichListsWithCounts(supabase, lists);
   } catch (err: any) {
     console.warn('Error fetching user WanderLists:', err?.message || err);
     return [];
@@ -212,7 +216,7 @@ export async function getUserCollaboratedLists(userId: string): Promise<WanderLi
       .order('updated_at', { ascending: false });
 
     if (error || !lists) return [];
-    return lists as WanderList[];
+    return await enrichListsWithCounts(supabase, lists as WanderList[]);
   } catch (err: any) {
     console.warn('Error fetching collaborated lists:', err?.message || err);
     return [];
@@ -283,7 +287,8 @@ export async function getUserSavedLists(userId: string): Promise<WanderList[]> {
       .order('created_at', { ascending: false });
 
     if (error || !data) return [];
-    return data.map((d: any) => d.wander_lists).filter(Boolean) as WanderList[];
+    const lists = data.map((d: any) => d.wander_lists).filter(Boolean) as WanderList[];
+    return await enrichListsWithCounts(supabase, lists);
   } catch {
     return [];
   }

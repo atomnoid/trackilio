@@ -35,16 +35,24 @@ export function PlaceDiscoveryCard({ place, currentUserId, initialSaved }: Place
   const emoji = CATEGORY_EMOJIS[category] || '📍';
   const slug = place.slug || place.id;
   const locationText = place.city || place.location || place.country || '';
-  const score = place.community_score ?? 0;
+  const upvotes = place.upvotes_count ?? 0;
 
   return (
     <div className="group relative block rounded-3xl bg-white border border-gray-100 p-5 hover:-translate-y-1.5 hover:shadow-lg transition-all duration-200 space-y-3.5">
-      {/* Top Header: Category Badge + Save Button */}
+      {/* Top Header: Category Badge + Tags + Save Button */}
       <div className="flex items-center justify-between gap-2">
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FFEAE6] border border-[#FFD3CC] px-3 py-1 text-[11px] font-bold text-[#FF5841]">
-          <span>{emoji}</span>
-          <span>{category}</span>
-        </span>
+        <div className="flex flex-wrap items-center gap-1.5 overflow-hidden">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FFEAE6] border border-[#FFD3CC] px-3 py-1 text-[11px] font-bold text-[#FF5841]">
+            <span>{emoji}</span>
+            <span>{category}</span>
+          </span>
+
+          {place.tags && place.tags.length > 0 && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-[#FDF4F8] border border-[#F4CDDF] px-2.5 py-0.5 text-[10px] font-extrabold text-[#C53678]">
+              {place.tags[0]}
+            </span>
+          )}
+        </div>
 
         <SavePlaceButton
           placeId={place.id}
@@ -73,13 +81,18 @@ export function PlaceDiscoveryCard({ place, currentUserId, initialSaved }: Place
         )}
       </Link>
 
-      {/* Card Footer: Community Stats + Detail CTA */}
+      {/* Card Footer: Real Upvotes Count + Lists Count + Detail CTA */}
       <div className="pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
         <div className="flex items-center gap-3">
-          {score > 0 && (
-            <span className="inline-flex items-center gap-1 font-extrabold text-[#FF5841]">
+          {upvotes > 0 ? (
+            <span className="inline-flex items-center gap-1 font-extrabold text-[#FF5841]" title={`${upvotes} upvotes`}>
               <Flame className="h-3.5 w-3.5 fill-current" />
-              <span>+{score}</span>
+              <span>{upvotes} upvote{upvotes !== 1 ? 's' : ''}</span>
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1 font-bold text-gray-400">
+              <Flame className="h-3.5 w-3.5" />
+              <span>0 upvotes</span>
             </span>
           )}
 
