@@ -194,3 +194,26 @@ export async function getBlendSession(blendId: string): Promise<BlendResult | nu
     return null;
   }
 }
+
+export async function getUserBlendSessions(userId: string): Promise<Array<BlendSession & { otherUser?: Profile }>> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await (supabase as any)
+      .from('blend_sessions')
+      .select('*, user_a:profiles!user_a_id(*), user_b:profiles!user_b_id(*)')
+      .or(`user_a_id.eq.${userId},user_b_id.eq.${userId}`)
+      .order('created_at', { ascending: false });
+
+    if (error || !data) return [];
+
+    return data.map((item: any) => {
+      const otherUser = item.user_a_id === userId ? item.user_b : item.user_a;
+      return {
+        ...item,
+        otherUser,
+      };
+    });
+  } catch {
+    return [];
+  }
+}

@@ -2,9 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { SavedPlace, WanderList } from '@/types/database';
-import { WanderListCard } from '@/components/lists/WanderListCard';
-import { PlaceDiscoveryCard } from '@/components/places/PlaceDiscoveryCard';
+import { useRouter } from 'next/navigation';
 import {
   Plus,
   Compass,
@@ -13,36 +11,53 @@ import {
   Sparkles,
   MapPin,
   Bookmark,
-  Zap,
+  Users,
   CheckCircle2,
-  FolderHeart,
+  HeartHandshake,
+  ArrowRight,
+  UserPlus,
+  Share2,
 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { SavedPlace, WanderList, BlendSession, Profile } from '@/types/database';
+import { WanderListCard } from '@/components/lists/WanderListCard';
+import { PlaceDiscoveryCard } from '@/components/places/PlaceDiscoveryCard';
+import { BlendHistoryCard } from '@/components/blend/BlendHistoryCard';
 
 interface InteractiveDashboardProps {
   userDisplayName: string;
   initialLists: WanderList[];
+  initialCollabLists?: WanderList[];
   initialSavedPlaces?: SavedPlace[];
+  initialBlendSessions?: Array<BlendSession & { otherUser?: Profile }>;
   userId: string;
 }
 
 const TEMPLATE_SUGGESTIONS = [
   { title: '7 Days in Kyoto: Cafes & Bamboo Groves', dest: 'Kyoto, Japan', emoji: '⛩️' },
-  { title: 'Paris Pastry & Natural Wine Bar Tour', dest: 'Paris, France', emoji: '🥐' },
-  { title: 'Best Hidden Heritage Cafes of Kolkata', dest: 'Kolkata, India', emoji: '☕' },
-  { title: 'Bali Waterfall & Sunset Bucket List', dest: 'Bali, Indonesia', emoji: '🌴' },
+  { title: 'Paris Pastry & Natural Wine Tour', dest: 'Paris, France', emoji: '🥐' },
+  { title: 'Kolkata Heritage Coffee & Bookshops', dest: 'Kolkata, India', emoji: '☕' },
+  { title: 'Amalfi Coast Sunset & Cliffside Dining', dest: 'Amalfi, Italy', emoji: '🍋' },
 ];
 
 export function InteractiveDashboard({
   userDisplayName,
   initialLists,
+  initialCollabLists = [],
   initialSavedPlaces = [],
+  initialBlendSessions = [],
   userId,
 }: InteractiveDashboardProps) {
   const router = useRouter();
   const [lists, setLists] = useState<WanderList[]>(initialLists);
+  const [collabLists, setCollabLists] = useState<WanderList[]>(initialCollabLists);
   const [savedPlaces, setSavedPlaces] = useState<SavedPlace[]>(initialSavedPlaces);
-  const [filter, setFilter] = useState<'all' | 'public' | 'private' | 'saved'>('all');
+  const [blendSessions, setBlendSessions] = useState<Array<BlendSession & { otherUser?: Profile }>>(
+    initialBlendSessions
+  );
+
+  const [activeTab, setActiveTab] = useState<'all' | 'collaborated' | 'blends' | 'public' | 'private' | 'saved'>(
+    'all'
+  );
   const [quickTitle, setQuickTitle] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const [createdSuccess, setCreatedSuccess] = useState<string | null>(null);
@@ -69,7 +84,7 @@ export function InteractiveDashboard({
       setIsCreating(false);
 
       if (res.ok && data.slug) {
-        setCreatedSuccess(`List created: "${finalTitle}"!`);
+        setCreatedSuccess(`Created: "${finalTitle}"!`);
         setTimeout(() => setCreatedSuccess(null), 3000);
         router.push(`/l/${data.slug}`);
       } else {
@@ -81,268 +96,355 @@ export function InteractiveDashboard({
     }
   };
 
-  const filteredLists = lists.filter((l) => {
-    if (filter === 'public') return l.is_public;
-    if (filter === 'private') return !l.is_public;
-    return true;
-  });
+  // Filter logic
+  const filteredLists = () => {
+    if (activeTab === 'collaborated') return collabLists;
+    if (activeTab === 'public') return lists.filter((l) => l.is_public);
+    if (activeTab === 'private') return lists.filter((l) => !l.is_public);
+    return lists;
+  };
 
+  const currentDisplayLists = filteredLists();
   const publicCount = lists.filter((l) => l.is_public).length;
   const privateCount = lists.filter((l) => !l.is_public).length;
 
   return (
-    <div className="space-y-10">
-      {/* Interactive Welcome Hero Banner */}
-      <div className="rounded-3xl bg-[#2C2A29] text-white p-6 sm:p-10 space-y-6 shadow-sm relative overflow-hidden">
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-amber-300">
-              <Sparkles className="h-3.5 w-3.5" /> Easy-as-Air Workspace
+    <div className="space-y-8 sm:space-y-10">
+      {/* Serene Pastel Purple & Light Steel Blue Hero Banner */}
+      <div className="relative rounded-3xl overflow-hidden border border-[#E7E0EE] bg-gradient-to-br from-[#F6F1F6] via-[#FAF9FC] to-[#F1F3FB] p-6 sm:p-10 shadow-xs">
+        {/* Soft Ambient Radial Accents */}
+        <div className="absolute -top-16 -right-16 w-72 h-72 rounded-full bg-[#C5ADC5]/20 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-16 -left-16 w-72 h-72 rounded-full bg-[#B2B5E0]/25 blur-3xl pointer-events-none" />
+
+        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div className="space-y-3 max-w-xl">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/80 border border-[#E7E0EE] px-3.5 py-1 text-xs font-bold text-[#6469AC] shadow-2xs">
+              <Sparkles className="h-3.5 w-3.5 text-[#8E6D8E]" />
+              <span>Mindful Travel Hub</span>
             </span>
-            <h1 className="font-sans text-3xl sm:text-4xl font-black text-white tracking-tight">
-              Welcome back, {userDisplayName}! 👋
+            <h1 className="font-sans text-3xl sm:text-4xl font-black text-[#2A2735] tracking-tight">
+              Welcome back, {userDisplayName} ✨
             </h1>
-            <p className="text-xs sm:text-sm text-[#9E968F] font-medium max-w-lg">
-              Organize your saved spots into collections, plan upcoming trips, or share guides with friends.
+            <p className="text-xs sm:text-sm text-[#595567] font-medium leading-relaxed">
+              Create, collaborate on shared itineraries with friends, and compare travel tastes seamlessly.
             </p>
           </div>
 
-          <div className="flex items-center gap-2 self-start md:self-auto shrink-0">
-            <Link
-              href="/discover"
-              className="inline-flex items-center gap-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white px-4 py-3 text-xs font-bold transition-all active-press"
+          {/* Main Hero CTAs — Collaborated Lists as Primary CTA */}
+          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+            <button
+              onClick={() => setActiveTab('collaborated')}
+              className={`inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-xs font-black shadow-xs active-press transition-all ${
+                activeTab === 'collaborated'
+                  ? 'bg-[#6469AC] text-white'
+                  : 'bg-white/90 border border-[#B2B5E0] text-[#6469AC] hover:bg-[#F1F3FB]'
+              }`}
             >
-              <Compass className="h-4 w-4 text-amber-300" /> Discover Places
+              <Users className="h-4 w-4" />
+              <span>Collaborated Lists ({collabLists.length})</span>
+            </button>
+
+            <Link
+              href="/blend"
+              className="inline-flex items-center gap-2 rounded-2xl bg-white/90 border border-[#E7E0EE] hover:border-[#C5ADC5] text-[#8E6D8E] px-4.5 py-3 text-xs font-bold shadow-2xs active-press transition-all"
+            >
+              <Sparkles className="h-4 w-4 text-[#C5ADC5]" />
+              <span>Blend Taste</span>
             </Link>
 
             <Link
               href="/create"
-              className="inline-flex items-center gap-2 rounded-xl bg-[#4A6B5D] hover:bg-[#3B594B] text-white px-5 py-3 text-xs font-bold shadow-2xs active-press transition-all"
+              className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#C5ADC5] to-[#B2B5E0] hover:opacity-95 text-white px-5 py-3 text-xs font-extrabold shadow-xs active-press transition-all"
             >
-              <Plus className="h-4 w-4 stroke-[2.5]" /> Create List
+              <Plus className="h-4 w-4 stroke-[2.5]" />
+              <span>New List</span>
             </Link>
           </div>
         </div>
 
-        {/* Instant 1-Click Creation Input */}
-        <div className="relative z-10 pt-2">
+        {/* Serene 1-Click Instant List Creation Input */}
+        <div className="relative z-10 pt-6 mt-6 border-t border-[#E7E0EE]/70">
           <form
             onSubmit={(e) => {
               e.preventDefault();
               handleQuickCreate();
             }}
-            className="flex flex-col sm:flex-row gap-2.5 bg-white/10 backdrop-blur-md p-2 rounded-2xl border border-white/15"
+            className="flex flex-col sm:flex-row gap-2.5 bg-white/95 backdrop-blur-md p-2 rounded-2xl border border-[#E7E0EE] shadow-2xs"
           >
             <div className="relative flex-1">
-              <MapPin className="absolute left-3.5 top-3 h-4.5 w-4.5 text-amber-300" />
+              <MapPin className="absolute left-3.5 top-3 h-4.5 w-4.5 text-[#8E6D8E]" />
               <input
                 type="text"
-                placeholder="Enter trip name or destination (e.g. 7 Days in Amalfi Coast)..."
+                placeholder="Where to next? Enter trip name (e.g. 5 Days in Kyoto or Amalfi Coast Escapes)..."
                 value={quickTitle}
                 onChange={(e) => setQuickTitle(e.target.value)}
-                className="w-full bg-transparent pl-10 pr-4 py-2.5 text-xs text-white placeholder-white/50 focus:outline-none font-medium"
+                className="w-full bg-transparent pl-10 pr-4 py-2.5 text-xs text-[#2A2735] placeholder-[#847F95] focus:outline-none font-medium"
               />
             </div>
             <button
               type="submit"
               disabled={isCreating || !quickTitle.trim()}
-              className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#4A6B5D] hover:bg-[#3B594B] text-white font-extrabold px-5 py-2.5 text-xs shadow-2xs disabled:opacity-50 active-press transition-all shrink-0"
+              className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-[#C5ADC5] to-[#B2B5E0] text-white font-extrabold px-5 py-2.5 text-xs shadow-2xs disabled:opacity-50 active-press transition-all shrink-0"
             >
-              <Zap className="h-4 w-4" />
-              {isCreating ? 'Creating...' : 'Instant Create'}
+              {isCreating ? 'Creating…' : 'Quick Create'}
             </button>
           </form>
-        </div>
 
-        {/* Success Alert */}
-        {createdSuccess && (
-          <div className="relative z-10 flex items-center gap-2 bg-[#E8F5E9] text-[#2E7D32] px-4 py-2 rounded-xl text-xs font-bold">
-            <CheckCircle2 className="h-4 w-4" /> {createdSuccess}
-          </div>
-        )}
+          {createdSuccess && (
+            <p className="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-1.5 mt-2 inline-flex items-center gap-1.5">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              {createdSuccess}
+            </p>
+          )}
 
-        {/* 1-Click Quick Template Starter Chips */}
-        <div className="relative z-10 space-y-2 pt-1">
-          <span className="text-[11px] font-bold text-[#9E968F] uppercase tracking-wider block">
-            ⚡ Quick-Start Templates (Click to create)
-          </span>
-          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
-            {TEMPLATE_SUGGESTIONS.map((tpl) => (
+          {/* Instant Inspiration Chips */}
+          <div className="flex flex-wrap items-center gap-2 pt-3">
+            <span className="text-[11px] font-bold text-[#847F95]">Inspirations:</span>
+            {TEMPLATE_SUGGESTIONS.map((sug) => (
               <button
-                key={tpl.title}
-                onClick={() => handleQuickCreate(tpl.title, tpl.dest)}
-                className="whitespace-nowrap rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 px-3.5 py-1.5 text-xs font-bold text-white flex items-center gap-1.5 transition-all active-press"
+                key={sug.title}
+                type="button"
+                onClick={() => handleQuickCreate(sug.title, sug.dest)}
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/80 border border-[#E7E0EE] hover:border-[#C5ADC5] hover:bg-white text-[11px] font-medium text-[#595567] active-press transition-all"
               >
-                <span>{tpl.emoji}</span>
-                <span>{tpl.title}</span>
+                <span>{sug.emoji}</span>
+                <span>{sug.title.split(':')[0]}</span>
               </button>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Stats Quick Bar */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="bg-white border border-[#E6DFD5] rounded-2xl p-5 shadow-2xs space-y-1 cozy-card">
-          <span className="text-[11px] font-extrabold text-[#78726D] uppercase tracking-wider">
-            Total Lists
-          </span>
-          <p className="text-2xl sm:text-3xl font-black font-sans text-[#2C2A29]">{lists.length}</p>
-        </div>
-
-        <div className="bg-white border border-[#E6DFD5] rounded-2xl p-5 shadow-2xs space-y-1 cozy-card">
-          <span className="text-[11px] font-extrabold text-[#4A6B5D] uppercase tracking-wider flex items-center gap-1.5">
-            <Globe className="h-3.5 w-3.5 text-[#4A6B5D]" /> Public
-          </span>
-          <p className="text-2xl sm:text-3xl font-black font-sans text-[#2C2A29]">{publicCount}</p>
-        </div>
-
-        <div className="bg-white border border-[#E6DFD5] rounded-2xl p-5 shadow-2xs space-y-1 cozy-card">
-          <span className="text-[11px] font-extrabold text-[#78726D] uppercase tracking-wider flex items-center gap-1.5">
-            <Lock className="h-3.5 w-3.5 text-[#78726D]" /> Private
-          </span>
-          <p className="text-2xl sm:text-3xl font-black font-sans text-[#2C2A29]">{privateCount}</p>
-        </div>
-
-        <div className="bg-white border border-[#E6DFD5] rounded-2xl p-5 shadow-2xs space-y-1 cozy-card">
-          <span className="text-[11px] font-extrabold text-[#D96B43] uppercase tracking-wider flex items-center gap-1.5">
-            <Bookmark className="h-3.5 w-3.5 text-[#D96B43]" /> Saved Places
-          </span>
-          <p className="text-2xl sm:text-3xl font-black font-sans text-[#2C2A29]">{savedPlaces.length}</p>
-        </div>
-      </div>
-
-      {/* Lists & Saved Places Tabs */}
+      {/* Main Section Header with Filter Tabs */}
       <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E6DFD5] pb-3">
-          <h2 className="font-sans text-2xl font-black text-[#2C2A29] flex items-center gap-2">
-            {filter === 'saved' ? (
-              <>
-                <Bookmark className="h-5 w-5 text-[#D96B43]" />
-                Saved Places ({savedPlaces.length})
-              </>
-            ) : (
-              <>
-                <FolderHeart className="h-5 w-5 text-[#4A6B5D]" />
-                My Collections ({filteredLists.length})
-              </>
-            )}
-          </h2>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#E7E0EE]">
+          <div className="flex items-center gap-3">
+            <h2 className="font-sans text-xl sm:text-2xl font-black text-[#2A2735]">
+              {activeTab === 'collaborated'
+                ? 'Collaborated Travel Lists'
+                : activeTab === 'blends'
+                ? 'Saved Blend Matches'
+                : activeTab === 'saved'
+                ? 'Saved Places Bucket'
+                : 'My Travel Lists'}
+            </h2>
+          </div>
 
-          {/* Interactive Filter Pills */}
-          <div className="flex items-center gap-1 bg-[#F3ECE1] p-1 rounded-xl border border-[#E6DFD5] overflow-x-auto">
+          {/* Filter Pills */}
+          <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-2xl bg-white/90 border border-[#E7E0EE] shadow-2xs">
             <button
-              onClick={() => setFilter('all')}
-              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
-                filter === 'all'
-                  ? 'bg-white text-[#2C2A29] shadow-2xs'
-                  : 'text-[#78726D] hover:text-[#2C2A29]'
+              onClick={() => setActiveTab('all')}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                activeTab === 'all'
+                  ? 'bg-gradient-to-r from-[#C5ADC5] to-[#B2B5E0] text-white shadow-2xs'
+                  : 'text-[#595567] hover:text-[#2A2735] hover:bg-[#F6F1F6]'
               }`}
             >
               All Lists ({lists.length})
             </button>
+
             <button
-              onClick={() => setFilter('public')}
-              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
-                filter === 'public'
-                  ? 'bg-white text-[#4A6B5D] shadow-2xs'
-                  : 'text-[#78726D] hover:text-[#2C2A29]'
+              onClick={() => setActiveTab('collaborated')}
+              className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                activeTab === 'collaborated'
+                  ? 'bg-[#6469AC] text-white shadow-2xs'
+                  : 'text-[#6469AC] hover:bg-[#F1F3FB]'
+              }`}
+            >
+              <Users className="h-3.5 w-3.5" />
+              <span>Collaborated ({collabLists.length})</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('blends')}
+              className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                activeTab === 'blends'
+                  ? 'bg-gradient-to-r from-[#C5ADC5] to-[#B2B5E0] text-white shadow-2xs'
+                  : 'text-[#595567] hover:text-[#2A2735] hover:bg-[#F6F1F6]'
+              }`}
+            >
+              <Sparkles className="h-3.5 w-3.5 text-[#C5ADC5]" />
+              <span>Blends ({blendSessions.length})</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('public')}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                activeTab === 'public'
+                  ? 'bg-gradient-to-r from-[#C5ADC5] to-[#B2B5E0] text-white shadow-2xs'
+                  : 'text-[#595567] hover:text-[#2A2735] hover:bg-[#F6F1F6]'
               }`}
             >
               Public ({publicCount})
             </button>
+
             <button
-              onClick={() => setFilter('private')}
-              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
-                filter === 'private'
-                  ? 'bg-white text-[#2C2A29] shadow-2xs'
-                  : 'text-[#78726D] hover:text-[#2C2A29]'
+              onClick={() => setActiveTab('private')}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                activeTab === 'private'
+                  ? 'bg-gradient-to-r from-[#C5ADC5] to-[#B2B5E0] text-white shadow-2xs'
+                  : 'text-[#595567] hover:text-[#2A2735] hover:bg-[#F6F1F6]'
               }`}
             >
               Private ({privateCount})
             </button>
+
             <button
-              onClick={() => setFilter('saved')}
-              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
-                filter === 'saved'
-                  ? 'bg-white text-[#D96B43] shadow-2xs'
-                  : 'text-[#78726D] hover:text-[#2C2A29]'
+              onClick={() => setActiveTab('saved')}
+              className={`inline-flex items-center gap-1 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                activeTab === 'saved'
+                  ? 'bg-gradient-to-r from-[#C5ADC5] to-[#B2B5E0] text-white shadow-2xs'
+                  : 'text-[#595567] hover:text-[#2A2735] hover:bg-[#F6F1F6]'
               }`}
             >
-              Saved Places ({savedPlaces.length})
+              <Bookmark className="h-3.5 w-3.5" />
+              <span>Saved Places ({savedPlaces.length})</span>
             </button>
           </div>
         </div>
 
-        {/* Content Section */}
-        {filter === 'saved' ? (
-          /* Saved Places Grid */
-          savedPlaces.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {savedPlaces.map((sp) => {
-                if (!sp.place) return null;
-                return (
-                  <PlaceDiscoveryCard
-                    key={sp.id}
-                    place={{ ...sp.place, is_saved: true }}
-                    currentUserId={userId}
-                  />
-                );
-              })}
-            </div>
-          ) : (
-            <div className="rounded-3xl bg-white border border-[#E6DFD5] p-12 text-center space-y-4 shadow-2xs max-w-lg mx-auto">
-              <div className="h-14 w-14 rounded-2xl bg-[#F0F5F2] text-[#4A6B5D] flex items-center justify-center mx-auto">
-                <Bookmark className="h-7 w-7 stroke-[2]" />
+        {/* Tab Content 1: Collaborated Lists */}
+        {activeTab === 'collaborated' && (
+          <div className="space-y-6">
+            {collabLists.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+                {collabLists.map((list) => (
+                  <WanderListCard key={list.id} list={list} showCollabBadge />
+                ))}
               </div>
-              <div className="space-y-1">
-                <h3 className="font-sans text-xl font-bold text-[#2C2A29]">
-                  You haven&apos;t saved any places yet
-                </h3>
-                <p className="text-[#78726D] text-xs font-medium">
-                  When you find spots, cafés, or attractions you love, click the save button to bookmark them here.
-                </p>
+            ) : (
+              <div className="rounded-3xl border border-[#E7E0EE] bg-white/90 p-10 sm:p-14 text-center space-y-4 shadow-xs">
+                <div className="mx-auto h-14 w-14 rounded-2xl bg-gradient-to-br from-[#F6F1F6] to-[#F1F3FB] border border-[#E7E0EE] text-[#6469AC] flex items-center justify-center shadow-2xs">
+                  <Users className="h-7 w-7" />
+                </div>
+                <div className="space-y-1.5">
+                  <h3 className="font-sans text-lg font-bold text-[#2A2735]">
+                    No collaborated lists yet
+                  </h3>
+                  <p className="text-xs sm:text-sm text-[#595567] font-medium max-w-md mx-auto">
+                    Collaborate with friends on shared travel plans! Open any of your lists and invite friends by their @username to edit or view.
+                  </p>
+                </div>
+                <div className="pt-2">
+                  <Link
+                    href="/create"
+                    className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#C5ADC5] to-[#B2B5E0] text-white px-5 py-2.5 text-xs font-bold shadow-xs active-press"
+                  >
+                    <Plus className="h-4 w-4" /> Create a List to Collaborate
+                  </Link>
+                </div>
               </div>
-              <Link
-                href="/discover"
-                className="inline-flex items-center gap-2 rounded-xl bg-[#4A6B5D] text-white font-extrabold px-5 py-2.5 text-xs shadow-2xs hover:bg-[#3B594B] active-press transition-colors"
-              >
-                <Compass className="h-4 w-4" /> Discover Places
-              </Link>
-            </div>
-          )
-        ) : (
-          /* Lists Grid */
-          filteredLists.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredLists.map((list) => (
-                <WanderListCard key={list.id} list={list} />
-              ))}
-            </div>
-          ) : (
-            <div className="rounded-3xl bg-white border border-[#E6DFD5] p-12 text-center space-y-4 shadow-2xs max-w-lg mx-auto">
-              <div className="h-14 w-14 rounded-2xl bg-[#F3ECE1] text-[#2C2A29] flex items-center justify-center mx-auto">
-                <Compass className="h-7 w-7 stroke-[2]" />
+            )}
+          </div>
+        )}
+
+        {/* Tab Content 2: Blend Matches */}
+        {activeTab === 'blends' && (
+          <div className="space-y-6">
+            {blendSessions.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+                {blendSessions.map((blend) => (
+                  <BlendHistoryCard key={blend.id} blend={blend} />
+                ))}
               </div>
-              <div className="space-y-1">
-                <h3 className="font-sans text-xl font-bold text-[#2C2A29]">
-                  No lists found in this filter
-                </h3>
-                <p className="text-[#78726D] text-xs font-medium">
-                  Create a new list or pick a quick template above to start collecting places.
-                </p>
+            ) : (
+              <div className="rounded-3xl border border-[#E7E0EE] bg-white/90 p-10 sm:p-14 text-center space-y-4 shadow-xs">
+                <div className="mx-auto h-14 w-14 rounded-2xl bg-gradient-to-br from-[#C5ADC5]/30 to-[#B2B5E0]/30 border border-[#E7E0EE] text-[#6469AC] flex items-center justify-center shadow-2xs">
+                  <Sparkles className="h-7 w-7" />
+                </div>
+                <div className="space-y-1.5">
+                  <h3 className="font-sans text-lg font-bold text-[#2A2735]">
+                    No Blend matches yet
+                  </h3>
+                  <p className="text-xs sm:text-sm text-[#595567] font-medium max-w-md mx-auto">
+                    Enter any @username to calculate your Travel Taste match score. Your results will automatically be saved here for both of you!
+                  </p>
+                </div>
+                <div className="pt-2">
+                  <Link
+                    href="/blend"
+                    className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#C5ADC5] to-[#B2B5E0] text-white px-5 py-2.5 text-xs font-bold shadow-xs active-press"
+                  >
+                    <Sparkles className="h-4 w-4" /> Start a Blend Now
+                  </Link>
+                </div>
               </div>
-              <button
-                onClick={() => handleQuickCreate('My Next Adventure')}
-                className="inline-flex items-center gap-2 rounded-xl bg-[#4A6B5D] text-white font-extrabold px-5 py-2.5 text-xs shadow-2xs hover:bg-[#3B594B] active-press transition-colors"
-              >
-                <Zap className="h-4 w-4" /> Instant Create List
-              </button>
-            </div>
-          )
+            )}
+          </div>
+        )}
+
+        {/* Tab Content 3: Saved Places */}
+        {activeTab === 'saved' && (
+          <div className="space-y-6">
+            {savedPlaces.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+                {savedPlaces.map((sp) =>
+                  sp.place ? (
+                    <PlaceDiscoveryCard key={sp.id} place={sp.place} initialSaved={true} />
+                  ) : null
+                )}
+              </div>
+            ) : (
+              <div className="rounded-3xl border border-[#E7E0EE] bg-white/90 p-10 sm:p-14 text-center space-y-4 shadow-xs">
+                <div className="mx-auto h-14 w-14 rounded-2xl bg-[#F6F1F6] border border-[#E7E0EE] text-[#8E6D8E] flex items-center justify-center shadow-2xs">
+                  <Bookmark className="h-7 w-7" />
+                </div>
+                <div className="space-y-1.5">
+                  <h3 className="font-sans text-lg font-bold text-[#2A2735]">
+                    No saved places yet
+                  </h3>
+                  <p className="text-xs sm:text-sm text-[#595567] font-medium max-w-md mx-auto">
+                    Bookmark interesting cafes, landmarks, and hotels as you discover them across Trackilio.
+                  </p>
+                </div>
+                <div className="pt-2">
+                  <Link
+                    href="/discover"
+                    className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#C5ADC5] to-[#B2B5E0] text-white px-5 py-2.5 text-xs font-bold shadow-xs active-press"
+                  >
+                    <Compass className="h-4 w-4" /> Discover Places
+                  </Link>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Tab Content 4: All, Public, or Private Lists */}
+        {activeTab !== 'collaborated' && activeTab !== 'blends' && activeTab !== 'saved' && (
+          <div className="space-y-6">
+            {currentDisplayLists.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+                {currentDisplayLists.map((list) => (
+                  <WanderListCard key={list.id} list={list} />
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-3xl border border-[#E7E0EE] bg-white/90 p-10 sm:p-14 text-center space-y-4 shadow-xs">
+                <div className="mx-auto h-14 w-14 rounded-2xl bg-[#F6F1F6] border border-[#E7E0EE] text-[#8E6D8E] flex items-center justify-center shadow-2xs">
+                  <Compass className="h-7 w-7" />
+                </div>
+                <div className="space-y-1.5">
+                  <h3 className="font-sans text-lg font-bold text-[#2A2735]">
+                    No lists in this section
+                  </h3>
+                  <p className="text-xs sm:text-sm text-[#595567] font-medium max-w-md mx-auto">
+                    Start crafting a new travel guide or itinerary to organize your dream spots.
+                  </p>
+                </div>
+                <div className="pt-2">
+                  <Link
+                    href="/create"
+                    className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#C5ADC5] to-[#B2B5E0] text-white px-5 py-2.5 text-xs font-bold shadow-xs active-press"
+                  >
+                    <Plus className="h-4 w-4" /> Create Your First List
+                  </Link>
+                </div>
+              </div>
+            )}
+          </div>
         )}
       </div>
     </div>
   );
 }
-

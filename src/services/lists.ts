@@ -180,6 +180,43 @@ export async function getUserWanderLists(userId: string): Promise<WanderList[]> 
   }
 }
 
+export async function getUserCollaboratedLists(userId: string): Promise<WanderList[]> {
+  try {
+    const supabase = await createClient();
+
+    // Fetch lists where user is a member
+    const { data: memberRows } = await (supabase as any)
+      .from('list_members')
+      .select('list_id')
+      .eq('user_id', userId);
+
+    const memberListIds = (memberRows ?? []).map((m: any) => m.list_id);
+
+    // Fetch lists owned by user that have at least one member
+    const { data: ownedMemberRows } = await (supabase as any)
+      .from('list_members')
+      .select('list_id, wander_lists!inner(owner_id)')
+      .eq('wander_lists.owner_id', userId);
+
+    const ownedCollabIds = (ownedMemberRows ?? []).map((m: any) => m.list_id);
+    const combinedIds = Array.from(new Set([...memberListIds, ...ownedCollabIds]));
+
+    if (combinedIds.length === 0) return [];
+
+    const { data: lists, error } = await (supabase as any)
+      .from('wander_lists')
+      .select('*, owner:profiles(*)')
+      .in('id', combinedIds)
+      .order('updated_at', { ascending: false });
+
+    if (error || !lists) return [];
+    return lists as WanderList[];
+  } catch (err: any) {
+    console.warn('Error fetching collaborated lists:', err?.message || err);
+    return [];
+  }
+}
+
 export async function createWanderList(params: {
   ownerId: string;
   title: string;

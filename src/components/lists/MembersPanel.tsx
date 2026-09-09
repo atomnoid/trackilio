@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import { MemberRole } from '@/types/database';
-import { UserPlus, Trash2, ChevronDown, Loader2, Users, Crown } from 'lucide-react';
+import { UserPlus, Trash2, ChevronDown, Loader2, Users, Crown, Sparkles, ExternalLink } from 'lucide-react';
+import { sanitizeUsername } from '@/lib/username';
 
 interface MemberEntry {
   id: string;
@@ -36,7 +37,7 @@ export function MembersPanel({
 }: MembersPanelProps) {
   const [members, setMembers] = useState<MemberEntry[]>(initialMembers);
   const [inviteUsername, setInviteUsername] = useState('');
-  const [inviteRole, setInviteRole] = useState<'editor' | 'viewer'>('viewer');
+  const [inviteRole, setInviteRole] = useState<'editor' | 'viewer'>('editor');
   const [inviting, setInviting] = useState(false);
   const [inviteError, setInviteError] = useState<string | null>(null);
   const [inviteSuccess, setInviteSuccess] = useState<string | null>(null);
@@ -47,7 +48,8 @@ export function MembersPanel({
 
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inviteUsername.trim()) return;
+    const cleanUser = sanitizeUsername(inviteUsername);
+    if (!cleanUser) return;
 
     setInviting(true);
     setInviteError(null);
@@ -59,7 +61,7 @@ export function MembersPanel({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           listId,
-          username: inviteUsername.trim().replace(/^@/, ''),
+          username: cleanUser,
           role: inviteRole,
         }),
       });
@@ -80,7 +82,11 @@ export function MembersPanel({
         };
         setMembers((prev) => [...prev, newMember]);
         setInviteUsername('');
-        setInviteSuccess(`@${data.member.username || data.member.display_name} has been added as ${ROLE_LABELS[data.member.role as MemberRole] || data.member.role}.`);
+        setInviteSuccess(
+          `@${data.member.username || data.member.display_name} added as ${
+            ROLE_LABELS[data.member.role as MemberRole] || data.member.role
+          }!`
+        );
         setTimeout(() => setInviteSuccess(null), 4000);
       }
     } catch {
@@ -106,7 +112,7 @@ export function MembersPanel({
         );
       }
     } catch {
-      // silent fail — role displayed as-is
+      // silent fail
     } finally {
       setUpdatingId(null);
     }
@@ -134,17 +140,20 @@ export function MembersPanel({
   };
 
   return (
-    <div className="rounded-3xl bg-white border border-[#E6DFD5] shadow-sm overflow-hidden">
+    <div className="rounded-3xl bg-white/95 backdrop-blur-md border border-[#E7E0EE] shadow-xs overflow-hidden">
       {/* Header */}
-      <div className="px-6 py-4 border-b border-[#E6DFD5] flex items-center gap-2">
-        <Users className="h-4 w-4 text-[#4A6B5D]" />
-        <h3 className="font-sans text-sm font-black text-[#2C2A29]">
-          Collaborators ({members.length})
-        </h3>
+      <div className="px-6 py-4 border-b border-[#E7E0EE] bg-gradient-to-r from-[#F6F1F6] to-[#F1F3FB] flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Users className="h-4 w-4 text-[#6469AC]" />
+          <h3 className="font-sans text-sm font-black text-[#2A2735]">
+            Collaborators ({members.length})
+          </h3>
+        </div>
+        <span className="text-[11px] font-bold text-[#8E6D8E]">Shared Workspace</span>
       </div>
 
       {/* Member List */}
-      <ul className="divide-y divide-[#F3EFE6]">
+      <ul className="divide-y divide-[#F3EFF7]">
         {members.map((m) => {
           const name = m.profile?.display_name || m.profile?.username || 'Traveler';
           const initials = name.slice(0, 2).toUpperCase();
@@ -158,58 +167,70 @@ export function MembersPanel({
               }`}
             >
               {/* Avatar */}
-              <div className="h-8 w-8 rounded-xl bg-[#2C2A29] text-white font-bold text-[11px] flex items-center justify-center shrink-0">
-                {initials}
-              </div>
+              {m.profile?.avatar_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={m.profile.avatar_url}
+                  alt={name}
+                  className="h-8 w-8 rounded-xl object-cover border border-[#E7E0EE] shrink-0"
+                />
+              ) : (
+                <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-[#C5ADC5] to-[#B2B5E0] text-white font-bold text-[11px] flex items-center justify-center shrink-0 shadow-2xs">
+                  {initials}
+                </div>
+              )}
 
               {/* Name + username */}
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-bold text-[#2C2A29] truncate">{name}</p>
+                <p className="text-xs font-bold text-[#2A2735] truncate">{name}</p>
                 {m.profile?.username ? (
                   <a
                     href={`/u/${m.profile.username}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[10px] text-[#4A6B5D] hover:underline font-semibold"
+                    className="text-[10px] text-[#6469AC] hover:underline font-semibold inline-flex items-center gap-0.5"
                   >
                     @{m.profile.username}
+                    <ExternalLink className="h-2.5 w-2.5 opacity-60" />
                   </a>
                 ) : (
-                  <p className="text-[10px] text-[#9E968F] font-medium">Collaborator</p>
+                  <p className="text-[10px] text-[#847F95] font-medium">Collaborator</p>
                 )}
               </div>
 
               {/* Role badge / selector */}
               {isThisOwner ? (
-                <span className="inline-flex items-center gap-1 rounded-full bg-[#2C2A29] text-white px-2.5 py-0.5 text-[10px] font-extrabold shrink-0">
+                <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-[#C5ADC5] to-[#B2B5E0] text-white px-2.5 py-0.5 text-[10px] font-extrabold shrink-0 shadow-2xs">
                   <Crown className="h-2.5 w-2.5" /> Owner
                 </span>
               ) : isOwner ? (
-                <div className="relative shrink-0">
+                <div className="relative shrink-0 flex items-center gap-1.5">
                   <select
                     value={m.role}
                     onChange={(e) => handleRoleChange(m.user_id, e.target.value as MemberRole)}
                     disabled={updatingId === m.user_id}
-                    className="appearance-none rounded-lg border border-[#E6DFD5] bg-[#FAF6F0] pl-2.5 pr-6 py-1 text-[10px] font-bold text-[#2C2A29] focus:outline-none focus:ring-1 focus:ring-[#4A6B5D] cursor-pointer disabled:opacity-50"
+                    className="rounded-lg border border-[#E7E0EE] bg-[#FAF9FC] px-2 py-1 text-[11px] font-bold text-[#2A2735] focus:outline-none focus:ring-1 focus:ring-[#C5ADC5] cursor-pointer"
                   >
                     <option value="editor">Editor</option>
                     <option value="viewer">Viewer</option>
                   </select>
-                  <ChevronDown className="absolute right-1.5 top-1/2 -translate-y-1/2 h-3 w-3 text-[#78726D] pointer-events-none" />
+                  {updatingId === m.user_id && (
+                    <Loader2 className="h-3 w-3 animate-spin text-[#6469AC]" />
+                  )}
                 </div>
               ) : (
-                <span className="text-[10px] font-bold text-[#78726D] bg-[#F3EFE6] rounded-full px-2.5 py-0.5 shrink-0">
-                  {ROLE_LABELS[m.role as MemberRole] ?? m.role}
+                <span className="inline-flex items-center rounded-full bg-[#F1F3FB] border border-[#DFE1F5] text-[#6469AC] px-2.5 py-0.5 text-[10px] font-bold shrink-0">
+                  {ROLE_LABELS[m.role] || m.role}
                 </span>
               )}
 
-              {/* Remove button (owner can remove others; member can remove themselves) */}
+              {/* Remove button */}
               {(isOwner && !isThisOwner) || (!isOwner && m.user_id === currentUserId) ? (
                 <button
                   onClick={() => handleRemove(m.user_id)}
                   disabled={removingId === m.user_id}
                   title={m.user_id === currentUserId ? 'Leave list' : 'Remove member'}
-                  className="shrink-0 p-1 rounded-md text-[#C09090] hover:text-[#E0533C] hover:bg-[#FDF3F1] disabled:opacity-40 transition-colors"
+                  className="shrink-0 p-1.5 rounded-lg text-[#847F95] hover:text-rose-600 hover:bg-rose-50 disabled:opacity-40 transition-colors"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>
@@ -221,45 +242,45 @@ export function MembersPanel({
 
       {/* Invite Form (owner only) */}
       {isOwner && (
-        <div className="px-5 py-4 border-t border-[#E6DFD5] space-y-3">
+        <div className="px-5 py-4 border-t border-[#E7E0EE] bg-[#FAF9FC] space-y-3">
           {inviteSuccess && (
-            <p className="text-[11px] font-bold text-[#4A6B5D] bg-[#EDF5F0] border border-[#BFD9CA] rounded-lg px-3 py-2">
+            <p className="text-[11px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2">
               ✓ {inviteSuccess}
             </p>
           )}
           {inviteError && (
-            <p className="text-[11px] font-bold text-[#E0533C] bg-[#FDF3F1] border border-[#F0D5D5] rounded-lg px-3 py-2">
+            <p className="text-[11px] font-bold text-rose-800 bg-rose-50 border border-rose-200 rounded-xl px-3 py-2">
               {inviteError}
             </p>
           )}
 
           <form onSubmit={handleInvite} className="flex flex-col gap-2">
-            <label className="text-[10px] font-extrabold uppercase tracking-wider text-[#78726D] flex items-center gap-1">
-              <UserPlus className="h-3 w-3" /> Invite by username
+            <label className="text-[10px] font-extrabold uppercase tracking-wider text-[#847F95] flex items-center gap-1">
+              <UserPlus className="h-3 w-3 text-[#6469AC]" /> Invite by @username
             </label>
             <div className="flex gap-2">
               <input
                 type="text"
                 value={inviteUsername}
                 onChange={(e) => setInviteUsername(e.target.value)}
-                placeholder="@username"
+                placeholder="e.g. sara_travels"
                 autoComplete="off"
                 spellCheck={false}
-                className="flex-1 min-w-0 rounded-xl border border-[#E6DFD5] bg-[#FAF6F0] px-3 py-2 text-xs font-medium text-[#2C2A29] focus:outline-none focus:ring-1 focus:ring-[#4A6B5D] focus:bg-white transition-all"
+                className="flex-1 min-w-0 rounded-xl border border-[#E7E0EE] bg-white px-3 py-2 text-xs font-medium text-[#2A2735] focus:outline-none focus:ring-2 focus:ring-[#C5ADC5] transition-all"
               />
               <select
                 value={inviteRole}
                 onChange={(e) => setInviteRole(e.target.value as 'editor' | 'viewer')}
-                className="rounded-xl border border-[#E6DFD5] bg-[#FAF6F0] px-2 py-2 text-xs font-bold text-[#2C2A29] focus:outline-none focus:ring-1 focus:ring-[#4A6B5D] cursor-pointer shrink-0"
+                className="rounded-xl border border-[#E7E0EE] bg-white px-2.5 py-2 text-xs font-bold text-[#2A2735] focus:outline-none focus:ring-2 focus:ring-[#C5ADC5] cursor-pointer shrink-0"
               >
-                <option value="viewer">Viewer</option>
-                <option value="editor">Editor</option>
+                <option value="editor">Editor (Can add/edit)</option>
+                <option value="viewer">Viewer (View only)</option>
               </select>
             </div>
             <button
               type="submit"
               disabled={inviting || !inviteUsername.trim()}
-              className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#4A6B5D] hover:bg-[#3B594B] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2 text-xs shadow-sm transition-all active-press"
+              className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-[#C5ADC5] to-[#B2B5E0] hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed text-white font-extrabold py-2 text-xs shadow-xs transition-all active-press"
             >
               {inviting ? (
                 <>

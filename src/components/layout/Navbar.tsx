@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { TrackilioLogo } from './TrackilioLogo';
-import { Plus, Search, User, LogOut, FolderHeart, Settings } from 'lucide-react';
+import { Plus, Search, User, LogOut, Settings, Users, Sparkles } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { User as SupabaseUser } from '@supabase/supabase-js';
@@ -56,7 +56,7 @@ export function Navbar() {
       setLoading(false);
     });
 
-    // Listen to real-time auth state changes (login, signup, logout)
+    // Listen to real-time auth state changes
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
       const currentUser = session?.user ?? null;
       setUser(currentUser);
@@ -101,7 +101,7 @@ export function Navbar() {
     <header
       className={`sticky top-0 z-40 transition-all duration-300 ${
         scrolled
-          ? 'bg-[#FAF6F0]/90 backdrop-blur-md border-b border-[#E6DFD5] py-3'
+          ? 'bg-[#FAF9FC]/90 backdrop-blur-md border-b border-[#E7E0EE] shadow-xs py-3'
           : 'bg-transparent py-5'
       }`}
     >
@@ -111,17 +111,17 @@ export function Navbar() {
           <TrackilioLogo />
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center gap-8 text-sm font-semibold">
+          <nav className="hidden md:flex items-center gap-7 text-sm font-semibold">
             {navLinks.map((link) => {
               const isActive = pathname === link.href;
               return (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`transition-colors ${
+                  className={`transition-colors py-1 px-2.5 rounded-xl ${
                     isActive
-                      ? 'text-[#4A6B5D] font-bold'
-                      : 'text-[#4A4643] hover:text-[#2C2A29]'
+                      ? 'text-[#6469AC] bg-[#F1F3FB] font-bold shadow-2xs'
+                      : 'text-[#595567] hover:text-[#2A2735] hover:bg-[#F6F1F6]'
                   }`}
                 >
                   {link.label}
@@ -131,10 +131,10 @@ export function Navbar() {
           </nav>
 
           {/* Actions & Dynamic Auth Button */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             <Link
               href="/discover"
-              className="p-2 text-[#78726D] hover:text-[#2C2A29] hover:bg-[#F3ECE1] rounded-xl transition-colors"
+              className="p-2 text-[#847F95] hover:text-[#2A2735] hover:bg-[#F6F1F6] rounded-xl transition-colors"
               title="Search Places & Lists"
             >
               <Search className="h-4.5 w-4.5" />
@@ -143,11 +143,11 @@ export function Navbar() {
             {!loading && (
               <>
                 {user ? (
-                  /* Authenticated User Actions — Profile Logo Links to /u/[username] */
+                  /* Authenticated User Actions */
                   <div className="flex items-center gap-2">
                     <Link
                       href={profileHref}
-                      className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#F0F5F2] border border-[#D5E3DC] hover:bg-[#E2EFE9] transition-colors"
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/90 border border-[#E7E0EE] hover:border-[#C5ADC5] hover:bg-[#F6F1F6] transition-all shadow-2xs"
                       title="View Public Profile"
                     >
                       {avatarUrl ? (
@@ -155,21 +155,21 @@ export function Navbar() {
                         <img
                           src={avatarUrl}
                           alt={nameToShow}
-                          className="h-6 w-6 rounded-lg object-cover border border-[#D5E3DC]"
+                          className="h-6 w-6 rounded-lg object-cover border border-[#E7E0EE]"
                         />
                       ) : (
-                        <div className="h-6 w-6 rounded-lg bg-[#4A6B5D] text-white font-bold text-[10px] flex items-center justify-center">
+                        <div className="h-6 w-6 rounded-lg bg-gradient-to-br from-[#C5ADC5] to-[#B2B5E0] text-white font-bold text-[10px] flex items-center justify-center shadow-2xs">
                           {initialChar}
                         </div>
                       )}
-                      <span className="hidden sm:inline text-xs font-bold text-[#2C2A29] max-w-[100px] truncate">
+                      <span className="hidden sm:inline text-xs font-bold text-[#2A2735] max-w-[110px] truncate">
                         {nameToShow}
                       </span>
                     </Link>
 
                     <Link
                       href="/settings"
-                      className="p-2 text-[#78726D] hover:text-[#2C2A29] hover:bg-[#F3ECE1] rounded-xl transition-colors"
+                      className="p-2 text-[#847F95] hover:text-[#2A2735] hover:bg-[#F6F1F6] rounded-xl transition-colors"
                       title="Account & Profile Settings"
                     >
                       <Settings className="h-4.5 w-4.5" />
@@ -177,7 +177,7 @@ export function Navbar() {
 
                     <button
                       onClick={handleSignOut}
-                      className="p-2 text-[#78726D] hover:text-[#C87A7A] hover:bg-[#FBF0F0] rounded-xl transition-colors"
+                      className="p-2 text-[#847F95] hover:text-[#E2A1A1] hover:bg-rose-50 rounded-xl transition-colors"
                       title="Sign Out"
                     >
                       <LogOut className="h-4.5 w-4.5" />
@@ -187,7 +187,7 @@ export function Navbar() {
                   /* Unauthenticated Visitor Actions */
                   <Link
                     href="/auth/login"
-                    className="hidden sm:inline-block text-sm font-bold text-[#4A4643] hover:text-[#2C2A29] px-3 py-2 transition-colors"
+                    className="hidden sm:inline-block text-sm font-bold text-[#595567] hover:text-[#2A2735] px-3.5 py-2 rounded-xl transition-colors"
                   >
                     Log in
                   </Link>
@@ -197,10 +197,10 @@ export function Navbar() {
 
             <Link
               href="/create"
-              className="inline-flex items-center gap-2 rounded-xl bg-[#4A6B5D] hover:bg-[#3B594B] text-white px-4.5 py-2.5 text-xs font-bold shadow-2xs active-press transition-all"
+              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#C5ADC5] to-[#B2B5E0] hover:opacity-95 text-white px-4.5 py-2.5 text-xs font-extrabold shadow-xs active-press transition-all"
             >
               <Plus className="h-4 w-4 stroke-[2.5]" />
-              Create a list
+              <span>Create list</span>
             </Link>
           </div>
         </div>

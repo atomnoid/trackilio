@@ -10,7 +10,6 @@ export function SignupForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  // Username status: 'idle' | 'checking' | 'available' | 'invalid' | 'taken'
   const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'invalid' | 'taken'>('idle');
   const [usernameMessage, setUsernameMessage] = useState<string>('');
 
@@ -59,14 +58,14 @@ export function SignupForm() {
     (usernameStatus === 'available' || (username.trim() && usernameStatus !== 'invalid' && usernameStatus !== 'taken'));
 
   return (
-    <form action="/auth/signup/action" method="POST" className="bg-white border border-[#E6DFD5] rounded-3xl p-6 sm:p-8 shadow-xs space-y-5">
+    <form action="/auth/signup/action" method="POST" className="bg-white/95 backdrop-blur-md border border-[#E7E0EE] rounded-3xl p-6 sm:p-8 shadow-xs space-y-5">
       {/* Display Name */}
       <div className="space-y-1.5">
-        <label className="block text-xs font-bold text-[#2C2A29]">
-          Display Name <span className="text-red-500">*</span>
+        <label className="block text-xs font-bold text-[#2A2735]">
+          Display Name <span className="text-rose-400">*</span>
         </label>
         <div className="relative">
-          <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#78726D]" />
+          <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#847F95]" />
           <input
             type="text"
             name="displayName"
@@ -74,7 +73,7 @@ export function SignupForm() {
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
             placeholder="e.g. Elena Rostova"
-            className="w-full rounded-2xl border border-[#E6DFD5] bg-[#FAF6F0] pl-10 pr-4 py-3 text-sm font-medium text-[#2C2A29] focus:outline-none focus:ring-2 focus:ring-[#4A6B5D] focus:bg-white transition-all"
+            className="w-full rounded-2xl border border-[#E7E0EE] bg-[#FAF9FC] pl-10 pr-4 py-3 text-sm font-medium text-[#2A2735] focus:outline-none focus:ring-2 focus:ring-[#C5ADC5] focus:bg-white transition-all"
           />
         </div>
       </div>
@@ -82,13 +81,13 @@ export function SignupForm() {
       {/* Unique Username */}
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">
-          <label className="block text-xs font-bold text-[#2C2A29]">
-            Choose Username <span className="text-red-500">*</span>
+          <label className="block text-xs font-bold text-[#2A2735]">
+            Choose Handle <span className="text-rose-400">*</span>
           </label>
-          <span className="text-[11px] font-semibold text-[#78726D]">Unique handle</span>
+          <span className="text-[11px] font-semibold text-[#847F95]">Unique @username</span>
         </div>
         <div className="relative">
-          <AtSign className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#78726D]" />
+          <AtSign className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#847F95]" />
           <input
             type="text"
             name="username"
@@ -98,16 +97,16 @@ export function SignupForm() {
             placeholder="e.g. elena_travels"
             autoComplete="username"
             spellCheck={false}
-            className={`w-full rounded-2xl border pl-10 pr-10 py-3 text-sm font-medium text-[#2C2A29] focus:outline-none focus:bg-white transition-all ${
+            className={`w-full rounded-2xl border pl-10 pr-10 py-3 text-sm font-medium text-[#2A2735] focus:outline-none focus:bg-white transition-all ${
               usernameStatus === 'available'
                 ? 'border-emerald-400 bg-emerald-50/30 focus:ring-2 focus:ring-emerald-500'
                 : usernameStatus === 'taken' || usernameStatus === 'invalid'
                 ? 'border-rose-300 bg-rose-50/40 focus:ring-2 focus:ring-rose-400'
-                : 'border-[#E6DFD5] bg-[#FAF6F0] focus:ring-2 focus:ring-[#4A6B5D]'
+                : 'border-[#E7E0EE] bg-[#FAF9FC] focus:ring-2 focus:ring-[#C5ADC5]'
             }`}
           />
           <div className="absolute right-3.5 top-1/2 -translate-y-1/2">
-            {usernameStatus === 'checking' && <Loader2 className="h-4 w-4 animate-spin text-[#78726D]" />}
+            {usernameStatus === 'checking' && <Loader2 className="h-4 w-4 animate-spin text-[#847F95]" />}
             {usernameStatus === 'available' && <CheckCircle2 className="h-4 w-4 text-emerald-600" />}
             {(usernameStatus === 'taken' || usernameStatus === 'invalid') && (
               <XCircle className="h-4 w-4 text-rose-500" />
@@ -122,26 +121,26 @@ export function SignupForm() {
               usernameStatus === 'available'
                 ? 'text-emerald-600'
                 : usernameStatus === 'checking'
-                ? 'text-[#78726D]'
+                ? 'text-[#847F95]'
                 : 'text-rose-500'
             }`}
           >
             {usernameMessage}
           </p>
         ) : (
-          <p className="text-[11px] text-[#78726D] font-medium">
-            3-30 characters, lowercase letters, numbers, periods (.), and underscores (_). Used for your public link, Blend matches, and list invites.
+          <p className="text-[11px] text-[#847F95] font-medium">
+            Letters, numbers, periods (.), and underscores (_). Used for your public link, Blend matches, and list invites.
           </p>
         )}
       </div>
 
       {/* Email Address */}
       <div className="space-y-1.5">
-        <label className="block text-xs font-bold text-[#2C2A29]">
-          Email Address <span className="text-red-500">*</span>
+        <label className="block text-xs font-bold text-[#2A2735]">
+          Email Address <span className="text-rose-400">*</span>
         </label>
         <div className="relative">
-          <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#78726D]" />
+          <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#847F95]" />
           <input
             type="email"
             name="email"
@@ -150,18 +149,18 @@ export function SignupForm() {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
             autoComplete="email"
-            className="w-full rounded-2xl border border-[#E6DFD5] bg-[#FAF6F0] pl-10 pr-4 py-3 text-sm font-medium text-[#2C2A29] focus:outline-none focus:ring-2 focus:ring-[#4A6B5D] focus:bg-white transition-all"
+            className="w-full rounded-2xl border border-[#E7E0EE] bg-[#FAF9FC] pl-10 pr-4 py-3 text-sm font-medium text-[#2A2735] focus:outline-none focus:ring-2 focus:ring-[#C5ADC5] focus:bg-white transition-all"
           />
         </div>
       </div>
 
       {/* Password */}
       <div className="space-y-1.5">
-        <label className="block text-xs font-bold text-[#2C2A29]">
-          Password <span className="text-red-500">*</span>
+        <label className="block text-xs font-bold text-[#2A2735]">
+          Password <span className="text-rose-400">*</span>
         </label>
         <div className="relative">
-          <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#78726D]" />
+          <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#847F95]" />
           <input
             type="password"
             name="password"
@@ -171,7 +170,7 @@ export function SignupForm() {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Minimum 6 characters"
             autoComplete="new-password"
-            className="w-full rounded-2xl border border-[#E6DFD5] bg-[#FAF6F0] pl-10 pr-4 py-3 text-sm font-medium text-[#2C2A29] focus:outline-none focus:ring-2 focus:ring-[#4A6B5D] focus:bg-white transition-all"
+            className="w-full rounded-2xl border border-[#E7E0EE] bg-[#FAF9FC] pl-10 pr-4 py-3 text-sm font-medium text-[#2A2735] focus:outline-none focus:ring-2 focus:ring-[#C5ADC5] focus:bg-white transition-all"
           />
         </div>
       </div>
@@ -180,7 +179,7 @@ export function SignupForm() {
       <button
         type="submit"
         disabled={!isFormValid || usernameStatus === 'invalid' || usernameStatus === 'taken'}
-        className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-[#4A6B5D] hover:bg-[#3B594B] disabled:opacity-50 disabled:cursor-not-allowed text-white font-extrabold py-3.5 text-sm shadow-2xs active-press transition-all mt-2"
+        className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#C5ADC5] to-[#B2B5E0] hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed text-white font-extrabold py-3.5 text-sm shadow-xs active-press transition-all mt-2"
       >
         <Sparkles className="h-4 w-4" />
         <span>Create Account</span>

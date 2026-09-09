@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { getPublicProfileByUsernameOrId } from '@/services/profiles';
 import { WanderListCard } from '@/components/lists/WanderListCard';
 import { ProfileJsonLd } from '@/components/seo/ProfileJsonLd';
-import { MapPin, Globe, Layers, ArrowRight, User, Settings } from 'lucide-react';
+import { MapPin, Globe, Layers, ArrowRight, User, Settings, Sparkles } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 
 export const revalidate = 60;
@@ -80,20 +80,23 @@ export default async function PublicProfilePage({ params }: ProfilePageProps) {
         username={profile.username ?? username}
       />
 
-      {/* Minimal Header & Creator Bio (Light, Mobile-First) */}
-      <header className="rounded-3xl bg-white border border-[#E6DFD5] p-6 sm:p-8 md:p-10 shadow-xs">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-6">
-          {/* Light Avatar */}
+      {/* Serene Pastel Header Card */}
+      <header className="rounded-3xl bg-white/95 backdrop-blur-md border border-[#E7E0EE] p-6 sm:p-8 md:p-10 shadow-xs relative overflow-hidden">
+        <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-[#C5ADC5]/15 blur-2xl pointer-events-none" />
+        <div className="absolute -bottom-16 -left-16 w-64 h-64 rounded-full bg-[#B2B5E0]/20 blur-2xl pointer-events-none" />
+
+        <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-6">
+          {/* Avatar */}
           <div className="relative shrink-0">
             {profile.avatar_url ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={profile.avatar_url}
                 alt={displayName}
-                className="h-20 w-20 sm:h-24 sm:w-24 rounded-2xl object-cover border border-[#E6DFD5] shadow-xs"
+                className="h-20 w-20 sm:h-24 sm:w-24 rounded-2xl object-cover border border-[#E7E0EE] shadow-xs"
               />
             ) : (
-              <div className="h-20 w-20 sm:h-24 sm:w-24 rounded-2xl bg-[#F0F5F2] border border-[#D5E3DC] text-[#3B594B] font-black text-2xl sm:text-3xl flex items-center justify-center shadow-xs">
+              <div className="h-20 w-20 sm:h-24 sm:w-24 rounded-2xl bg-gradient-to-br from-[#C5ADC5] to-[#B2B5E0] text-white font-black text-2xl sm:text-3xl flex items-center justify-center shadow-xs">
                 {initials}
               </div>
             )}
@@ -102,32 +105,32 @@ export default async function PublicProfilePage({ params }: ProfilePageProps) {
           {/* Profile Identity */}
           <div className="flex-1 min-w-0 space-y-2">
             <div className="flex flex-wrap items-center gap-2.5">
-              <h1 className="font-sans text-2xl sm:text-3xl md:text-4xl font-black text-[#2C2A29] tracking-tight">
+              <h1 className="font-sans text-2xl sm:text-3xl md:text-4xl font-black text-[#2A2735] tracking-tight">
                 {displayName}
               </h1>
               {profile.username && (
-                <span className="rounded-full bg-[#F3ECE1] border border-[#E6DFD5] px-2.5 py-0.5 text-xs font-bold text-[#78726D]">
+                <span className="rounded-full bg-[#F6F1F6] border border-[#E7E0EE] px-3 py-0.5 text-xs font-bold text-[#8E6D8E]">
                   @{profile.username}
                 </span>
               )}
             </div>
 
             {profile.bio && (
-              <p className="text-sm sm:text-base text-[#78726D] font-medium leading-relaxed max-w-2xl">
+              <p className="text-sm sm:text-base text-[#595567] font-medium leading-relaxed max-w-2xl">
                 {profile.bio}
               </p>
             )}
 
             {/* Badges / Stats */}
-            <div className="flex flex-wrap items-center gap-3 pt-1 text-xs font-bold text-[#78726D]">
+            <div className="flex flex-wrap items-center gap-2.5 pt-1 text-xs font-bold text-[#847F95]">
               {profile.location && (
-                <span className="inline-flex items-center gap-1.5 rounded-lg bg-[#F8F6F0] border border-[#EAE4D9] px-2.5 py-1 text-[#4A6B5D]">
+                <span className="inline-flex items-center gap-1.5 rounded-xl bg-[#FAF9FC] border border-[#E7E0EE] px-3 py-1 text-[#8E6D8E]">
                   <MapPin className="h-3.5 w-3.5" />
                   {profile.location}
                 </span>
               )}
-              <span className="inline-flex items-center gap-1.5 rounded-lg bg-[#F8F6F0] border border-[#EAE4D9] px-2.5 py-1">
-                <Globe className="h-3.5 w-3.5 text-[#4A6B5D]" />
+              <span className="inline-flex items-center gap-1.5 rounded-xl bg-[#FAF9FC] border border-[#E7E0EE] px-3 py-1 text-[#6469AC]">
+                <Globe className="h-3.5 w-3.5" />
                 {listCount} Curated List{listCount !== 1 ? 's' : ''}
               </span>
             </div>
@@ -138,17 +141,17 @@ export default async function PublicProfilePage({ params }: ProfilePageProps) {
             {isSelf ? (
               <Link
                 href="/settings"
-                className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-[#FAF6F0] hover:bg-[#F3ECE1] border border-[#E6DFD5] text-[#2C2A29] font-bold px-4 py-2.5 text-xs sm:text-sm active-press transition-colors"
+                className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-[#FAF9FC] hover:bg-[#F6F1F6] border border-[#E7E0EE] text-[#2A2735] font-bold px-4 py-2.5 text-xs sm:text-sm active-press transition-colors shadow-2xs"
               >
-                <Settings className="h-4 w-4 text-[#78726D]" />
+                <Settings className="h-4 w-4 text-[#847F95]" />
                 <span>Edit Settings</span>
               </Link>
             ) : profile.username ? (
               <Link
                 href={`/blend?with=${encodeURIComponent(profile.username)}`}
-                className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-[#F0F5F2] hover:bg-[#E3EEE8] border border-[#D5E3DC] text-[#3B594B] font-bold px-4 py-2.5 text-xs sm:text-sm active-press transition-colors"
+                className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#C5ADC5] to-[#B2B5E0] hover:opacity-95 text-white font-extrabold px-5 py-2.5 text-xs sm:text-sm shadow-xs active-press transition-all"
               >
-                <span>✨</span>
+                <Sparkles className="h-4 w-4" />
                 <span>Blend Taste</span>
                 <ArrowRight className="h-3.5 w-3.5" />
               </Link>
@@ -159,12 +162,12 @@ export default async function PublicProfilePage({ params }: ProfilePageProps) {
 
       {/* Curated Lists Section */}
       <section className="space-y-6">
-        <div className="flex items-center justify-between pb-2 border-b border-[#E6DFD5]">
-          <h2 className="font-sans text-xl sm:text-2xl font-black text-[#2C2A29] flex items-center gap-2">
-            <Layers className="h-5 w-5 text-[#4A6B5D]" />
+        <div className="flex items-center justify-between pb-2 border-b border-[#E7E0EE]">
+          <h2 className="font-sans text-xl sm:text-2xl font-black text-[#2A2735] flex items-center gap-2">
+            <Layers className="h-5 w-5 text-[#6469AC]" />
             Curated Travel Lists
           </h2>
-          <span className="text-xs font-bold text-[#78726D] bg-[#F3ECE1] border border-[#E6DFD5] px-2.5 py-1 rounded-full">
+          <span className="text-xs font-bold text-[#8E6D8E] bg-[#F6F1F6] border border-[#E7E0EE] px-3 py-1 rounded-full">
             {listCount}
           </span>
         </div>
@@ -176,22 +179,22 @@ export default async function PublicProfilePage({ params }: ProfilePageProps) {
             ))}
           </div>
         ) : (
-          <div className="rounded-3xl border border-[#E6DFD5] bg-white p-10 sm:p-14 text-center space-y-4 shadow-xs">
-            <div className="mx-auto h-12 w-12 rounded-2xl bg-[#F0F5F2] border border-[#D5E3DC] text-[#4A6B5D] flex items-center justify-center">
+          <div className="rounded-3xl border border-[#E7E0EE] bg-white/90 p-10 sm:p-14 text-center space-y-4 shadow-xs">
+            <div className="mx-auto h-12 w-12 rounded-2xl bg-[#F6F1F6] border border-[#E7E0EE] text-[#6469AC] flex items-center justify-center">
               <User className="h-6 w-6 stroke-[1.75]" />
             </div>
             <div className="space-y-1">
-              <h3 className="font-sans text-base sm:text-lg font-bold text-[#2C2A29]">
+              <h3 className="font-sans text-base sm:text-lg font-bold text-[#2A2735]">
                 No public lists yet
               </h3>
-              <p className="text-xs sm:text-sm text-[#78726D] font-medium max-w-sm mx-auto">
+              <p className="text-xs sm:text-sm text-[#595567] font-medium max-w-sm mx-auto">
                 {displayName} hasn&apos;t shared any public travel lists yet. Check back soon for new itineraries!
               </p>
             </div>
             <div className="pt-2">
               <Link
                 href="/discover"
-                className="inline-flex items-center gap-2 text-xs font-bold text-[#4A6B5D] hover:underline"
+                className="inline-flex items-center gap-2 text-xs font-bold text-[#6469AC] hover:underline"
               >
                 Discover other travelers&apos; lists <ArrowRight className="h-3 w-3" />
               </Link>
