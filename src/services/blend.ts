@@ -15,6 +15,8 @@ export interface BlendResult {
 
 
 
+import { sanitizeUsername } from '@/lib/username';
+
 export async function calculateAndCreateBlend(
   userAIdentifier: string,
   userBIdentifier: string
@@ -22,22 +24,33 @@ export async function calculateAndCreateBlend(
   try {
     const supabase = await createClient();
 
+    const cleanA = sanitizeUsername(userAIdentifier);
+    const cleanB = sanitizeUsername(userBIdentifier);
+
     // Fetch Profile A
-    const { data: userA } = await (supabase as any)
-      .from('profiles')
-      .select('*')
-      .or(`username.eq.${userAIdentifier.toLowerCase()},id.eq.${userAIdentifier}`)
-      .maybeSingle();
+    let userA: any = null;
+    if (userAIdentifier.includes('-') && userAIdentifier.length === 36) {
+      const { data } = await (supabase as any).from('profiles').select('*').eq('id', userAIdentifier).maybeSingle();
+      userA = data;
+    }
+    if (!userA && cleanA) {
+      const { data } = await (supabase as any).from('profiles').select('*').eq('username', cleanA).maybeSingle();
+      userA = data;
+    }
 
     // Fetch Profile B
-    const { data: userB } = await (supabase as any)
-      .from('profiles')
-      .select('*')
-      .or(`username.eq.${userBIdentifier.toLowerCase()},id.eq.${userBIdentifier}`)
-      .maybeSingle();
+    let userB: any = null;
+    if (userBIdentifier.includes('-') && userBIdentifier.length === 36) {
+      const { data } = await (supabase as any).from('profiles').select('*').eq('id', userBIdentifier).maybeSingle();
+      userB = data;
+    }
+    if (!userB && cleanB) {
+      const { data } = await (supabase as any).from('profiles').select('*').eq('username', cleanB).maybeSingle();
+      userB = data;
+    }
 
     if (!userA || !userB) {
-      return { error: 'One or both travelers could not be found.' };
+      return { error: 'One or both travelers could not be found. Please double check the @username.' };
     }
 
     if (userA.id === userB.id) {

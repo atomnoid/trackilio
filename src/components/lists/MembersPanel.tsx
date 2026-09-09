@@ -165,10 +165,17 @@ export function MembersPanel({
               {/* Name + username */}
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-bold text-[#2C2A29] truncate">{name}</p>
-                {m.profile?.username && (
-                  <p className="text-[10px] text-[#9E968F] font-medium">
+                {m.profile?.username ? (
+                  <a
+                    href={`/u/${m.profile.username}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[10px] text-[#4A6B5D] hover:underline font-semibold"
+                  >
                     @{m.profile.username}
-                  </p>
+                  </a>
+                ) : (
+                  <p className="text-[10px] text-[#9E968F] font-medium">Collaborator</p>
                 )}
               </div>
 

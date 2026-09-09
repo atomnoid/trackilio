@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { TrackilioLogo } from './TrackilioLogo';
-import { Plus, Search, User, LogOut, FolderHeart } from 'lucide-react';
+import { Plus, Search, User, LogOut, FolderHeart, Settings } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { User as SupabaseUser } from '@supabase/supabase-js';
@@ -165,6 +165,14 @@ export function Navbar() {
                       <span className="hidden sm:inline text-xs font-bold text-[#2C2A29] max-w-[100px] truncate">
                         {nameToShow}
                       </span>
+                    </Link>
+
+                    <Link
+                      href="/settings"
+                      className="p-2 text-[#78726D] hover:text-[#2C2A29] hover:bg-[#F3ECE1] rounded-xl transition-colors"
+                      title="Account & Profile Settings"
+                    >
+                      <Settings className="h-4.5 w-4.5" />
                     </Link>
 
                     <button

@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { ListMember, MemberRole } from '@/types/database';
+import { sanitizeUsername } from '@/lib/username';
 
 export async function getListMembers(listId: string): Promise<ListMember[]> {
   const supabase = await createClient();
@@ -60,16 +61,18 @@ export async function removeListMember(
 }
 
 /**
- * Find a profile by username or email prefix for member invitation.
+ * Find a profile by username or id for member invitation.
  * Returns the profile id if found, null otherwise.
  */
 export async function findProfileByUsernameOrEmail(
   identifier: string
 ): Promise<{ id: string; display_name: string; username: string | null } | null> {
   const supabase = await createClient();
-  const clean = identifier.toLowerCase().trim();
+  const clean = sanitizeUsername(identifier);
 
-  // Try username first
+  if (!clean) return null;
+
+  // Try exact username first
   const { data: byUsername } = await (supabase as any)
     .from('profiles')
     .select('id, display_name, username')
@@ -78,7 +81,15 @@ export async function findProfileByUsernameOrEmail(
 
   if (byUsername) return byUsername;
 
-  // Try by email (Supabase auth.users) via a safe approach using profiles display_name prefix match
-  // We use ilike on display_name as a secondary heuristic if no username match
+  // Try by profile id (UUID)
+  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(identifier.trim())) {
+    const { data: byId } = await (supabase as any)
+      .from('profiles')
+      .select('id, display_name, username')
+      .eq('id', identifier.trim())
+      .maybeSingle();
+    if (byId) return byId;
+  }
+
   return null;
 }

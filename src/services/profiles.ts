@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { Profile, WanderList } from '@/types/database';
+import { validateUsernameFormat, sanitizeUsername } from '@/lib/username';
 
 export async function getProfile(userId: string): Promise<Profile | null> {
   try {
@@ -17,12 +18,61 @@ export async function getProfile(userId: string): Promise<Profile | null> {
   }
 }
 
+export async function checkUsernameAvailability(
+  rawUsername: string,
+  excludeUserId?: string
+): Promise<{ available: boolean; error?: string; cleanUsername: string }> {
+  const validation = validateUsernameFormat(rawUsername);
+  if (!validation.valid) {
+    return {
+      available: false,
+      error: validation.error,
+      cleanUsername: validation.cleanUsername,
+    };
+  }
+
+  const clean = validation.cleanUsername;
+
+  try {
+    const supabase = await createClient();
+    let query = (supabase as any)
+      .from('profiles')
+      .select('id')
+      .eq('username', clean);
+
+    if (excludeUserId) {
+      query = query.neq('id', excludeUserId);
+    }
+
+    const { data: existing } = await query.maybeSingle();
+
+    if (existing) {
+      return {
+        available: false,
+        error: 'This username is already taken. Please choose another.',
+        cleanUsername: clean,
+      };
+    }
+
+    return {
+      available: true,
+      cleanUsername: clean,
+    };
+  } catch (err: any) {
+    return {
+      available: false,
+      error: 'Unable to verify username availability at this moment.',
+      cleanUsername: clean,
+    };
+  }
+}
+
 export async function getPublicProfileByUsernameOrId(
   identifier: string
 ): Promise<{ profile: Profile; publicLists: WanderList[] } | null> {
   try {
     const supabase = await createClient();
-    const cleanIdent = identifier.toLowerCase().trim();
+    const cleanIdent = sanitizeUsername(identifier);
 
     // Query profile by username or id
     let { data: profile } = await (supabase as any)
@@ -35,7 +85,7 @@ export async function getPublicProfileByUsernameOrId(
       const { data: profileById } = await (supabase as any)
         .from('profiles')
         .select('*')
-        .eq('id', identifier)
+        .eq('id', identifier.trim())
         .maybeSingle();
       profile = profileById;
     }
@@ -70,39 +120,21 @@ export async function updateProfile(
     const supabase = await createClient();
 
     // Validate username if updating
-    if (updates.username) {
-      const cleanUsername = updates.username.toLowerCase().trim();
-      if (!/^[a-z0-9_-]{3,30}$/.test(cleanUsername)) {
+    if (updates.username !== undefined && updates.username !== null) {
+      const check = await checkUsernameAvailability(updates.username, userId);
+      if (!check.available) {
         return {
           success: false,
-          error: 'Username must be 3-30 characters long and contain only letters, numbers, hyphens, or underscores.',
+          error: check.error || 'Invalid username.',
         };
       }
-
-      // Check for reserved usernames
-      const reserved = ['admin', 'api', 'auth', 'dashboard', 'settings', 'explore', 'discover', 'create', 'login', 'signup', 'u', 'l', 'blend'];
-      if (reserved.includes(cleanUsername)) {
-        return { success: false, error: 'This username is reserved.' };
-      }
-
-      // Check uniqueness
-      const { data: existing } = await (supabase as any)
-        .from('profiles')
-        .select('id')
-        .eq('username', cleanUsername)
-        .neq('id', userId)
-        .maybeSingle();
-
-      if (existing) {
-        return { success: false, error: 'Username is already taken.' };
-      }
-
-      updates.username = cleanUsername;
+      updates.username = check.cleanUsername;
     }
 
     const { error } = await (supabase as any)
       .from('profiles')
-      .update({
+      .upsert({
+        id: userId,
         ...updates,
         updated_at: new Date().toISOString(),
       })

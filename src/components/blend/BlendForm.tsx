@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, Loader2, User, Sparkles } from 'lucide-react';
+import { ArrowRight, Loader2, AtSign, Sparkles } from 'lucide-react';
+import { sanitizeUsername } from '@/lib/username';
 
 interface BlendFormProps {
   prefillUsername?: string;
@@ -10,13 +11,14 @@ interface BlendFormProps {
 
 export function BlendForm({ prefillUsername }: BlendFormProps) {
   const router = useRouter();
-  const [username, setUsername] = useState(prefillUsername || '');
+  const [username, setUsername] = useState(prefillUsername ? sanitizeUsername(prefillUsername) : '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!username.trim()) return;
+    const cleanUser = sanitizeUsername(username);
+    if (!cleanUser) return;
 
     setLoading(true);
     setError(null);
@@ -25,13 +27,13 @@ export function BlendForm({ prefillUsername }: BlendFormProps) {
       const res = await fetch('/api/blend', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ withUsername: username.trim() }),
+        body: JSON.stringify({ withUsername: cleanUser }),
       });
 
       const data = await res.json();
 
       if (!res.ok || data.error) {
-        setError(data.error || 'Something went wrong. Please try again.');
+        setError(data.error || 'Something went wrong. Please check the @username and try again.');
         setLoading(false);
         return;
       }
@@ -46,12 +48,12 @@ export function BlendForm({ prefillUsername }: BlendFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="relative">
-        <User className="absolute left-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#78726D]" />
+        <AtSign className="absolute left-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#78726D]" />
         <input
           type="text"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          placeholder="Enter a username (e.g. sara_travels)"
+          placeholder="Enter traveler's @username (e.g. sara_travels)"
           className="w-full rounded-2xl border border-[#E6DFD5] bg-[#FAF6F0] pl-11 pr-4 py-4 text-sm font-medium text-[#2C2A29] focus:outline-none focus:ring-2 focus:ring-[#4A6B5D] focus:bg-white transition-all"
           disabled={loading}
           autoComplete="off"

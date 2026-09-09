@@ -4,7 +4,8 @@ import Link from 'next/link';
 import { getPublicProfileByUsernameOrId } from '@/services/profiles';
 import { WanderListCard } from '@/components/lists/WanderListCard';
 import { ProfileJsonLd } from '@/components/seo/ProfileJsonLd';
-import { MapPin, Globe, Layers, ArrowRight, User } from 'lucide-react';
+import { MapPin, Globe, Layers, ArrowRight, User, Settings } from 'lucide-react';
+import { createClient } from '@/lib/supabase/server';
 
 export const revalidate = 60;
 
@@ -62,6 +63,13 @@ export default async function PublicProfilePage({ params }: ProfilePageProps) {
   const displayName = profile.display_name || profile.username || 'Traveler';
   const initials = displayName.slice(0, 2).toUpperCase();
   const listCount = publicLists.length;
+
+  const supabase = await createClient();
+  const {
+    data: { user: currentUser },
+  } = await supabase.auth.getUser();
+
+  const isSelf = currentUser && currentUser.id === profile.id;
 
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8 sm:space-y-10">
@@ -125,19 +133,27 @@ export default async function PublicProfilePage({ params }: ProfilePageProps) {
             </div>
           </div>
 
-          {/* Minimal Light Blend Action */}
-          {profile.username && (
-            <div className="pt-2 sm:pt-0 w-full sm:w-auto">
+          {/* Actions: Edit Profile (if self) or Blend Taste */}
+          <div className="pt-2 sm:pt-0 w-full sm:w-auto flex flex-col sm:flex-row gap-2 shrink-0">
+            {isSelf ? (
+              <Link
+                href="/settings"
+                className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-[#FAF6F0] hover:bg-[#F3ECE1] border border-[#E6DFD5] text-[#2C2A29] font-bold px-4 py-2.5 text-xs sm:text-sm active-press transition-colors"
+              >
+                <Settings className="h-4 w-4 text-[#78726D]" />
+                <span>Edit Settings</span>
+              </Link>
+            ) : profile.username ? (
               <Link
                 href={`/blend?with=${encodeURIComponent(profile.username)}`}
-                className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-[#F0F5F2] hover:bg-[#E3EEE8] border border-[#D5E3DC] text-[#3B594B] font-bold px-4 py-2.5 text-xs sm:text-sm active-press transition-colors shrink-0"
+                className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-[#F0F5F2] hover:bg-[#E3EEE8] border border-[#D5E3DC] text-[#3B594B] font-bold px-4 py-2.5 text-xs sm:text-sm active-press transition-colors"
               >
                 <span>✨</span>
                 <span>Blend Taste</span>
                 <ArrowRight className="h-3.5 w-3.5" />
               </Link>
-            </div>
-          )}
+            ) : null}
+          </div>
         </div>
       </header>
 

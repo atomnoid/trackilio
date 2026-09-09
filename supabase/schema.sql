@@ -7,10 +7,22 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE IF NOT EXISTS public.profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   display_name TEXT NOT NULL,
+  username TEXT UNIQUE CHECK (
+    username IS NULL OR (
+      char_length(username) >= 3 AND
+      char_length(username) <= 30 AND
+      username ~ '^[a-z0-9](?:[a-z0-9._-]{1,28}[a-z0-9])?$' AND
+      username !~ '\.\.'
+    )
+  ),
+  bio TEXT,
+  location TEXT,
   avatar_url TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
+
+CREATE INDEX IF NOT EXISTS idx_profiles_username ON public.profiles(username);
 
 -- 2. WANDER_LISTS
 CREATE TABLE IF NOT EXISTS public.wander_lists (
@@ -107,14 +119,33 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public
 AS $$
+DECLARE
+  v_username TEXT;
+  v_display_name TEXT;
+  v_avatar_url TEXT;
 BEGIN
-  INSERT INTO public.profiles (id, display_name, avatar_url)
+  v_username := NULLIF(LOWER(TRIM(NEW.raw_user_meta_data->>'username')), '');
+  v_display_name := COALESCE(NEW.raw_user_meta_data->>'display_name', split_part(NEW.email, '@', 1));
+  v_avatar_url := NEW.raw_user_meta_data->>'avatar_url';
+
+  IF v_username IS NOT NULL THEN
+    IF EXISTS (SELECT 1 FROM public.profiles WHERE LOWER(username) = v_username) THEN
+      v_username := NULL;
+    END IF;
+  END IF;
+
+  INSERT INTO public.profiles (id, display_name, username, avatar_url)
   VALUES (
     NEW.id,
-    COALESCE(NEW.raw_user_meta_data->>'display_name', split_part(NEW.email, '@', 1)),
-    NEW.raw_user_meta_data->>'avatar_url'
+    v_display_name,
+    v_username,
+    v_avatar_url
   )
-  ON CONFLICT (id) DO NOTHING;
+  ON CONFLICT (id) DO UPDATE SET
+    display_name = EXCLUDED.display_name,
+    username = COALESCE(public.profiles.username, EXCLUDED.username),
+    avatar_url = COALESCE(public.profiles.avatar_url, EXCLUDED.avatar_url);
+
   RETURN NEW;
 END;
 $$;
