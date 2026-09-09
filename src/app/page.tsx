@@ -1,13 +1,18 @@
 import Link from 'next/link';
 import { ArrowRight, Compass, Plus, Users, Sparkles, MapPin } from 'lucide-react';
 import { getPublicWanderLists } from '@/services/lists';
+import { getTodaysFact } from '@/services/dailyFacts';
 import { WanderList } from '@/types/database';
 import { WanderListCard } from '@/components/lists/WanderListCard';
+import { FunFactWidget } from '@/components/daily-fact/DailyFactCard';
 
 export const revalidate = 60; // Refresh public landing every 60s
 
 export default async function HomePage() {
-  const featuredLists = await getPublicWanderLists({ limit: 6 });
+  const [featuredLists, todaysFact] = await Promise.all([
+    getPublicWanderLists({ limit: 6 }),
+    getTodaysFact(),
+  ]);
 
   // Fallback demo data if DB has no lists yet
   const fallbackLists: WanderList[] = [
@@ -63,7 +68,14 @@ export default async function HomePage() {
         <div className="absolute top-40 -left-20 w-80 h-80 rounded-full bg-[#C53678]/10 blur-3xl pointer-events-none" />
 
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col items-center text-center max-w-4xl mx-auto space-y-8">
+          <div className="flex flex-col items-center text-center max-w-4xl mx-auto space-y-7">
+            {/* Top Interactive Fun Fact Widget */}
+            {todaysFact && (
+              <div className="w-full pb-2 animate-fade-in">
+                <FunFactWidget initialFact={todaysFact} variant="hero" />
+              </div>
+            )}
+
             {/* Eyebrow */}
             <span className="inline-flex items-center gap-2 rounded-full bg-[#FFEAE6] border border-[#FFD3CC] px-4 py-1.5 text-xs font-black text-[#FF5841]">
               <span className="h-2 w-2 rounded-full bg-[#FF5841] animate-pulse" />

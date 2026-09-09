@@ -18,10 +18,11 @@ import {
   UserPlus,
   Share2,
 } from 'lucide-react';
-import { SavedPlace, WanderList, BlendSession, Profile } from '@/types/database';
+import { SavedPlace, WanderList, BlendSession, Profile, DailyFact } from '@/types/database';
 import { WanderListCard } from '@/components/lists/WanderListCard';
 import { PlaceDiscoveryCard } from '@/components/places/PlaceDiscoveryCard';
 import { BlendHistoryCard } from '@/components/blend/BlendHistoryCard';
+import { FunFactWidget } from '@/components/daily-fact/DailyFactCard';
 
 interface InteractiveDashboardProps {
   userDisplayName: string;
@@ -30,6 +31,7 @@ interface InteractiveDashboardProps {
   initialSavedLists?: WanderList[];
   initialSavedPlaces?: SavedPlace[];
   initialBlendSessions?: Array<BlendSession & { otherUser?: Profile }>;
+  initialDailyFact?: DailyFact | null;
   userId: string;
 }
 
@@ -47,6 +49,7 @@ export function InteractiveDashboard({
   initialSavedLists = [],
   initialSavedPlaces = [],
   initialBlendSessions = [],
+  initialDailyFact,
   userId,
 }: InteractiveDashboardProps) {
   const router = useRouter();
@@ -209,6 +212,13 @@ export function InteractiveDashboard({
           </div>
         </div>
       </div>
+
+      {/* Daily Fun Fact Banner on Dashboard */}
+      {initialDailyFact && (
+        <div className="w-full">
+          <FunFactWidget initialFact={initialDailyFact} variant="dashboard" />
+        </div>
+      )}
 
       {/* Main Section Header with Filter Tabs */}
       <div className="space-y-6">

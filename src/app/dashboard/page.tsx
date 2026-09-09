@@ -5,6 +5,7 @@ import { getUserWanderLists, getUserCollaboratedLists, getUserSavedLists } from 
 import { getUserSavedPlaces } from '@/services/places';
 import { getProfile } from '@/services/profiles';
 import { getUserBlendSessions } from '@/services/blend';
+import { getTodaysFact } from '@/services/dailyFacts';
 import { InteractiveDashboard } from '@/components/dashboard/InteractiveDashboard';
 
 export const metadata: Metadata = {
@@ -23,13 +24,14 @@ export default async function DashboardPage() {
     redirect('/auth/login?redirect=/dashboard');
   }
 
-  const [profile, ownedLists, collabLists, savedLists, savedPlaces, blendSessions] = await Promise.all([
+  const [profile, ownedLists, collabLists, savedLists, savedPlaces, blendSessions, dailyFact] = await Promise.all([
     getProfile(user.id),
     getUserWanderLists(user.id),
     getUserCollaboratedLists(user.id),
     getUserSavedLists(user.id),
     getUserSavedPlaces(user.id),
     getUserBlendSessions(user.id),
+    getTodaysFact(),
   ]);
 
   const displayName = profile?.display_name || user.email?.split('@')[0] || 'Traveler';
@@ -43,6 +45,7 @@ export default async function DashboardPage() {
         initialSavedLists={savedLists}
         initialSavedPlaces={savedPlaces}
         initialBlendSessions={blendSessions}
+        initialDailyFact={dailyFact}
         userId={user.id}
       />
     </div>
