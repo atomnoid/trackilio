@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { UserPlus, X, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { sanitizeUsername } from '@/lib/username';
 
@@ -22,8 +23,25 @@ export function QuickInviteModal({
   const [inviting, setInviting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
+  if (!isOpen || !mounted) return null;
 
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,58 +78,166 @@ export function QuickInviteModal({
     }
   };
 
-  return (
+  const modal = (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs"
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 9999,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '1rem',
+        backgroundColor: 'rgba(0,0,0,0.65)',
+        backdropFilter: 'blur(4px)',
+        WebkitBackdropFilter: 'blur(4px)',
+      }}
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-md bg-white rounded-3xl border border-gray-100 p-6 sm:p-8 shadow-2xl space-y-6"
+        style={{
+          position: 'relative',
+          width: '100%',
+          maxWidth: '28rem',
+          backgroundColor: '#ffffff',
+          borderRadius: '1.5rem',
+          border: '1px solid #f3f4f6',
+          padding: '2rem',
+          boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
+        }}
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Close button */}
         <button
           type="button"
           onClick={onClose}
           aria-label="Close modal"
-          className="absolute top-5 right-5 p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors cursor-pointer"
+          style={{
+            position: 'absolute',
+            top: '1.25rem',
+            right: '1.25rem',
+            padding: '0.5rem',
+            borderRadius: '9999px',
+            border: 'none',
+            background: 'transparent',
+            cursor: 'pointer',
+            color: '#9ca3af',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.background = '#f3f4f6';
+            (e.currentTarget as HTMLButtonElement).style.color = '#111827';
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
+            (e.currentTarget as HTMLButtonElement).style.color = '#9ca3af';
+          }}
         >
-          <X className="h-5 w-5" />
+          <X style={{ width: '1.25rem', height: '1.25rem' }} />
         </button>
 
-        <div className="space-y-1.5 pr-6">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FFEAE6] text-[#FF5841] text-xs font-black">
-            <UserPlus className="h-3.5 w-3.5 stroke-[2.5]" />
+        {/* Header */}
+        <div style={{ paddingRight: '2rem', marginBottom: '1.5rem' }}>
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.375rem',
+              padding: '0.25rem 0.75rem',
+              borderRadius: '9999px',
+              backgroundColor: '#FFEAE6',
+              color: '#FF5841',
+              fontSize: '0.75rem',
+              fontWeight: 900,
+              marginBottom: '0.75rem',
+            }}
+          >
+            <UserPlus style={{ width: '0.875rem', height: '0.875rem' }} />
             <span>List Collaboration</span>
           </div>
-          <h2 className="font-sans text-2xl font-black text-gray-900 tracking-tight">
+          <h2
+            style={{
+              fontSize: '1.5rem',
+              fontWeight: 900,
+              color: '#111827',
+              letterSpacing: '-0.025em',
+              margin: '0 0 0.375rem 0',
+            }}
+          >
             Invite Collaborator
           </h2>
-          <p className="text-xs text-gray-500 font-medium leading-relaxed">
+          <p style={{ fontSize: '0.75rem', color: '#6b7280', margin: 0, lineHeight: 1.6 }}>
             Invite friends by @username to co-curate and plan this itinerary together.
           </p>
         </div>
 
+        {/* Error */}
         {error && (
-          <div className="rounded-2xl bg-rose-50 border border-rose-200 p-3.5 text-xs font-bold text-rose-800 flex items-center gap-2">
-            <AlertCircle className="h-4 w-4 shrink-0 text-rose-600" />
+          <div
+            style={{
+              borderRadius: '1rem',
+              backgroundColor: '#fff1f2',
+              border: '1px solid #fecdd3',
+              padding: '0.875rem',
+              fontSize: '0.75rem',
+              fontWeight: 700,
+              color: '#9f1239',
+              marginBottom: '1rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+            }}
+          >
+            <AlertCircle style={{ width: '1rem', height: '1rem', flexShrink: 0, color: '#dc2626' }} />
             <span>{error}</span>
           </div>
         )}
 
+        {/* Success */}
         {success && (
-          <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-3.5 text-xs font-bold text-emerald-800 flex items-center gap-2">
-            <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
+          <div
+            style={{
+              borderRadius: '1rem',
+              backgroundColor: '#f0fdf4',
+              border: '1px solid #bbf7d0',
+              padding: '0.875rem',
+              fontSize: '0.75rem',
+              fontWeight: 700,
+              color: '#14532d',
+              marginBottom: '1rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+            }}
+          >
+            <CheckCircle2 style={{ width: '1rem', height: '1rem', flexShrink: 0, color: '#16a34a' }} />
             <span>{success}</span>
           </div>
         )}
 
-        <form onSubmit={handleInvite} className="space-y-4">
-          <div className="space-y-1.5">
-            <label className="block text-xs font-bold text-gray-700">
+        <form onSubmit={handleInvite}>
+          {/* Username */}
+          <div style={{ marginBottom: '1rem' }}>
+            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#374151', marginBottom: '0.375rem' }}>
               Traveler Username
             </label>
-            <div className="relative">
-              <span className="absolute left-4 top-3.5 text-xs font-black text-gray-400">@</span>
+            <div style={{ position: 'relative' }}>
+              <span
+                style={{
+                  position: 'absolute',
+                  left: '1rem',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  fontSize: '0.75rem',
+                  fontWeight: 900,
+                  color: '#9ca3af',
+                  pointerEvents: 'none',
+                }}
+              >
+                @
+              </span>
               <input
                 type="text"
                 required
@@ -121,46 +247,101 @@ export function QuickInviteModal({
                 autoComplete="off"
                 spellCheck={false}
                 autoFocus
-                className="w-full rounded-2xl border border-gray-200 bg-gray-50 pl-8 pr-4 py-3 text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#FF5841]/20 focus:bg-white focus:border-[#FF5841] transition-all"
+                style={{
+                  width: '100%',
+                  borderRadius: '1rem',
+                  border: '1px solid #e5e7eb',
+                  backgroundColor: '#f9fafb',
+                  paddingLeft: '2rem',
+                  paddingRight: '1rem',
+                  paddingTop: '0.75rem',
+                  paddingBottom: '0.75rem',
+                  fontSize: '0.875rem',
+                  fontWeight: 500,
+                  color: '#111827',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                }}
               />
             </div>
           </div>
 
-          <div className="space-y-1.5">
-            <label className="block text-xs font-bold text-gray-700">
+          {/* Role */}
+          <div style={{ marginBottom: '1.25rem' }}>
+            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#374151', marginBottom: '0.375rem' }}>
               Permission Role
             </label>
             <select
               value={role}
               onChange={(e) => setRole(e.target.value as 'editor' | 'viewer')}
-              className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-xs font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#FF5841]/20 focus:border-[#FF5841] cursor-pointer"
+              style={{
+                width: '100%',
+                borderRadius: '1rem',
+                border: '1px solid #e5e7eb',
+                backgroundColor: '#f9fafb',
+                padding: '0.75rem 1rem',
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                color: '#111827',
+                outline: 'none',
+                cursor: 'pointer',
+                boxSizing: 'border-box',
+                appearance: 'auto',
+              }}
             >
               <option value="editor">Editor — Can add, edit, and organize places</option>
               <option value="viewer">Viewer — Can view and explore only</option>
             </select>
           </div>
 
-          <div className="pt-2 flex items-center gap-3">
+          {/* Actions */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-3 px-4 rounded-2xl border border-gray-200 text-xs font-bold text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer"
+              style={{
+                flex: 1,
+                padding: '0.75rem 1rem',
+                borderRadius: '1rem',
+                border: '1px solid #e5e7eb',
+                backgroundColor: '#ffffff',
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                color: '#4b5563',
+                cursor: 'pointer',
+              }}
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={inviting || !username.trim()}
-              className="flex-1 inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#FF5841] to-[#C53678] hover:opacity-95 disabled:opacity-50 text-white font-black py-3 px-4 text-xs shadow-md active-press transition-all cursor-pointer"
+              style={{
+                flex: 1,
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem',
+                borderRadius: '1rem',
+                border: 'none',
+                background: 'linear-gradient(to right, #FF5841, #C53678)',
+                color: '#ffffff',
+                fontWeight: 900,
+                padding: '0.75rem 1rem',
+                fontSize: '0.75rem',
+                boxShadow: '0 4px 12px rgba(255, 88, 65, 0.35)',
+                cursor: inviting || !username.trim() ? 'not-allowed' : 'pointer',
+                opacity: inviting || !username.trim() ? 0.6 : 1,
+              }}
             >
               {inviting ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader2 style={{ width: '1rem', height: '1rem', animation: 'spin 1s linear infinite' }} />
                   <span>Inviting…</span>
                 </>
               ) : (
                 <>
-                  <UserPlus className="h-4 w-4" />
+                  <UserPlus style={{ width: '1rem', height: '1rem' }} />
                   <span>Send Invite</span>
                 </>
               )}
@@ -170,4 +351,6 @@ export function QuickInviteModal({
       </div>
     </div>
   );
+
+  return createPortal(modal, document.body);
 }

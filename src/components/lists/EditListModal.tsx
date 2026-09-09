@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
-import { Edit3, Trash2, X, Loader2, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { Edit3, Trash2, X, Loader2, AlertTriangle } from 'lucide-react';
 
 interface EditListModalProps {
   listId: string;
@@ -34,8 +35,25 @@ export function EditListModal({
   const [deleting, setDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
+  if (!isOpen || !mounted) return null;
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,60 +115,154 @@ export function EditListModal({
     }
   };
 
-  return (
+  const modal = (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs"
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 9999,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '1rem',
+        backgroundColor: 'rgba(0,0,0,0.65)',
+        backdropFilter: 'blur(4px)',
+        WebkitBackdropFilter: 'blur(4px)',
+      }}
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-lg bg-white rounded-3xl border border-gray-100 p-6 sm:p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto no-scrollbar"
+        style={{
+          position: 'relative',
+          width: '100%',
+          maxWidth: '32rem',
+          backgroundColor: '#ffffff',
+          borderRadius: '1.5rem',
+          border: '1px solid #f3f4f6',
+          padding: '2rem',
+          boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
+          maxHeight: '90vh',
+          overflowY: 'auto',
+        }}
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Close button */}
         <button
           type="button"
           onClick={onClose}
           aria-label="Close modal"
-          className="absolute top-5 right-5 p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors cursor-pointer"
+          style={{
+            position: 'absolute',
+            top: '1.25rem',
+            right: '1.25rem',
+            padding: '0.5rem',
+            borderRadius: '9999px',
+            border: 'none',
+            background: 'transparent',
+            cursor: 'pointer',
+            color: '#9ca3af',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.background = '#f3f4f6';
+            (e.currentTarget as HTMLButtonElement).style.color = '#111827';
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
+            (e.currentTarget as HTMLButtonElement).style.color = '#9ca3af';
+          }}
         >
-          <X className="h-5 w-5" />
+          <X style={{ width: '1.25rem', height: '1.25rem' }} />
         </button>
 
-        <div className="space-y-1 pr-6">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FFEAE6] text-[#FF5841] text-xs font-black">
-            <Edit3 className="h-3.5 w-3.5" />
+        {/* Header */}
+        <div style={{ paddingRight: '2rem', marginBottom: '1.5rem' }}>
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.375rem',
+              padding: '0.25rem 0.75rem',
+              borderRadius: '9999px',
+              backgroundColor: '#FFEAE6',
+              color: '#FF5841',
+              fontSize: '0.75rem',
+              fontWeight: 900,
+              marginBottom: '0.75rem',
+            }}
+          >
+            <Edit3 style={{ width: '0.875rem', height: '0.875rem' }} />
             <span>List Settings</span>
           </div>
-          <h2 className="font-sans text-2xl font-black text-gray-900 tracking-tight">
-            Edit Guide & Itinerary
+          <h2
+            style={{
+              fontSize: '1.5rem',
+              fontWeight: 900,
+              color: '#111827',
+              letterSpacing: '-0.025em',
+              margin: 0,
+            }}
+          >
+            Edit Guide &amp; Itinerary
           </h2>
         </div>
 
+        {/* Error */}
         {error && (
-          <div className="rounded-2xl bg-rose-50 border border-rose-200 p-3.5 text-xs font-bold text-rose-800">
+          <div
+            style={{
+              borderRadius: '1rem',
+              backgroundColor: '#fff1f2',
+              border: '1px solid #fecdd3',
+              padding: '0.875rem',
+              fontSize: '0.75rem',
+              fontWeight: 700,
+              color: '#9f1239',
+              marginBottom: '1rem',
+            }}
+          >
             {error}
           </div>
         )}
 
         {showDeleteConfirm ? (
-          <div className="rounded-2xl bg-rose-50 border border-rose-200 p-5 space-y-4">
-            <div className="flex items-start gap-3">
-              <AlertTriangle className="h-5 w-5 text-rose-600 shrink-0 mt-0.5" />
-              <div className="space-y-1">
-                <h4 className="font-sans text-sm font-black text-rose-900">
+          <div
+            style={{
+              borderRadius: '1rem',
+              backgroundColor: '#fff1f2',
+              border: '1px solid #fecdd3',
+              padding: '1.25rem',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', marginBottom: '1rem' }}>
+              <AlertTriangle style={{ width: '1.25rem', height: '1.25rem', color: '#dc2626', flexShrink: 0, marginTop: '0.125rem' }} />
+              <div>
+                <h4 style={{ fontSize: '0.875rem', fontWeight: 900, color: '#7f1d1d', margin: '0 0 0.25rem 0' }}>
                   Are you sure you want to delete this list?
                 </h4>
-                <p className="text-xs text-rose-700 font-medium leading-relaxed">
-                  This action cannot be undone. All places, notes, and collaborator links in this list will be permanently removed.
+                <p style={{ fontSize: '0.75rem', color: '#b91c1c', margin: 0, lineHeight: 1.6 }}>
+                  This action cannot be undone. All places, notes, and collaborator links will be permanently removed.
                 </p>
               </div>
             </div>
-
-            <div className="flex gap-2.5 pt-2">
+            <div style={{ display: 'flex', gap: '0.625rem' }}>
               <button
                 type="button"
                 onClick={() => setShowDeleteConfirm(false)}
                 disabled={deleting}
-                className="flex-1 py-2.5 px-4 rounded-xl border border-rose-200 bg-white text-xs font-bold text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
+                style={{
+                  flex: 1,
+                  padding: '0.625rem 1rem',
+                  borderRadius: '0.75rem',
+                  border: '1px solid #fecdd3',
+                  backgroundColor: '#ffffff',
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  color: '#374151',
+                  cursor: 'pointer',
+                }}
               >
                 Keep List
               </button>
@@ -158,86 +270,194 @@ export function EditListModal({
                 type="button"
                 onClick={handleDelete}
                 disabled={deleting}
-                className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-black py-2.5 px-4 transition-colors disabled:opacity-50 cursor-pointer"
+                style={{
+                  flex: 1,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.375rem',
+                  padding: '0.625rem 1rem',
+                  borderRadius: '0.75rem',
+                  border: 'none',
+                  backgroundColor: '#dc2626',
+                  color: '#ffffff',
+                  fontSize: '0.75rem',
+                  fontWeight: 900,
+                  cursor: deleting ? 'not-allowed' : 'pointer',
+                  opacity: deleting ? 0.6 : 1,
+                }}
               >
-                {deleting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                {deleting ? <Loader2 style={{ width: '0.875rem', height: '0.875rem', animation: 'spin 1s linear infinite' }} /> : <Trash2 style={{ width: '0.875rem', height: '0.875rem' }} />}
                 <span>{deleting ? 'Deleting…' : 'Yes, Delete Permanently'}</span>
               </button>
             </div>
           </div>
         ) : (
-          <form onSubmit={handleUpdate} className="space-y-4">
-            <div className="space-y-1">
-              <label className="block text-xs font-bold text-gray-700">List Title *</label>
+          <form onSubmit={handleUpdate}>
+            {/* Title */}
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#374151', marginBottom: '0.375rem' }}>
+                List Title *
+              </label>
               <input
                 type="text"
                 required
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g. Best Coffee & Food in Tokyo"
-                className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#FF5841]/20 focus:bg-white focus:border-[#FF5841] transition-all"
+                style={{
+                  width: '100%',
+                  borderRadius: '1rem',
+                  border: '1px solid #e5e7eb',
+                  backgroundColor: '#f9fafb',
+                  padding: '0.75rem 1rem',
+                  fontSize: '0.875rem',
+                  fontWeight: 500,
+                  color: '#111827',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                }}
               />
             </div>
 
-            <div className="space-y-1">
-              <label className="block text-xs font-bold text-gray-700">Destination / Region</label>
+            {/* Destination */}
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#374151', marginBottom: '0.375rem' }}>
+                Destination / Region
+              </label>
               <input
                 type="text"
                 value={destination}
                 onChange={(e) => setDestination(e.target.value)}
                 placeholder="e.g. Tokyo, Japan"
-                className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#FF5841]/20 focus:bg-white focus:border-[#FF5841] transition-all"
+                style={{
+                  width: '100%',
+                  borderRadius: '1rem',
+                  border: '1px solid #e5e7eb',
+                  backgroundColor: '#f9fafb',
+                  padding: '0.75rem 1rem',
+                  fontSize: '0.875rem',
+                  fontWeight: 500,
+                  color: '#111827',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                }}
               />
             </div>
 
-            <div className="space-y-1">
-              <label className="block text-xs font-bold text-gray-700">Description</label>
+            {/* Description */}
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#374151', marginBottom: '0.375rem' }}>
+                Description
+              </label>
               <textarea
                 rows={3}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Curated itinerary for weekend coffee lovers..."
-                className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-xs font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#FF5841]/20 focus:bg-white focus:border-[#FF5841] transition-all"
+                style={{
+                  width: '100%',
+                  borderRadius: '1rem',
+                  border: '1px solid #e5e7eb',
+                  backgroundColor: '#f9fafb',
+                  padding: '0.75rem 1rem',
+                  fontSize: '0.75rem',
+                  fontWeight: 500,
+                  color: '#111827',
+                  outline: 'none',
+                  resize: 'vertical',
+                  boxSizing: 'border-box',
+                  fontFamily: 'inherit',
+                }}
               />
             </div>
 
-            <div className="flex items-center justify-between p-3.5 rounded-2xl bg-gray-50 border border-gray-200">
-              <div className="space-y-0.5">
-                <span className="text-xs font-bold text-gray-900">Public Discoverability</span>
-                <p className="text-[11px] text-gray-500">Allow other travelers to discover this list.</p>
+            {/* Public toggle */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '0.875rem',
+                borderRadius: '1rem',
+                backgroundColor: '#f9fafb',
+                border: '1px solid #e5e7eb',
+                marginBottom: '1.25rem',
+              }}
+            >
+              <div>
+                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#111827', display: 'block' }}>Public Discoverability</span>
+                <p style={{ fontSize: '0.6875rem', color: '#6b7280', margin: 0 }}>Allow other travelers to discover this list.</p>
               </div>
               <input
                 type="checkbox"
                 checked={isPublic}
                 onChange={(e) => setIsPublic(e.target.checked)}
-                className="h-4 w-4 rounded accent-[#FF5841] cursor-pointer"
+                style={{ width: '1rem', height: '1rem', cursor: 'pointer', accentColor: '#FF5841' }}
               />
             </div>
 
-            <div className="pt-2 flex items-center justify-between gap-3">
+            {/* Actions */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem' }}>
               <button
                 type="button"
                 onClick={() => setShowDeleteConfirm(true)}
-                className="inline-flex items-center gap-1.5 px-3.5 py-3 rounded-2xl text-rose-600 hover:bg-rose-50 text-xs font-bold transition-colors cursor-pointer"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.375rem',
+                  padding: '0.75rem 0.875rem',
+                  borderRadius: '1rem',
+                  border: 'none',
+                  background: 'transparent',
+                  color: '#dc2626',
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                }}
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 style={{ width: '1rem', height: '1rem' }} />
                 <span>Delete</span>
               </button>
 
-              <div className="flex items-center gap-2 ml-auto">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <button
                   type="button"
                   onClick={onClose}
-                  className="py-3 px-4 rounded-2xl border border-gray-200 text-xs font-bold text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer"
+                  style={{
+                    padding: '0.75rem 1rem',
+                    borderRadius: '1rem',
+                    border: '1px solid #e5e7eb',
+                    backgroundColor: '#ffffff',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    color: '#4b5563',
+                    cursor: 'pointer',
+                  }}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loading || !title.trim()}
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#FF5841] to-[#C53678] hover:opacity-95 disabled:opacity-50 text-white font-black py-3 px-5 text-xs shadow-md active-press transition-all cursor-pointer"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.5rem',
+                    borderRadius: '1rem',
+                    border: 'none',
+                    background: 'linear-gradient(to right, #FF5841, #C53678)',
+                    color: '#ffffff',
+                    fontWeight: 900,
+                    padding: '0.75rem 1.25rem',
+                    fontSize: '0.75rem',
+                    boxShadow: '0 4px 12px rgba(255, 88, 65, 0.35)',
+                    cursor: loading || !title.trim() ? 'not-allowed' : 'pointer',
+                    opacity: loading || !title.trim() ? 0.6 : 1,
+                  }}
                 >
-                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                  {loading ? <Loader2 style={{ width: '1rem', height: '1rem', animation: 'spin 1s linear infinite' }} /> : null}
                   <span>{loading ? 'Saving…' : 'Save Changes'}</span>
                 </button>
               </div>
@@ -247,4 +467,6 @@ export function EditListModal({
       </div>
     </div>
   );
+
+  return createPortal(modal, document.body);
 }
