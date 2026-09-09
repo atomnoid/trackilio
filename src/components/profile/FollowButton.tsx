@@ -40,23 +40,25 @@ export function FollowButton({
         });
 
         if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
           if (res.status === 401) {
             router.push('/auth/login');
             setIsFollowing(!nextState);
             if (onFollowChange) onFollowChange(!nextState);
             return;
           }
-          throw new Error('Follow request failed');
+          throw new Error(errData.error || `Follow request failed with status ${res.status}`);
         }
 
         router.refresh();
-      } catch (err) {
-        console.error('Follow error:', err);
+      } catch (err: any) {
+        console.error('Follow error:', err?.message || err);
         // Rollback state on failure
         setIsFollowing(!nextState);
         if (onFollowChange) onFollowChange(!nextState);
       }
     });
+
   };
 
   const isSmall = size === 'sm';

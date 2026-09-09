@@ -45,18 +45,20 @@ export async function POST(request: Request) {
 
     if (!result.success) {
       // Handle duplicate follow gracefully
-      if (result.error?.includes('Already following')) {
+      if (result.error?.includes('Already following') || result.error?.includes('23505')) {
         return NextResponse.json({ following: true, message: 'Already following.' });
       }
-      return NextResponse.json({ error: result.error }, { status: 400 });
+      console.error('Follow API error from service:', result.error);
+      return NextResponse.json({ error: result.error || 'Failed to follow user.' }, { status: 400 });
     }
 
     return NextResponse.json({ following: true });
   } catch (err: any) {
-    console.error('Follow API POST error:', err?.message);
-    return NextResponse.json({ error: 'Failed to follow user.' }, { status: 500 });
+    console.error('Follow API POST exception:', err?.message || err);
+    return NextResponse.json({ error: err?.message || 'Failed to follow user.' }, { status: 500 });
   }
 }
+
 
 // DELETE /api/follows — unfollow a user
 export async function DELETE(request: Request) {
