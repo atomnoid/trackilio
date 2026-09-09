@@ -39,6 +39,27 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Non-critical — continue without profile entries
   }
 
+  // Fetch all public places
+  let placeEntries: MetadataRoute.Sitemap = [];
+  try {
+    const supabase = await createClient();
+    const { data: places } = await (supabase as any)
+      .from('places')
+      .select('id, slug, updated_at')
+      .limit(1000);
+
+    if (places) {
+      placeEntries = places.map((p: any) => ({
+        url: `${siteUrl}/place/${p.slug || p.id}`,
+        lastModified: p.updated_at ? new Date(p.updated_at) : new Date(),
+        changeFrequency: 'weekly' as const,
+        priority: 0.8,
+      }));
+    }
+  } catch {
+    // Non-critical — continue without place entries
+  }
+
   return [
     {
       url: siteUrl,
@@ -66,6 +87,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     ...listEntries,
     ...profileEntries,
+    ...placeEntries,
   ];
 }
+
 

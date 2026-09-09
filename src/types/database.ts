@@ -46,12 +46,38 @@ export interface ListMember {
 export interface Place {
   id: string;
   name: string;
+  slug?: string;
   location: string | null;
+  city?: string | null;
   country: string | null;
   category: string | null;
+  address?: string | null;
+  description?: string | null;
+  website?: string | null;
+  image_url?: string | null;
+  rating?: number | null;
+  lat?: number | null;
+  lng?: number | null;
   maps_url: string | null;
   created_at: string;
   updated_at: string;
+  // Computed / Joined fields
+  community_score?: number;
+  upvotes_count?: number;
+  downvotes_count?: number;
+  saves_count?: number;
+  lists_count?: number;
+  is_saved?: boolean;
+  user_vote_type?: VoteType | null;
+  comments?: Comment[];
+}
+
+export interface SavedPlace {
+  id: string;
+  user_id: string;
+  place_id: string;
+  created_at: string;
+  place?: Place;
 }
 
 export interface ListPlace {
@@ -163,6 +189,11 @@ export interface Database {
         Row: BlendSession;
         Insert: Omit<BlendSession, 'id' | 'created_at'> & { id?: string; created_at?: string };
         Update: Partial<Omit<BlendSession, 'id'>>;
+      };
+      saved_places: {
+        Row: SavedPlace;
+        Insert: Omit<SavedPlace, 'id' | 'created_at'> & { id?: string; created_at?: string };
+        Update: Partial<Omit<SavedPlace, 'id'>>;
       };
     };
   };

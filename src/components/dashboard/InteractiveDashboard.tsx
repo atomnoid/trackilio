@@ -2,14 +2,27 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { WanderList } from '@/types/database';
+import { SavedPlace, WanderList } from '@/types/database';
 import { WanderListCard } from '@/components/lists/WanderListCard';
-import { Plus, Compass, Globe, Lock, Sparkles, MapPin, ArrowRight, Zap, CheckCircle2 } from 'lucide-react';
+import { PlaceDiscoveryCard } from '@/components/places/PlaceDiscoveryCard';
+import {
+  Plus,
+  Compass,
+  Globe,
+  Lock,
+  Sparkles,
+  MapPin,
+  Bookmark,
+  Zap,
+  CheckCircle2,
+  FolderHeart,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 interface InteractiveDashboardProps {
   userDisplayName: string;
   initialLists: WanderList[];
+  initialSavedPlaces?: SavedPlace[];
   userId: string;
 }
 
@@ -23,11 +36,13 @@ const TEMPLATE_SUGGESTIONS = [
 export function InteractiveDashboard({
   userDisplayName,
   initialLists,
+  initialSavedPlaces = [],
   userId,
 }: InteractiveDashboardProps) {
   const router = useRouter();
   const [lists, setLists] = useState<WanderList[]>(initialLists);
-  const [filter, setFilter] = useState<'all' | 'public' | 'private'>('all');
+  const [savedPlaces, setSavedPlaces] = useState<SavedPlace[]>(initialSavedPlaces);
+  const [filter, setFilter] = useState<'all' | 'public' | 'private' | 'saved'>('all');
   const [quickTitle, setQuickTitle] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const [createdSuccess, setCreatedSuccess] = useState<string | null>(null);
@@ -58,7 +73,6 @@ export function InteractiveDashboard({
         setTimeout(() => setCreatedSuccess(null), 3000);
         router.push(`/l/${data.slug}`);
       } else {
-        // Fallback navigation to /create with prefilled title
         router.push(`/create?title=${encodeURIComponent(finalTitle)}`);
       }
     } catch {
@@ -85,20 +99,29 @@ export function InteractiveDashboard({
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-amber-300">
               <Sparkles className="h-3.5 w-3.5" /> Easy-as-Air Workspace
             </span>
-            <h1 className="font-sans text-3xl sm:text-4xl font-black text-white">
+            <h1 className="font-sans text-3xl sm:text-4xl font-black text-white tracking-tight">
               Welcome back, {userDisplayName}! 👋
             </h1>
             <p className="text-xs sm:text-sm text-[#9E968F] font-medium max-w-lg">
-              Where are you traveling next? Create a list instantly or pick a 1-click template below.
+              Organize your saved spots into collections, plan upcoming trips, or share guides with friends.
             </p>
           </div>
 
-          <Link
-            href="/create"
-            className="inline-flex items-center gap-2 rounded-xl bg-[#4A6B5D] hover:bg-[#3B594B] text-white px-5 py-3 text-xs font-bold shadow-2xs active-press transition-all shrink-0 self-start md:self-auto"
-          >
-            <Plus className="h-4 w-4 stroke-[2.5]" /> Full List Creator
-          </Link>
+          <div className="flex items-center gap-2 self-start md:self-auto shrink-0">
+            <Link
+              href="/discover"
+              className="inline-flex items-center gap-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white px-4 py-3 text-xs font-bold transition-all active-press"
+            >
+              <Compass className="h-4 w-4 text-amber-300" /> Discover Places
+            </Link>
+
+            <Link
+              href="/create"
+              className="inline-flex items-center gap-2 rounded-xl bg-[#4A6B5D] hover:bg-[#3B594B] text-white px-5 py-3 text-xs font-bold shadow-2xs active-press transition-all"
+            >
+              <Plus className="h-4 w-4 stroke-[2.5]" /> Create List
+            </Link>
+          </div>
         </div>
 
         {/* Instant 1-Click Creation Input */}
@@ -159,51 +182,68 @@ export function InteractiveDashboard({
       </div>
 
       {/* Stats Quick Bar */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div className="bg-white border border-[#E6DFD5] rounded-2xl p-5 shadow-2xs space-y-1 cozy-card">
           <span className="text-[11px] font-extrabold text-[#78726D] uppercase tracking-wider">
             Total Lists
           </span>
-          <p className="text-3xl font-black font-sans text-[#2C2A29]">{lists.length}</p>
+          <p className="text-2xl sm:text-3xl font-black font-sans text-[#2C2A29]">{lists.length}</p>
         </div>
 
         <div className="bg-white border border-[#E6DFD5] rounded-2xl p-5 shadow-2xs space-y-1 cozy-card">
           <span className="text-[11px] font-extrabold text-[#4A6B5D] uppercase tracking-wider flex items-center gap-1.5">
-            <Globe className="h-3.5 w-3.5 text-[#4A6B5D]" /> Public Guides
+            <Globe className="h-3.5 w-3.5 text-[#4A6B5D]" /> Public
           </span>
-          <p className="text-3xl font-black font-sans text-[#2C2A29]">{publicCount}</p>
+          <p className="text-2xl sm:text-3xl font-black font-sans text-[#2C2A29]">{publicCount}</p>
         </div>
 
         <div className="bg-white border border-[#E6DFD5] rounded-2xl p-5 shadow-2xs space-y-1 cozy-card">
           <span className="text-[11px] font-extrabold text-[#78726D] uppercase tracking-wider flex items-center gap-1.5">
-            <Lock className="h-3.5 w-3.5 text-[#78726D]" /> Private Lists
+            <Lock className="h-3.5 w-3.5 text-[#78726D]" /> Private
           </span>
-          <p className="text-3xl font-black font-sans text-[#2C2A29]">{privateCount}</p>
+          <p className="text-2xl sm:text-3xl font-black font-sans text-[#2C2A29]">{privateCount}</p>
+        </div>
+
+        <div className="bg-white border border-[#E6DFD5] rounded-2xl p-5 shadow-2xs space-y-1 cozy-card">
+          <span className="text-[11px] font-extrabold text-[#D96B43] uppercase tracking-wider flex items-center gap-1.5">
+            <Bookmark className="h-3.5 w-3.5 text-[#D96B43]" /> Saved Places
+          </span>
+          <p className="text-2xl sm:text-3xl font-black font-sans text-[#2C2A29]">{savedPlaces.length}</p>
         </div>
       </div>
 
-      {/* Lists Controls & Tabs */}
+      {/* Lists & Saved Places Tabs */}
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E6DFD5] pb-3">
-          <h2 className="font-sans text-2xl font-black text-[#2C2A29]">
-            My Lists ({filteredLists.length})
+          <h2 className="font-sans text-2xl font-black text-[#2C2A29] flex items-center gap-2">
+            {filter === 'saved' ? (
+              <>
+                <Bookmark className="h-5 w-5 text-[#D96B43]" />
+                Saved Places ({savedPlaces.length})
+              </>
+            ) : (
+              <>
+                <FolderHeart className="h-5 w-5 text-[#4A6B5D]" />
+                My Collections ({filteredLists.length})
+              </>
+            )}
           </h2>
 
           {/* Interactive Filter Pills */}
-          <div className="flex items-center gap-1 bg-[#F3ECE1] p-1 rounded-xl border border-[#E6DFD5]">
+          <div className="flex items-center gap-1 bg-[#F3ECE1] p-1 rounded-xl border border-[#E6DFD5] overflow-x-auto">
             <button
               onClick={() => setFilter('all')}
-              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
                 filter === 'all'
                   ? 'bg-white text-[#2C2A29] shadow-2xs'
                   : 'text-[#78726D] hover:text-[#2C2A29]'
               }`}
             >
-              All ({lists.length})
+              All Lists ({lists.length})
             </button>
             <button
               onClick={() => setFilter('public')}
-              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
                 filter === 'public'
                   ? 'bg-white text-[#4A6B5D] shadow-2xs'
                   : 'text-[#78726D] hover:text-[#2C2A29]'
@@ -213,7 +253,7 @@ export function InteractiveDashboard({
             </button>
             <button
               onClick={() => setFilter('private')}
-              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
                 filter === 'private'
                   ? 'bg-white text-[#2C2A29] shadow-2xs'
                   : 'text-[#78726D] hover:text-[#2C2A29]'
@@ -221,38 +261,88 @@ export function InteractiveDashboard({
             >
               Private ({privateCount})
             </button>
+            <button
+              onClick={() => setFilter('saved')}
+              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
+                filter === 'saved'
+                  ? 'bg-white text-[#D96B43] shadow-2xs'
+                  : 'text-[#78726D] hover:text-[#2C2A29]'
+              }`}
+            >
+              Saved Places ({savedPlaces.length})
+            </button>
           </div>
         </div>
 
-        {/* Lists Grid */}
-        {filteredLists.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredLists.map((list) => (
-              <WanderListCard key={list.id} list={list} />
-            ))}
-          </div>
+        {/* Content Section */}
+        {filter === 'saved' ? (
+          /* Saved Places Grid */
+          savedPlaces.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {savedPlaces.map((sp) => {
+                if (!sp.place) return null;
+                return (
+                  <PlaceDiscoveryCard
+                    key={sp.id}
+                    place={{ ...sp.place, is_saved: true }}
+                    currentUserId={userId}
+                  />
+                );
+              })}
+            </div>
+          ) : (
+            <div className="rounded-3xl bg-white border border-[#E6DFD5] p-12 text-center space-y-4 shadow-2xs max-w-lg mx-auto">
+              <div className="h-14 w-14 rounded-2xl bg-[#F0F5F2] text-[#4A6B5D] flex items-center justify-center mx-auto">
+                <Bookmark className="h-7 w-7 stroke-[2]" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="font-sans text-xl font-bold text-[#2C2A29]">
+                  You haven&apos;t saved any places yet
+                </h3>
+                <p className="text-[#78726D] text-xs font-medium">
+                  When you find spots, cafés, or attractions you love, click the save button to bookmark them here.
+                </p>
+              </div>
+              <Link
+                href="/discover"
+                className="inline-flex items-center gap-2 rounded-xl bg-[#4A6B5D] text-white font-extrabold px-5 py-2.5 text-xs shadow-2xs hover:bg-[#3B594B] active-press transition-colors"
+              >
+                <Compass className="h-4 w-4" /> Discover Places
+              </Link>
+            </div>
+          )
         ) : (
-          <div className="rounded-3xl bg-white border border-[#E6DFD5] p-12 text-center space-y-4 shadow-2xs max-w-lg mx-auto">
-            <div className="h-14 w-14 rounded-2xl bg-[#F3ECE1] text-[#2C2A29] flex items-center justify-center mx-auto">
-              <Compass className="h-7 w-7 stroke-[2]" />
+          /* Lists Grid */
+          filteredLists.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {filteredLists.map((list) => (
+                <WanderListCard key={list.id} list={list} />
+              ))}
             </div>
-            <div className="space-y-1">
-              <h3 className="font-sans text-xl font-bold text-[#2C2A29]">
-                No lists found in this filter
-              </h3>
-              <p className="text-[#78726D] text-xs font-medium">
-                Create a new list or pick a quick template above to start collecting places.
-              </p>
+          ) : (
+            <div className="rounded-3xl bg-white border border-[#E6DFD5] p-12 text-center space-y-4 shadow-2xs max-w-lg mx-auto">
+              <div className="h-14 w-14 rounded-2xl bg-[#F3ECE1] text-[#2C2A29] flex items-center justify-center mx-auto">
+                <Compass className="h-7 w-7 stroke-[2]" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="font-sans text-xl font-bold text-[#2C2A29]">
+                  No lists found in this filter
+                </h3>
+                <p className="text-[#78726D] text-xs font-medium">
+                  Create a new list or pick a quick template above to start collecting places.
+                </p>
+              </div>
+              <button
+                onClick={() => handleQuickCreate('My Next Adventure')}
+                className="inline-flex items-center gap-2 rounded-xl bg-[#4A6B5D] text-white font-extrabold px-5 py-2.5 text-xs shadow-2xs hover:bg-[#3B594B] active-press transition-colors"
+              >
+                <Zap className="h-4 w-4" /> Instant Create List
+              </button>
             </div>
-            <button
-              onClick={() => handleQuickCreate('My Next Adventure')}
-              className="inline-flex items-center gap-2 rounded-xl bg-[#4A6B5D] text-white font-extrabold px-5 py-2.5 text-xs shadow-2xs hover:bg-[#3B594B] active-press transition-colors"
-            >
-              <Zap className="h-4 w-4" /> Instant Create List
-            </button>
-          </div>
+          )
         )}
       </div>
     </div>
   );
 }
+
