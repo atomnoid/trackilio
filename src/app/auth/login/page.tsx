@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { LoginForm } from '@/components/auth/LoginForm';
+import { TrackilioBalloonLogo } from '@/components/brand/TrackilioBalloonLogo';
 
 export const metadata: Metadata = {
   title: 'Log In to Trackilio',
@@ -17,10 +18,13 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const redirectUrl = resolvedParams.redirect || '/dashboard';
 
   return (
-    <div className="mx-auto max-w-md px-4 py-16 space-y-6">
-      <div className="text-center space-y-2">
-        <h1 className="font-sans text-3xl font-black text-gray-900">Welcome Back</h1>
-        <p className="text-sm text-gray-500 font-normal">Sign in to your Trackilio account</p>
+    <div className="mx-auto max-w-md px-4 py-12 sm:py-16 space-y-6">
+      <div className="text-center space-y-3">
+        <div className="flex justify-center pb-1">
+          <TrackilioBalloonLogo size={72} animated={true} />
+        </div>
+        <h1 className="font-sans text-3xl font-black text-[#222222]">Welcome Back</h1>
+        <p className="text-xs sm:text-sm text-[#6B6862] font-normal">Sign in to your Trackilio account</p>
       </div>
 
       {resolvedParams.error && (

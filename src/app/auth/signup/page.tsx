@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { SignupForm } from '@/components/auth/SignupForm';
+import { TrackilioBalloonLogo } from '@/components/brand/TrackilioBalloonLogo';
 
 export const metadata: Metadata = {
   title: 'Sign Up for Trackilio',
@@ -17,9 +18,12 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
 
   return (
     <div className="mx-auto max-w-md px-4 py-12 sm:py-16 space-y-6">
-      <div className="text-center space-y-2">
-        <h1 className="font-sans text-3xl sm:text-4xl font-black text-[#2C2A29]">Join Trackilio ✨</h1>
-        <p className="text-xs sm:text-sm text-[#78726D] font-normal">
+      <div className="text-center space-y-3">
+        <div className="flex justify-center pb-1">
+          <TrackilioBalloonLogo size={72} animated={true} />
+        </div>
+        <h1 className="font-sans text-3xl sm:text-4xl font-black text-[#222222]">Join Trackilio</h1>
+        <p className="text-xs sm:text-sm text-[#6B6862] font-normal">
           Pick your unique username, organize places, plan trips, and blend travel tastes.
         </p>
       </div>

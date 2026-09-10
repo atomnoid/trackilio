@@ -14,7 +14,7 @@ import {
 } from '@/components/illustrations/TrackilioIllustrations';
 import { ArrowRightIcon } from '@/components/icons/Icons';
 
-export const revalidate = 0;
+export const revalidate = 60;
 
 export default async function HomePage() {
   const supabase = await createClient();
