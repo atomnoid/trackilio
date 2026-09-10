@@ -6,6 +6,7 @@ import {
   SparklesIcon,
   CheckIcon,
   PlusIcon,
+  CloseIcon,
 } from '@/components/icons/Icons';
 
 export interface Spot {
@@ -24,7 +25,6 @@ export interface Spot {
   };
   upvotes: number;
   bestTime: string;
-  walkTimeFromPrev?: string;
   address: string;
 }
 
@@ -89,7 +89,6 @@ const CITY_PRESETS: CityPreset[] = [
         },
         upvotes: 312,
         bestTime: 'Sunrise / Early Morning',
-        walkTimeFromPrev: '14 min bike ride',
         address: 'Arashiyama, Ukyo Ward, Kyoto',
       },
       {
@@ -108,7 +107,6 @@ const CITY_PRESETS: CityPreset[] = [
         },
         upvotes: 245,
         bestTime: '10:30 AM',
-        walkTimeFromPrev: '8 min walk',
         address: '87-5 Hoshinocho, Higashiyama',
       },
       {
@@ -127,7 +125,6 @@ const CITY_PRESETS: CityPreset[] = [
         },
         upvotes: 198,
         bestTime: '5:45 PM (Sunset)',
-        walkTimeFromPrev: '12 min walk',
         address: 'Kamogawa Riverbank, Kyoto',
       },
       {
@@ -146,7 +143,6 @@ const CITY_PRESETS: CityPreset[] = [
         },
         upvotes: 276,
         bestTime: '7:30 PM (Dinner)',
-        walkTimeFromPrev: '9 min walk',
         address: 'Gionmachi Kitagawa, Higashiyama',
       },
     ],
@@ -197,7 +193,6 @@ const CITY_PRESETS: CityPreset[] = [
         },
         upvotes: 215,
         bestTime: '11:00 AM',
-        walkTimeFromPrev: '15 min cab',
         address: 'Park Street, Kolkata',
       },
       {
@@ -216,7 +211,6 @@ const CITY_PRESETS: CityPreset[] = [
         },
         upvotes: 340,
         bestTime: '2:30 PM Afternoon',
-        walkTimeFromPrev: '12 min drive',
         address: 'College Street, Kolkata',
       },
       {
@@ -235,7 +229,6 @@ const CITY_PRESETS: CityPreset[] = [
         },
         upvotes: 310,
         bestTime: '1:00 PM Lunch',
-        walkTimeFromPrev: '18 min drive',
         address: 'Hindustan Park, Gariahat, Kolkata',
       },
       {
@@ -254,7 +247,6 @@ const CITY_PRESETS: CityPreset[] = [
         },
         upvotes: 195,
         bestTime: '4:30 PM High Tea',
-        walkTimeFromPrev: '10 min walk',
         address: '18A Park St, Kolkata',
       },
     ],
@@ -305,7 +297,6 @@ const CITY_PRESETS: CityPreset[] = [
         },
         upvotes: 328,
         bestTime: '6:30 PM Sunset',
-        walkTimeFromPrev: '15 min walk',
         address: '15 Place du Pont Neuf, 1st arr.',
       },
       {
@@ -324,7 +315,6 @@ const CITY_PRESETS: CityPreset[] = [
         },
         upvotes: 260,
         bestTime: '10:00 AM',
-        walkTimeFromPrev: '11 min walk',
         address: '19 Rue du Pont aux Choux, Le Marais',
       },
       {
@@ -343,7 +333,6 @@ const CITY_PRESETS: CityPreset[] = [
         },
         upvotes: 375,
         bestTime: '7:00 PM Aperitif',
-        walkTimeFromPrev: '16 min walk',
         address: '3 Rue Basfroi, 11th arr.',
       },
       {
@@ -362,7 +351,6 @@ const CITY_PRESETS: CityPreset[] = [
         },
         upvotes: 220,
         bestTime: '3:00 PM Golden Light',
-        walkTimeFromPrev: '20 min metro',
         address: 'Rue des Saules, 18th arr.',
       },
     ],
@@ -413,7 +401,6 @@ const CITY_PRESETS: CityPreset[] = [
         },
         upvotes: 355,
         bestTime: '1:30 PM Lunch',
-        walkTimeFromPrev: '15 min walk down',
         address: 'Amalfi Town',
       },
       {
@@ -432,7 +419,6 @@ const CITY_PRESETS: CityPreset[] = [
         },
         upvotes: 390,
         bestTime: '11:00 AM Mid-day swim',
-        walkTimeFromPrev: '20 min scooter',
         address: 'Furore, Amalfi Coast',
       },
       {
@@ -451,7 +437,6 @@ const CITY_PRESETS: CityPreset[] = [
         },
         upvotes: 430,
         bestTime: '6:15 PM Sunset Aperitivo',
-        walkTimeFromPrev: '15 min ride',
         address: 'Via Laurito, Positano',
       },
       {
@@ -470,7 +455,6 @@ const CITY_PRESETS: CityPreset[] = [
         },
         upvotes: 260,
         bestTime: '2:00 PM Afternoon sun',
-        walkTimeFromPrev: '10 min boat',
         address: 'Positano, Amalfi Coast',
       },
     ],
@@ -489,6 +473,7 @@ export function InteractiveHeroMap({ className = '' }: { className?: string }) {
   const [upvotedMap, setUpvotedMap] = useState<Record<string, boolean>>({});
   const [savedMap, setSavedMap] = useState<Record<string, boolean>>({});
   const [showToast, setShowToast] = useState<string | null>(null);
+  const [isCardDismissed, setIsCardDismissed] = useState<boolean>(false);
 
   const activeCity = useMemo(
     () => CITY_PRESETS.find((c) => c.id === activeCityId) || CITY_PRESETS[0],
@@ -515,6 +500,7 @@ export function InteractiveHeroMap({ className = '' }: { className?: string }) {
     const city = CITY_PRESETS.find((c) => c.id === cityId) || CITY_PRESETS[0];
     setSelectedSpotId(city.spots[0].id);
     setIsPlayingTour(false);
+    setIsCardDismissed(false);
   };
 
   // Auto-play tour effect
@@ -807,16 +793,16 @@ export function InteractiveHeroMap({ className = '' }: { className?: string }) {
             {/* Animated Day Tour / Itinerary Route Line */}
             {showRoute && (
               <g>
-                {/* Route Glow Shadow */}
+                {/* Route Glow Shadow — subtle, not overpowering */}
                 <motion.path
                   key={`route-glow-${activeCity.id}`}
                   initial={{ pathLength: 0, opacity: 0 }}
-                  animate={{ pathLength: 1, opacity: 0.4 }}
-                  transition={{ duration: 1.6, ease: 'easeInOut' }}
+                  animate={{ pathLength: 1, opacity: 0.18 }}
+                  transition={{ duration: 1.4, ease: 'easeInOut' }}
                   d={activeCity.routeD}
                   fill="none"
                   stroke="#FA8112"
-                  strokeWidth="8"
+                  strokeWidth="4"
                   strokeLinecap="round"
                   filter="url(#routeGlow)"
                 />
@@ -825,28 +811,28 @@ export function InteractiveHeroMap({ className = '' }: { className?: string }) {
                 <motion.path
                   key={`route-${activeCity.id}`}
                   initial={{ pathLength: 0, opacity: 0 }}
-                  animate={{ pathLength: 1, opacity: 1 }}
-                  transition={{ duration: 1.6, ease: 'easeInOut' }}
+                  animate={{ pathLength: 1, opacity: 0.85 }}
+                  transition={{ duration: 1.4, ease: 'easeInOut' }}
                   d={activeCity.routeD}
                   fill="none"
                   stroke="#FA8112"
-                  strokeWidth="3"
-                  strokeDasharray="6 6"
+                  strokeWidth="2"
+                  strokeDasharray="5 5"
                   strokeLinecap="round"
                 />
 
-                {/* Animated Traveling Wanderer Dot */}
+                {/* Animated Traveling Wanderer Dot — smaller, cleaner */}
                 <motion.circle
-                  r="6"
+                  r="4"
                   fill="#FA8112"
                   stroke="#FFFFFF"
-                  strokeWidth="2"
+                  strokeWidth="1.5"
                   animate={{
                     offsetDistance: ['0%', '100%'],
                   }}
                   transition={{
                     repeat: Infinity,
-                    duration: 12,
+                    duration: 14,
                     ease: 'linear',
                   }}
                   style={{
@@ -874,34 +860,49 @@ export function InteractiveHeroMap({ className = '' }: { className?: string }) {
                   className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-auto z-10"
                 >
                   <div className="relative group">
-                    {/* Glowing Pulsing Radar Wave on Active Pin */}
+                    {/* Subtle, Smooth Breathing Ambient Halo (Soft, Modern & Professional) */}
                     {(isSelected || isHovered) && (
                       <motion.div
-                        initial={{ scale: 0.8, opacity: 0.8 }}
-                        animate={{ scale: [1, 2.2, 2.6], opacity: [0.8, 0.3, 0] }}
-                        transition={{ repeat: Infinity, duration: 2.2, ease: 'easeOut' }}
-                        className="absolute -inset-2 rounded-full bg-[#FA8112] pointer-events-none"
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{
+                          scale: [1, 1.15, 1],
+                          opacity: isSelected ? [0.25, 0.4, 0.25] : [0.15, 0.3, 0.15],
+                        }}
+                        transition={{
+                          repeat: Infinity,
+                          duration: 2.6,
+                          ease: 'easeInOut',
+                        }}
+                        className="absolute -inset-1.5 rounded-2xl bg-[#FA8112]/30 pointer-events-none blur-[2px]"
                       />
                     )}
 
-                    {/* Interactive Marker Pin Button */}
-                    <button
+                    {/* Interactive Marker Pin Button with Smooth Spring Motion */}
+                    <motion.button
+                      whileHover={{ scale: 1.04, y: -2 }}
+                      whileTap={{ scale: 0.96 }}
+                      animate={{
+                        scale: isSelected ? 1.06 : 1,
+                        y: isSelected ? -2 : 0,
+                      }}
+                      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                       onClick={() => {
                         setSelectedSpotId(spot.id);
                         setIsPlayingTour(false);
+                        setIsCardDismissed(false);
                       }}
                       onMouseEnter={() => setHoveredSpotId(spot.id)}
                       onMouseLeave={() => setHoveredSpotId(null)}
-                      className={`relative flex items-center gap-1.5 p-1 rounded-2xl transition-all duration-300 cursor-pointer shadow-lg active-press ${
+                      className={`relative flex items-center gap-1.5 p-1 rounded-2xl transition-colors duration-200 cursor-pointer shadow-md active-press ${
                         isSelected
-                          ? 'bg-[#FA8112] text-white scale-115 ring-4 ring-[#FA8112]/35 z-30'
+                          ? 'bg-[#FA8112] text-white ring-2 ring-[#FA8112]/50 shadow-[#FA8112]/20 z-30'
                           : isHovered
                           ? isNightMode
-                            ? 'bg-[#27272A] text-white scale-108 ring-2 ring-zinc-500'
-                            : 'bg-white text-[#222222] scale-108 ring-2 ring-[#FA8112]'
+                            ? 'bg-[#27272A] text-white ring-1.5 ring-zinc-400'
+                            : 'bg-white text-[#222222] ring-1.5 ring-[#FA8112]/70'
                           : isNightMode
-                          ? 'bg-[#222226] text-zinc-200 hover:scale-105 border border-[#3F3F46]'
-                          : 'bg-white text-[#222222] hover:scale-105 border border-[#E8DECA]'
+                          ? 'bg-[#222226] text-zinc-200 border border-[#3F3F46]'
+                          : 'bg-white text-[#222222] border border-[#E8DECA]'
                       }`}
                     >
                       {/* Step index badge or Category emoji */}
@@ -947,7 +948,7 @@ export function InteractiveHeroMap({ className = '' }: { className?: string }) {
                           ★
                         </div>
                       )}
-                    </button>
+                    </motion.button>
                   </div>
                 </div>
               );
@@ -955,37 +956,65 @@ export function InteractiveHeroMap({ className = '' }: { className?: string }) {
           </div>
         </motion.div>
 
-        {/* 4. FLOATING INTERACTIVE PLACE DETAIL CARD (Bottom Left Popover) */}
+        {/* 4. FLOATING INTERACTIVE PLACE DETAIL CARD (Compact, Minimal & Unobtrusive) */}
         <AnimatePresence mode="wait">
-          {activeSpot && (
+          {activeSpot && !isCardDismissed && (
             <motion.div
               key={activeSpot.id}
-              initial={{ opacity: 0, y: 15, scale: 0.95 }}
+              initial={{ opacity: 0, y: 10, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 10, scale: 0.95 }}
-              transition={{ duration: 0.25 }}
-              className="absolute left-3 right-3 sm:right-auto sm:left-4 bottom-3 sm:bottom-4 z-20 sm:max-w-sm pointer-events-auto"
+              transition={{ duration: 0.18 }}
+              className="absolute left-2.5 bottom-2.5 z-20 max-w-[270px] sm:max-w-[290px] pointer-events-auto"
             >
               <div
-                className={`rounded-2xl p-4 sm:p-5 border shadow-2xl backdrop-blur-md transition-all ${
+                className={`relative rounded-2xl p-3 border shadow-xl backdrop-blur-md transition-all ${
                   isNightMode
                     ? 'bg-[#1F1F23]/95 border-[#3F3F46] text-zinc-100'
                     : 'bg-white/95 border-[#E8DECA] text-[#222222]'
                 }`}
               >
-                {/* Header row: Status + Priority tags */}
-                <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-inherit">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-base">{activeSpot.emoji}</span>
-                    <div>
-                      <span className="text-xs font-black uppercase tracking-wider text-[#FA8112]">
-                        {activeSpot.priority}
-                      </span>
-                    </div>
-                  </div>
+                {/* Prominent Cross / Close Button */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsCardDismissed(true);
+                  }}
+                  title="Close card (click any pin to reopen)"
+                  aria-label="Close place details"
+                  className={`absolute top-2.5 right-2.5 h-6 w-6 rounded-full flex items-center justify-center font-black text-xs transition-colors cursor-pointer active-press shadow-xs ${
+                    isNightMode
+                      ? 'bg-[#2E2E33] hover:bg-rose-600 text-zinc-300 hover:text-white'
+                      : 'bg-[#FAF3E1] hover:bg-rose-500 text-[#4A4843] hover:text-white'
+                  }`}
+                >
+                  ✕
+                </button>
 
+                {/* Spot Header: Emoji + Title + Location */}
+                <div className="pr-7 flex items-center gap-2">
+                  <span className="text-lg flex-shrink-0">{activeSpot.emoji}</span>
+                  <div className="min-w-0">
+                    <h4 className="font-sans text-xs sm:text-sm font-black leading-tight truncate">
+                      {activeSpot.name}
+                    </h4>
+                    <p
+                      className={`text-[10px] font-medium truncate ${
+                        isNightMode ? 'text-zinc-400' : 'text-[#6B6862]'
+                      }`}
+                    >
+                      {activeSpot.address}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Priority & Timing Sub-bar */}
+                <div className="mt-2 pt-2 border-t border-inherit flex items-center justify-between gap-1 text-[10px] font-bold">
+                  <span className="text-[#FA8112] font-black uppercase tracking-wider text-[9px] sm:text-[10px]">
+                    {activeSpot.priority}
+                  </span>
                   <span
-                    className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full ${
+                    className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold ${
                       isNightMode ? 'bg-[#27272A] text-zinc-300' : 'bg-[#FAF3E1] text-[#6B6862]'
                     }`}
                   >
@@ -993,100 +1022,69 @@ export function InteractiveHeroMap({ className = '' }: { className?: string }) {
                   </span>
                 </div>
 
-                {/* Spot Title & Location */}
-                <div className="pt-2.5 space-y-1">
-                  <div className="flex items-start justify-between gap-2">
-                    <h4 className="font-sans text-sm sm:text-base font-black leading-snug">
-                      {activeSpot.name}
-                    </h4>
-                  </div>
-                  <p
-                    className={`text-[11px] font-medium flex items-center gap-1 truncate ${
-                      isNightMode ? 'text-zinc-400' : 'text-[#6B6862]'
+                {/* Action Buttons: Upvote + Save */}
+                <div className="mt-2 flex items-center gap-1.5">
+                  {/* Upvote Button */}
+                  <button
+                    onClick={() => toggleUpvote(activeSpot.id)}
+                    className={`flex-1 inline-flex items-center justify-center gap-1 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer active-press ${
+                      upvotedMap[activeSpot.id]
+                        ? 'bg-[#FA8112] text-white shadow-xs'
+                        : isNightMode
+                        ? 'bg-[#27272A] hover:bg-[#323238] text-zinc-300'
+                        : 'bg-[#FAF3E1] hover:bg-[#F5E7C6] text-[#222222]'
                     }`}
                   >
-                    <span>📍</span>
-                    <span>{activeSpot.address}</span>
-                  </p>
-                </div>
+                    <span>▲</span>
+                    <span>{activeSpot.upvotes + (upvotedMap[activeSpot.id] ? 1 : 0)}</span>
+                  </button>
 
-                {/* Curator Quote Box */}
-                <div
-                  className={`mt-2.5 p-2.5 rounded-xl border text-[11px] leading-relaxed relative ${
-                    isNightMode
-                      ? 'bg-[#18181B]/80 border-[#2E2E33] text-zinc-300'
-                      : 'bg-[#FAF3E1]/80 border-[#E8DECA] text-[#4A4843]'
-                  }`}
-                >
-                  <div className="flex items-center gap-1.5 pb-1">
-                    <div className="h-4 w-4 rounded-full bg-[#FA8112] text-white text-[8px] font-black flex items-center justify-center">
-                      {activeSpot.curator.avatar}
-                    </div>
-                    <span className="font-extrabold text-[10px]">
-                      {activeSpot.curator.name}
-                    </span>
-                  </div>
-                  <p className="italic font-normal">
-                    &ldquo;{activeSpot.curator.note}&rdquo;
-                  </p>
-                </div>
-
-                {/* Interactive Action Bar: Upvote + Save + Directions */}
-                <div className="mt-3 pt-2.5 border-t border-inherit flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-1.5">
-                    {/* Upvote Button */}
-                    <button
-                      onClick={() => toggleUpvote(activeSpot.id)}
-                      className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer active-press ${
-                        upvotedMap[activeSpot.id]
-                          ? 'bg-[#FA8112] text-white shadow-xs'
-                          : isNightMode
-                          ? 'bg-[#27272A] hover:bg-[#323238] text-zinc-300'
-                          : 'bg-[#FAF3E1] hover:bg-[#F5E7C6] text-[#222222]'
-                      }`}
-                    >
-                      <span>▲</span>
-                      <span>
-                        {activeSpot.upvotes + (upvotedMap[activeSpot.id] ? 1 : 0)}
-                      </span>
-                    </button>
-
-                    {/* Quick Save to List */}
-                    <button
-                      onClick={() => toggleSave(activeSpot.id)}
-                      className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer active-press ${
-                        savedMap[activeSpot.id]
-                          ? 'bg-emerald-600 text-white shadow-xs'
-                          : 'bg-[#222222] hover:bg-[#FA8112] text-white shadow-xs'
-                      }`}
-                    >
-                      {savedMap[activeSpot.id] ? (
-                        <>
-                          <CheckIcon className="w-3.5 h-3.5" />
-                          <span>Saved</span>
-                        </>
-                      ) : (
-                        <>
-                          <PlusIcon className="w-3.5 h-3.5" />
-                          <span>Add to list</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-
-                  {/* Next Stop Indicator */}
-                  {activeSpot.walkTimeFromPrev && (
-                    <div
-                      className={`text-[10px] font-bold ${
-                        isNightMode ? 'text-zinc-400' : 'text-[#6B6862]'
-                      }`}
-                    >
-                      🚶 {activeSpot.walkTimeFromPrev}
-                    </div>
-                  )}
+                  {/* Save to List Button */}
+                  <button
+                    onClick={() => toggleSave(activeSpot.id)}
+                    className={`flex-1 inline-flex items-center justify-center gap-1 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer active-press ${
+                      savedMap[activeSpot.id]
+                        ? 'bg-emerald-600 text-white shadow-xs'
+                        : 'bg-[#222222] hover:bg-[#FA8112] text-white shadow-xs'
+                    }`}
+                  >
+                    {savedMap[activeSpot.id] ? (
+                      <>
+                        <CheckIcon className="w-3.5 h-3.5" />
+                        <span>Saved</span>
+                      </>
+                    ) : (
+                      <>
+                        <PlusIcon className="w-3.5 h-3.5" />
+                        <span>Save</span>
+                      </>
+                    )}
+                  </button>
                 </div>
               </div>
             </motion.div>
+          )}
+
+          {/* Minimal Floating Pill when Card is Dismissed */}
+          {activeSpot && isCardDismissed && (
+            <motion.button
+              key="show-details-pill"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              onClick={() => setIsCardDismissed(false)}
+              className={`absolute left-2.5 bottom-2.5 z-20 px-3 py-1.5 rounded-xl border text-[11px] font-bold shadow-md backdrop-blur-md flex items-center gap-1.5 cursor-pointer pointer-events-auto transition-all active-press ${
+                isNightMode
+                  ? 'bg-[#1F1F23]/90 hover:bg-[#27272A] border-[#3F3F46] text-zinc-200'
+                  : 'bg-white/90 hover:bg-[#FAF3E1] border-[#E8DECA] text-[#222222]'
+              }`}
+            >
+              <span>{activeSpot.emoji}</span>
+              <span className="font-extrabold max-w-[130px] truncate">
+                {activeSpot.name}
+              </span>
+              <span className="text-[10px] text-[#FA8112] font-black">ℹ️ Open</span>
+            </motion.button>
           )}
         </AnimatePresence>
 
@@ -1193,6 +1191,7 @@ export function InteractiveHeroMap({ className = '' }: { className?: string }) {
                 onClick={() => {
                   setSelectedSpotId(spot.id);
                   setIsPlayingTour(false);
+                  setIsCardDismissed(false);
                 }}
                 onMouseEnter={() => setHoveredSpotId(spot.id)}
                 onMouseLeave={() => setHoveredSpotId(null)}
