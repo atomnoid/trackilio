@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { BlendInviteAccept } from "@/components/blend/BlendInviteAccept";
@@ -17,8 +17,8 @@ export async function generateMetadata({ params }: BlendInvitePageProps): Promis
   try {
     const res = await fetch(`${siteUrl}/api/blend/invite?token=${token}`, { cache: "no-store" });
     if (!res.ok) return { title: "Blend Invite | Trackilio", robots: { index: false, follow: false } };
-    const { invite } = await res.json();
-    const inviterName = invite?.inviter?.display_name || invite?.inviter?.username || "A traveler";
+    const data = await res.json();
+    const inviterName = data.inviter?.display_name || data.inviter?.username || "A traveler";
     return {
       title: `${inviterName} wants to Blend with you! | Trackilio`,
       description: `Accept the Blend invite from ${inviterName} and discover your travel compatibility score on Trackilio.`,
@@ -36,6 +36,7 @@ export default async function BlendInvitePage({ params }: BlendInvitePageProps) 
 
   const siteUrl = getSiteUrl();
   let invite: any = null;
+  let inviter: any = null;
   let fetchError: string | null = null;
 
   try {
@@ -43,7 +44,10 @@ export default async function BlendInvitePage({ params }: BlendInvitePageProps) 
     const data = await res.json();
     if (res.status === 409 && data.blendId) { redirect(`/blend/${data.blendId}`); }
     if (!res.ok) { fetchError = data.error || "This Blend invite link is invalid or has expired."; }
-    else { invite = data.invite; }
+    else {
+      invite = data.invite;
+      inviter = data.inviter;
+    }
   } catch { fetchError = "Failed to load invite."; }
 
   if (fetchError || !invite) {
@@ -57,22 +61,22 @@ export default async function BlendInvitePage({ params }: BlendInvitePageProps) 
     );
   }
 
-  const inviterName = invite.inviter?.display_name || invite.inviter?.username || "A traveler";
+  const inviterName = inviter?.display_name || inviter?.username || "A traveler";
   const initials = inviterName.slice(0, 2).toUpperCase();
 
   return (
     <div className="mx-auto max-w-md px-4 py-16 space-y-6">
       <div className="rounded-3xl bg-white border border-[#E8DECA] p-8 shadow-sm text-center space-y-5">
         <div className="flex justify-center">
-          {invite.inviter?.avatar_url ? (
-            <img src={invite.inviter.avatar_url} alt={inviterName} className="h-20 w-20 rounded-2xl object-cover border border-[#E8DECA]" />
+          {inviter?.avatar_url ? (
+            <img src={inviter.avatar_url} alt={inviterName} className="h-20 w-20 rounded-2xl object-cover border border-[#E8DECA]" />
           ) : (
             <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-[#FF5841] to-[#C53678] text-white font-black text-3xl flex items-center justify-center shadow-sm">{initials}</div>
           )}
         </div>
         <div className="space-y-1.5">
           <h1 className="font-sans text-2xl font-black text-[#222222]">{inviterName} wants to Blend! ✨</h1>
-          {invite.inviter?.username && <p className="text-sm text-[#6B6862]">@{invite.inviter.username}</p>}
+          {inviter?.username && <p className="text-sm text-[#6B6862]">@{inviter.username}</p>}
           <p className="text-sm text-[#6B6862] pt-1 max-w-xs mx-auto">Find out your travel compatibility score based on shared saved places.</p>
         </div>
         <BlendInviteAccept token={token} isLoggedIn={!!user} inviterName={inviterName} />
