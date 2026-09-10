@@ -15,7 +15,11 @@ interface LoginPageProps {
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const resolvedParams = await searchParams;
-  const redirectUrl = resolvedParams.redirect || '/dashboard';
+  const rawRedirect = resolvedParams.redirect || '/dashboard';
+  const redirectUrl =
+    rawRedirect.startsWith('/') && !rawRedirect.startsWith('//') && !rawRedirect.includes(':')
+      ? rawRedirect
+      : '/dashboard';
 
   return (
     <div className="mx-auto max-w-md px-4 py-12 sm:py-16 space-y-6">
