@@ -2,116 +2,23 @@ import { MetadataRoute } from 'next';
 import { createClient } from '@/lib/supabase/server';
 import { CURATED_LISTS } from '@/services/curatedData';
 import { getSiteUrl } from '@/lib/utils';
+import {
+  SITEMAP_CHUNK_SIZE,
+  STATIC_COUNT,
+  getStaticRoutes,
+  getSegmentCounts,
+  getSitemapChunkList,
+} from '@/lib/sitemap-config';
 
 export const revalidate = 3600;
 
-const CHUNK_SIZE = 1000;
-
-// Fixed static public routes with explicit priority and frequencies
-function getStaticRoutes(siteUrl: string): MetadataRoute.Sitemap {
-  return [
-    {
-      url: `${siteUrl}`,
-      lastModified: new Date(),
-      changeFrequency: 'daily',
-      priority: 1.0,
-    },
-    {
-      url: `${siteUrl}/discover`,
-      lastModified: new Date(),
-      changeFrequency: 'daily',
-      priority: 0.9,
-    },
-    {
-      url: `${siteUrl}/blend`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.6,
-    },
-    {
-      url: `${siteUrl}/about`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.6,
-    },
-    {
-      url: `${siteUrl}/contact`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.5,
-    },
-    {
-      url: `${siteUrl}/privacy`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.4,
-    },
-    {
-      url: `${siteUrl}/terms`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.4,
-    },
-  ];
-}
-
-// staticCount must match the exact number of entries returned by getStaticRoutes()
-const STATIC_COUNT = 7;
-
-interface SegmentCounts {
-  listsCount: number;
-  profilesCount: number;
-  placesCount: number;
-  totalCount: number;
-}
-
-async function getSegmentCounts(): Promise<SegmentCounts> {
-  let listsCount = 0;
-  let profilesCount = 0;
-  let placesCount = 0;
-
-  try {
-    const supabase = await createClient();
-
-    const [listsRes, profilesRes, placesRes] = await Promise.all([
-      // Count: public lists with non-null slugs
-      (supabase as any)
-        .from('wander_lists')
-        .select('id', { count: 'exact', head: true })
-        .eq('is_public', true)
-        .not('slug', 'is', null),
-      // Count: profiles with non-null usernames
-      (supabase as any)
-        .from('profiles')
-        .select('id', { count: 'exact', head: true })
-        .not('username', 'is', null),
-      // Count: places with non-null slugs (must match fetch filter below)
-      (supabase as any)
-        .from('places')
-        .select('id', { count: 'exact', head: true })
-        .not('slug', 'is', null),
-    ]);
-
-    listsCount = listsRes.count ?? CURATED_LISTS.length;
-    profilesCount = profilesRes.count ?? 0;
-    placesCount = placesRes.count ?? 0;
-  } catch {
-    listsCount = CURATED_LISTS.length;
-  }
-
-  const totalCount = STATIC_COUNT + listsCount + profilesCount + placesCount;
-  return { listsCount, profilesCount, placesCount, totalCount };
-}
-
 /**
- * Next.js native sitemap index generator.
+ * Next.js native sitemap chunk list generator.
  * Dynamically computes the required chunk IDs based on actual database record counts.
- * Generates: /sitemap.xml (index) → /sitemap/0.xml, /sitemap/1.xml, ...
+ * Generates child sitemaps: /sitemap/0.xml, /sitemap/1.xml, ...
  */
 export async function generateSitemaps() {
-  const { totalCount } = await getSegmentCounts();
-  const numChunks = Math.max(1, Math.ceil(totalCount / CHUNK_SIZE));
-  return Array.from({ length: numChunks }, (_, i) => ({ id: i }));
+  return getSitemapChunkList();
 }
 
 /**
@@ -134,8 +41,8 @@ export default async function sitemap({
 
   const { listsCount, profilesCount, placesCount } = await getSegmentCounts();
 
-  const chunkStart = chunkId * CHUNK_SIZE;
-  const chunkEnd = (chunkId + 1) * CHUNK_SIZE; // exclusive upper bound
+  const chunkStart = chunkId * SITEMAP_CHUNK_SIZE;
+  const chunkEnd = (chunkId + 1) * SITEMAP_CHUNK_SIZE; // exclusive upper bound
 
   const entries: MetadataRoute.Sitemap = [];
 

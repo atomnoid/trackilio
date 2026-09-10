@@ -25,10 +25,10 @@ const nextConfig: NextConfig = {
   },
   async rewrites() {
     return [
-      // Route /sitemap.xml to /sitemap/0.xml (Next.js generateSitemaps chunk)
+      // Route /sitemap.xml to the dedicated sitemap index route handler
       {
         source: '/sitemap.xml',
-        destination: '/sitemap/0.xml',
+        destination: '/api/sitemap-index',
       },
     ];
   },
