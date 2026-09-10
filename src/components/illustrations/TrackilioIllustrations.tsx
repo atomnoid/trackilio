@@ -1,3 +1,7 @@
+'use client';
+
+import React from 'react';
+import { motion } from 'framer-motion';
 import { InteractiveHeroMap } from '@/components/home/InteractiveHeroMap';
 
 export function MapIllustration({ className = 'w-full h-auto' }: { className?: string }) {
