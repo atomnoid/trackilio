@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { WanderList } from '@/types/database';
+import { CURATED_LISTS } from '@/services/curatedData';
 
 export function generateSlug(title: string): string {
   const clean = title
@@ -56,7 +57,7 @@ async function enrichListsWithCounts(
 
     return lists.map((l) => ({
       ...l,
-      places_count: countMap.get(l.id) ?? 0,
+      places_count: countMap.get(l.id) ?? l.places_count ?? 0,
     }));
   } catch {
     return lists;
@@ -70,10 +71,11 @@ export async function getPublicWanderLists(params?: {
   offset?: number;
   sort?: 'recent' | 'trending' | 'popular';
 }): Promise<WanderList[]> {
+  const limit = params?.limit ?? 24;
+  const offset = params?.offset ?? 0;
+
   try {
     const supabase = await createClient();
-    const limit = params?.limit ?? 24;
-    const offset = params?.offset ?? 0;
 
     let q = (supabase as any)
       .from('wander_lists')
@@ -91,36 +93,32 @@ export async function getPublicWanderLists(params?: {
       // Popular: rank by net engagement (upvotes - downvotes)
       q = q.order('created_at', { ascending: false }).limit(200);
       const { data, error } = await q;
-      if (error) {
-        console.warn('Unable to fetch popular WanderLists:', error.message || error);
-        return [];
+
+      if (!error && data && data.length > 0) {
+        const lists = data as WanderList[];
+        const listIds = lists.map((l: WanderList) => l.id);
+
+        const voteResult = await (supabase as any)
+          .from('list_places')
+          .select('list_id, votes(vote_type)')
+          .in('list_id', listIds);
+
+        const engagementMap = new Map<string, number>();
+        (voteResult.data ?? []).forEach((lp: any) => {
+          const votes: any[] = lp.votes || [];
+          const net =
+            votes.filter((v: any) => v.vote_type !== 'down').length -
+            votes.filter((v: any) => v.vote_type === 'down').length;
+          engagementMap.set(lp.list_id, (engagementMap.get(lp.list_id) ?? 0) + net);
+        });
+
+        const sorted = [...lists].sort(
+          (a: WanderList, b: WanderList) =>
+            (engagementMap.get(b.id) ?? 0) - (engagementMap.get(a.id) ?? 0)
+        ).slice(offset, offset + limit);
+
+        return await enrichListsWithCounts(supabase, sorted);
       }
-
-      const lists = (data ?? []) as WanderList[];
-      if (lists.length === 0) return [];
-
-      const listIds = lists.map((l: WanderList) => l.id);
-
-      const voteResult = await (supabase as any)
-        .from('list_places')
-        .select('list_id, votes(vote_type)')
-        .in('list_id', listIds);
-
-      const engagementMap = new Map<string, number>();
-      (voteResult.data ?? []).forEach((lp: any) => {
-        const votes: any[] = lp.votes || [];
-        const net =
-          votes.filter((v: any) => v.vote_type !== 'down').length -
-          votes.filter((v: any) => v.vote_type === 'down').length;
-        engagementMap.set(lp.list_id, (engagementMap.get(lp.list_id) ?? 0) + net);
-      });
-
-      const sorted = [...lists].sort(
-        (a: WanderList, b: WanderList) =>
-          (engagementMap.get(b.id) ?? 0) - (engagementMap.get(a.id) ?? 0)
-      ).slice(offset, offset + limit);
-
-      return await enrichListsWithCounts(supabase, sorted);
     } else if (params?.sort === 'trending') {
       q = q.order('updated_at', { ascending: false });
     } else {
@@ -133,24 +131,43 @@ export async function getPublicWanderLists(params?: {
     }
 
     const { data, error } = await q;
-    if (error) {
-      console.warn('Unable to fetch public WanderLists from Supabase:', error.message || error);
-      return [];
+    if (!error && data && data.length > 0) {
+      const lists = data as WanderList[];
+      return await enrichListsWithCounts(supabase, lists);
     }
-
-    const lists = (data ?? []) as WanderList[];
-    return await enrichListsWithCounts(supabase, lists);
   } catch (err: any) {
-    console.warn('Error connecting to Supabase for WanderLists:', err?.message || err);
-    return [];
+    console.warn('Error connecting to Supabase for WanderLists, using curated fallback:', err?.message || err);
   }
+
+  // Fallback to CURATED_LISTS
+  let filtered = [...CURATED_LISTS];
+
+  if (params?.destination) {
+    const dLower = params.destination.toLowerCase();
+    filtered = filtered.filter(
+      (l) => l.destination && l.destination.toLowerCase().includes(dLower)
+    );
+  }
+
+  if (params?.query) {
+    const qLower = params.query.toLowerCase();
+    filtered = filtered.filter(
+      (l) =>
+        l.title.toLowerCase().includes(qLower) ||
+        (l.description && l.description.toLowerCase().includes(qLower)) ||
+        (l.destination && l.destination.toLowerCase().includes(qLower))
+    );
+  }
+
+  return filtered.slice(offset, offset + limit);
 }
 
 export async function getWanderListBySlug(slugOrId: string): Promise<WanderList | null> {
+  const cleanParam = decodeURIComponent(slugOrId).trim().toLowerCase();
+  const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slugOrId.trim());
+
   try {
     const supabase = await createClient();
-    const cleanParam = decodeURIComponent(slugOrId).trim();
-    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cleanParam);
     let data: WanderList | null = null;
 
     // 1. If it's a UUID, check by ID
@@ -158,7 +175,7 @@ export async function getWanderListBySlug(slugOrId: string): Promise<WanderList 
       const { data: byIdData } = await (supabase as any)
         .from('wander_lists')
         .select('*, owner:profiles(*)')
-        .eq('id', cleanParam)
+        .eq('id', slugOrId.trim())
         .maybeSingle();
       data = byIdData;
     }
@@ -184,13 +201,25 @@ export async function getWanderListBySlug(slugOrId: string): Promise<WanderList 
       data = byIlikeSlug;
     }
 
-    if (!data) return null;
-    const enriched = await enrichListsWithCounts(supabase, [data as WanderList]);
-    return enriched[0] || null;
+    if (data) {
+      const enriched = await enrichListsWithCounts(supabase, [data as WanderList]);
+      return enriched[0] || data;
+    }
   } catch (err: any) {
-    console.error('getWanderListBySlug error:', err?.message || err);
-    return null;
+    console.warn('getWanderListBySlug error, falling back to curated:', err?.message || err);
   }
+
+  // Fallback to CURATED_LISTS
+  const curated =
+    CURATED_LISTS.find(
+      (l) =>
+        l.id === slugOrId.trim() ||
+        l.slug.toLowerCase() === cleanParam ||
+        cleanParam.includes(l.slug.toLowerCase()) ||
+        l.slug.toLowerCase().includes(cleanParam)
+    ) || null;
+
+  return curated;
 }
 
 

@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { ListPlace, Place, PriorityLevel, SavedPlace, VisitStatus, VoteType } from '@/types/database';
+import { CURATED_PLACES, CURATED_LISTS, CURATED_LIST_PLACES_MAP } from '@/services/curatedData';
 
 export function generatePlaceSlug(name: string, location?: string | null): string {
   const base = location ? `${name}-${location}` : name;
@@ -20,38 +21,52 @@ export async function getPlacesForList(
   listId: string,
   currentUserId?: string
 ): Promise<ListPlace[]> {
-  const supabase = await createClient();
+  try {
+    const supabase = await createClient();
 
-  const { data: listPlaces, error } = await (supabase as any)
-    .from('list_places')
-    .select(`
-      *,
-      place:places(*),
-      votes(id, user_id, vote_type)
-    `)
-    .eq('list_id', listId)
-    .order('created_at', { ascending: true });
+    const { data: listPlaces, error } = await (supabase as any)
+      .from('list_places')
+      .select(`
+        *,
+        place:places(*),
+        votes(id, user_id, vote_type)
+      `)
+      .eq('list_id', listId)
+      .order('created_at', { ascending: true });
 
-  if (error || !listPlaces) return [];
+    if (!error && listPlaces && listPlaces.length > 0) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return listPlaces.map((lp: any) => {
+        const votesArr = lp.votes || [];
+        const userVote = currentUserId
+          ? votesArr.find((v: { user_id: string; vote_type?: string }) => v.user_id === currentUserId)
+          : null;
+        const upvotes = votesArr.filter((v: any) => v.vote_type !== 'down').length;
+        const downvotes = votesArr.filter((v: any) => v.vote_type === 'down').length;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return listPlaces.map((lp: any) => {
-    const votesArr = lp.votes || [];
-    const userVote = currentUserId
-      ? votesArr.find((v: { user_id: string; vote_type?: string }) => v.user_id === currentUserId)
-      : null;
-    const upvotes = votesArr.filter((v: any) => v.vote_type !== 'down').length;
-    const downvotes = votesArr.filter((v: any) => v.vote_type === 'down').length;
+        return {
+          ...lp,
+          votes_count: upvotes - downvotes,
+          upvotes_count: upvotes,
+          downvotes_count: downvotes,
+          user_has_voted: !!userVote,
+          user_vote_type: userVote ? (userVote.vote_type || 'up') : null,
+        };
+      }) as ListPlace[];
+    }
+  } catch (err) {
+    console.warn('getPlacesForList fallback to curated places:', err);
+  }
 
-    return {
-      ...lp,
-      votes_count: upvotes - downvotes,
-      upvotes_count: upvotes,
-      downvotes_count: downvotes,
-      user_has_voted: !!userVote,
-      user_vote_type: userVote ? (userVote.vote_type || 'up') : null,
-    };
-  }) as ListPlace[];
+  // Fallback to curated list places
+  const fallbackListPlaces =
+    CURATED_LIST_PLACES_MAP[listId] ||
+    (listId.includes('kyoto') || listId === 'demo-1' ? CURATED_LIST_PLACES_MAP['list-kyoto-1'] : null) ||
+    (listId.includes('kolkata') || listId === 'demo-2' ? CURATED_LIST_PLACES_MAP['list-kolkata-1'] : null) ||
+    (listId.includes('paris') || listId === 'demo-3' ? CURATED_LIST_PLACES_MAP['list-paris-1'] : null) ||
+    [];
+
+  return fallbackListPlaces;
 }
 
 /**
@@ -235,10 +250,11 @@ export async function getPublicPlaces(params?: {
   offset?: number;
   currentUserId?: string;
 }): Promise<Place[]> {
+  const limit = params?.limit ?? 30;
+  const offset = params?.offset ?? 0;
+
   try {
     const supabase = await createClient();
-    const limit = params?.limit ?? 30;
-    const offset = params?.offset ?? 0;
 
     let q = (supabase as any).from('places').select('*');
 
@@ -262,28 +278,66 @@ export async function getPublicPlaces(params?: {
 
     const { data: rawPlaces, error } = await q;
 
-    if (error || !rawPlaces) {
-      console.warn('Unable to query places from Supabase:', error?.message || error);
-      return [];
+    if (!error && rawPlaces && rawPlaces.length > 0) {
+      const enriched = await enrichPlacesWithStats(supabase, rawPlaces as Place[], params?.currentUserId);
+
+      // Sort by requested ranking
+      const sort = params?.sort ?? 'trending';
+      if (sort === 'popular' || sort === 'trending') {
+        enriched.sort((a, b) => (b.upvotes_count ?? 0) - (a.upvotes_count ?? 0));
+      } else if (sort === 'rated') {
+        enriched.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+      }
+
+      return enriched.slice(offset, offset + limit);
     }
-
-    if (rawPlaces.length === 0) return [];
-
-    const enriched = await enrichPlacesWithStats(supabase, rawPlaces as Place[], params?.currentUserId);
-
-    // Sort by requested ranking
-    const sort = params?.sort ?? 'trending';
-    if (sort === 'popular' || sort === 'trending') {
-      enriched.sort((a, b) => (b.upvotes_count ?? 0) - (a.upvotes_count ?? 0));
-    } else if (sort === 'rated') {
-      enriched.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
-    }
-
-    return enriched.slice(offset, offset + limit);
   } catch (err: any) {
-    console.warn('Error fetching public places:', err?.message || err);
-    return [];
+    console.warn('Error fetching public places from Supabase, using curated fallback:', err?.message || err);
   }
+
+  // Fallback to curated places with filtering
+  let filtered = [...CURATED_PLACES];
+
+  if (params?.query) {
+    const qLower = params.query.toLowerCase();
+    filtered = filtered.filter(
+      (p) =>
+        p.name.toLowerCase().includes(qLower) ||
+        (p.location && p.location.toLowerCase().includes(qLower)) ||
+        (p.city && p.city.toLowerCase().includes(qLower)) ||
+        (p.category && p.category.toLowerCase().includes(qLower)) ||
+        (p.description && p.description.toLowerCase().includes(qLower))
+    );
+  }
+
+  if (params?.city) {
+    const cLower = params.city.toLowerCase();
+    filtered = filtered.filter(
+      (p) =>
+        (p.city && p.city.toLowerCase().includes(cLower)) ||
+        (p.location && p.location.toLowerCase().includes(cLower))
+    );
+  }
+
+  if (params?.category && params.category !== 'All') {
+    const catLower = params.category.toLowerCase();
+    filtered = filtered.filter(
+      (p) => p.category && p.category.toLowerCase().includes(catLower)
+    );
+  }
+
+  if (params?.tag) {
+    filtered = filtered.filter((p) => p.tags && p.tags.includes(params.tag!));
+  }
+
+  const sort = params?.sort ?? 'trending';
+  if (sort === 'popular' || sort === 'trending') {
+    filtered.sort((a, b) => (b.upvotes_count ?? 0) - (a.upvotes_count ?? 0));
+  } else if (sort === 'rated') {
+    filtered.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+  }
+
+  return filtered.slice(offset, offset + limit);
 }
 
 /**
@@ -297,11 +351,12 @@ export async function getPlaceBySlugOrId(
   relatedLists: Array<{ id: string; title: string; slug: string; destination: string | null; owner_name: string }>;
   relatedPlaces: Place[];
 } | null> {
+  const clean = decodeURIComponent(identifier).toLowerCase().trim();
+  const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(identifier);
+
   try {
     const supabase = await createClient();
-    const clean = identifier.toLowerCase().trim();
-    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(identifier);
-    let place = null;
+    let place: Place | null = null;
 
     // 1. If identifier is a UUID, query by ID
     if (isUUID) {
@@ -346,89 +401,130 @@ export async function getPlaceBySlugOrId(
       place = byName;
     }
 
-    if (!place) return null;
+    if (place) {
+      const slug = place.slug || generatePlaceSlug(place.name, place.location || place.city);
 
-    const slug = place.slug || generatePlaceSlug(place.name, place.location || place.city);
+      // Fetch lists containing this place and votes
+      const [listPlacesRes, savedRes, relatedRes] = await Promise.all([
+        (supabase as any)
+          .from('list_places')
+          .select(`
+            id,
+            list:wander_lists(id, title, slug, destination, is_public, owner:profiles(display_name, username)),
+            votes(id, user_id, vote_type)
+          `)
+          .eq('place_id', place.id),
+        currentUserId
+          ? (supabase as any)
+              .from('saved_places')
+              .select('id')
+              .eq('user_id', currentUserId)
+              .eq('place_id', place.id)
+              .maybeSingle()
+          : Promise.resolve({ data: null }),
+        place.category
+          ? (supabase as any)
+              .from('places')
+              .select('*')
+              .neq('id', place.id)
+              .ilike('category', `%${place.category}%`)
+              .limit(6)
+          : Promise.resolve({ data: [] }),
+      ]);
 
-    // Fetch lists containing this place and votes
-    const [listPlacesRes, savedRes, relatedRes] = await Promise.all([
-      (supabase as any)
-        .from('list_places')
-        .select(`
-          id,
-          list:wander_lists(id, title, slug, destination, is_public, owner:profiles(display_name, username)),
-          votes(id, user_id, vote_type)
-        `)
-        .eq('place_id', place.id),
-      currentUserId
-        ? (supabase as any)
-            .from('saved_places')
-            .select('id')
-            .eq('user_id', currentUserId)
-            .eq('place_id', place.id)
-            .maybeSingle()
-        : Promise.resolve({ data: null }),
-      place.category
-        ? (supabase as any)
-            .from('places')
-            .select('*')
-            .neq('id', place.id)
-            .ilike('category', `%${place.category}%`)
-            .limit(6)
-        : Promise.resolve({ data: [] }),
-    ]);
+      const isSaved = !!savedRes.data;
 
-    const isSaved = !!savedRes.data;
+      let upvotes = 0;
+      let downvotes = 0;
+      let userVoteType: VoteType | null = null;
+      const relatedLists: Array<{ id: string; title: string; slug: string; destination: string | null; owner_name: string }> = [];
 
-    let upvotes = 0;
-    let downvotes = 0;
-    let userVoteType: VoteType | null = null;
-    const relatedLists: Array<{ id: string; title: string; slug: string; destination: string | null; owner_name: string }> = [];
+      (listPlacesRes.data ?? []).forEach((lp: any) => {
+        if (lp.list && lp.list.is_public) {
+          relatedLists.push({
+            id: lp.list.id,
+            title: lp.list.title,
+            slug: lp.list.slug,
+            destination: lp.list.destination,
+            owner_name: lp.list.owner?.display_name || lp.list.owner?.username || 'Traveler',
+          });
+        }
 
-    (listPlacesRes.data ?? []).forEach((lp: any) => {
-      if (lp.list && lp.list.is_public) {
-        relatedLists.push({
-          id: lp.list.id,
-          title: lp.list.title,
-          slug: lp.list.slug,
-          destination: lp.list.destination,
-          owner_name: lp.list.owner?.display_name || lp.list.owner?.username || 'Traveler',
-        });
-      }
+        const votes = lp.votes || [];
+        upvotes += votes.filter((v: any) => v.vote_type !== 'down').length;
+        downvotes += votes.filter((v: any) => v.vote_type === 'down').length;
 
-      const votes = lp.votes || [];
-      upvotes += votes.filter((v: any) => v.vote_type !== 'down').length;
-      downvotes += votes.filter((v: any) => v.vote_type === 'down').length;
+        if (currentUserId && !userVoteType) {
+          const myVote = votes.find((v: any) => v.user_id === currentUserId);
+          if (myVote) userVoteType = myVote.vote_type || 'up';
+        }
+      });
 
-      if (currentUserId && !userVoteType) {
-        const myVote = votes.find((v: any) => v.user_id === currentUserId);
-        if (myVote) userVoteType = myVote.vote_type || 'up';
-      }
-    });
+      const communityScore = upvotes - downvotes + relatedLists.length * 3;
 
-    const communityScore = upvotes - downvotes + relatedLists.length * 3;
+      const rawRelated = (relatedRes.data ?? []) as Place[];
+      const enrichedRelated = await enrichPlacesWithStats(supabase, rawRelated, currentUserId);
 
-    const rawRelated = (relatedRes.data ?? []) as Place[];
-    const enrichedRelated = await enrichPlacesWithStats(supabase, rawRelated, currentUserId);
-
-    return {
-      place: {
-        ...place,
-        slug,
-        upvotes_count: upvotes,
-        downvotes_count: downvotes,
-        community_score: communityScore,
-        lists_count: relatedLists.length,
-        is_saved: isSaved,
-        user_vote_type: userVoteType,
-      },
-      relatedLists,
-      relatedPlaces: enrichedRelated,
-    };
+      return {
+        place: {
+          ...place,
+          slug,
+          upvotes_count: upvotes || place.upvotes_count || 0,
+          downvotes_count: downvotes,
+          community_score: communityScore,
+          lists_count: relatedLists.length,
+          is_saved: isSaved,
+          user_vote_type: userVoteType,
+        },
+        relatedLists,
+        relatedPlaces: enrichedRelated.length > 0 ? enrichedRelated : CURATED_PLACES.slice(0, 3),
+      };
+    }
   } catch (err: any) {
-    console.warn('Error fetching place by slug:', err?.message || err);
-    return null;
+    console.warn('Error fetching place from Supabase, checking curated fallback:', err?.message || err);
   }
+
+  // Fallback to CURATED_PLACES
+  const nameWords = clean.replace(/-/g, ' ').trim();
+  const curatedPlace =
+    CURATED_PLACES.find(
+      (p) =>
+        p.id === identifier ||
+        p.slug?.toLowerCase() === clean ||
+        (p.slug && clean.includes(p.slug.toLowerCase())) ||
+        (p.slug && p.slug.toLowerCase().includes(clean)) ||
+        p.name.toLowerCase() === nameWords ||
+        p.name.toLowerCase().includes(nameWords) ||
+        nameWords.includes(p.name.toLowerCase())
+    ) || null;
+
+  if (!curatedPlace) return null;
+
+  // Synthesize related lists from CURATED_LISTS
+  const relatedLists = CURATED_LISTS.filter((l) => {
+    const listPlaces = CURATED_LIST_PLACES_MAP[l.id] || [];
+    return (
+      listPlaces.some((lp) => lp.place_id === curatedPlace.id) ||
+      (curatedPlace.city && l.destination?.includes(curatedPlace.city))
+    );
+  }).map((l) => ({
+    id: l.id,
+    title: l.title,
+    slug: l.slug,
+    destination: l.destination,
+    owner_name: l.owner?.display_name || 'Traveler',
+  }));
+
+  // Synthesize related places
+  const relatedPlaces = CURATED_PLACES.filter(
+    (p) => p.id !== curatedPlace.id && (p.category === curatedPlace.category || p.city === curatedPlace.city)
+  ).slice(0, 3);
+
+  return {
+    place: curatedPlace,
+    relatedLists,
+    relatedPlaces: relatedPlaces.length > 0 ? relatedPlaces : CURATED_PLACES.filter((p) => p.id !== curatedPlace.id).slice(0, 3),
+  };
 }
 
 /**
