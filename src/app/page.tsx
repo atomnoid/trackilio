@@ -6,8 +6,8 @@ import { getTodaysFact } from '@/services/dailyFacts';
 import { WanderList } from '@/types/database';
 import { WanderListCard } from '@/components/lists/WanderListCard';
 import { FunFactWidget } from '@/components/daily-fact/DailyFactCard';
+import { InteractiveHeroMap } from '@/components/home/InteractiveHeroMap';
 import {
-  MapIllustration,
   BlendIllustration,
   SaveFlowIllustration,
   CollabIllustration,
@@ -122,9 +122,23 @@ export default async function HomePage() {
               </Link>
             </div>
 
-            {/* Visual Hero Illustration */}
-            <div className="w-full pt-6 max-w-3xl">
-              <MapIllustration />
+            {/* Interactive Visual Hero Map */}
+            <div className="w-full pt-8 max-w-4xl lg:max-w-5xl">
+              <div className="mb-3 flex items-center justify-between px-2 text-xs font-bold text-[#6B6862]">
+                <div className="flex items-center gap-2">
+                  <span className="inline-block h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-[#222222] font-black uppercase tracking-wider text-[11px]">
+                    Interactive Map Canvas
+                  </span>
+                  <span className="hidden sm:inline-block text-[#6B6862] text-[11px] font-medium">
+                    — Explore real curated lists & routes
+                  </span>
+                </div>
+                <span className="text-[11px] text-[#FA8112] font-extrabold hidden sm:inline-block">
+                  ✨ Switch cities & click pins
+                </span>
+              </div>
+              <InteractiveHeroMap />
             </div>
           </div>
         </div>
