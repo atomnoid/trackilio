@@ -55,7 +55,7 @@ export function SignupForm() {
     displayName.trim().length > 0 &&
     email.trim().length > 0 &&
     password.length >= 6 &&
-    (usernameStatus === 'available' || (username.trim() && usernameStatus !== 'invalid' && usernameStatus !== 'taken'));
+    usernameStatus === 'available';
 
   const inputBase = "w-full rounded-2xl border bg-gray-50 pl-10 pr-4 py-3 text-sm font-medium text-gray-900 focus:outline-none focus:bg-white transition-all";
   const inputNormal = `${inputBase} border-gray-200 focus:ring-2 focus:ring-[#FF5841]/40 focus:border-[#FF5841]/50`;
@@ -112,7 +112,14 @@ export function SignupForm() {
             {usernameStatus === 'checking' && <SpinnerIcon className="h-4 w-4 animate-spin text-gray-400" />}
             {usernameStatus === 'available' && <CheckCircleIcon className="h-4 w-4 text-emerald-600" />}
             {(usernameStatus === 'taken' || usernameStatus === 'invalid') && (
-              <XCircleIcon className="h-4 w-4 text-rose-500" />
+              <button
+                type="button"
+                aria-label="Clear username"
+                onClick={() => setUsername('')}
+                className="flex items-center justify-center rounded-full p-0.5 hover:bg-rose-100 transition-colors"
+              >
+                <XCircleIcon className="h-4 w-4 text-rose-500" />
+              </button>
             )}
           </div>
         </div>

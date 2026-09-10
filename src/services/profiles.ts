@@ -35,10 +35,14 @@ export async function checkUsernameAvailability(
 
   try {
     const supabase = await createClient();
+
+    // Build a query that only counts profiles belonging to *confirmed* auth users.
+    // Profiles from abandoned/unverified signups should not block the username.
     let query = (supabase as any)
       .from('profiles')
-      .select('id')
-      .eq('username', clean);
+      .select('id, user:id!inner(email_confirmed_at)')
+      .eq('username', clean)
+      .not('user.email_confirmed_at', 'is', null);
 
     if (excludeUserId) {
       query = query.neq('id', excludeUserId);
@@ -58,14 +62,40 @@ export async function checkUsernameAvailability(
       available: true,
       cleanUsername: clean,
     };
-  } catch (err: any) {
-    return {
-      available: false,
-      error: 'Unable to verify username availability at this moment.',
-      cleanUsername: clean,
-    };
+  } catch {
+    // Fallback: simple check without the join (e.g., if the join isn't supported)
+    try {
+      const supabase = await createClient();
+      let fallbackQuery = (supabase as any)
+        .from('profiles')
+        .select('id')
+        .eq('username', clean);
+
+      if (excludeUserId) {
+        fallbackQuery = fallbackQuery.neq('id', excludeUserId);
+      }
+
+      const { data: existing } = await fallbackQuery.maybeSingle();
+
+      if (existing) {
+        return {
+          available: false,
+          error: 'This username is already taken. Please choose another.',
+          cleanUsername: clean,
+        };
+      }
+
+      return { available: true, cleanUsername: clean };
+    } catch {
+      return {
+        available: false,
+        error: 'Unable to verify username availability at this moment.',
+        cleanUsername: clean,
+      };
+    }
   }
 }
+
 
 export async function getPublicProfileByUsernameOrId(
   identifier: string
