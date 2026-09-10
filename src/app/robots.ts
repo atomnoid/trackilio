@@ -1,13 +1,14 @@
 import { MetadataRoute } from 'next';
+import { getSiteUrl } from '@/lib/utils';
 
 export default function robots(): MetadataRoute.Robots {
-  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || 'https://trackilio.com').replace(/\/+$/, '');
+  const siteUrl = getSiteUrl();
 
   return {
     rules: {
       userAgent: '*',
       allow: ['/', '/discover', '/place/*', '/l/*', '/u/*', '/blend/*', '/about', '/sitemap.xml', '/sitemap/*'],
-      disallow: ['/dashboard', '/create', '/settings', '/auth/*', '/api/*'],
+      disallow: ['/dashboard', '/create', '/settings', '/auth/*', '/api/*', '/invite/*', '/l/invite/*', '/blend/invite/*'],
     },
     sitemap: `${siteUrl}/sitemap.xml`,
   };

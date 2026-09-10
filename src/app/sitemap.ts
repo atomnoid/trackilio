@@ -1,16 +1,11 @@
 import { MetadataRoute } from 'next';
 import { createClient } from '@/lib/supabase/server';
 import { CURATED_LISTS } from '@/services/curatedData';
+import { getSiteUrl } from '@/lib/utils';
 
 export const revalidate = 3600;
 
 const CHUNK_SIZE = 1000;
-
-// Canonical domain normalization
-function getCanonicalSiteUrl(): string {
-  const raw = process.env.NEXT_PUBLIC_SITE_URL || 'https://trackilio.com';
-  return raw.replace(/\/+$/, '');
-}
 
 // Fixed static public routes with explicit priority and frequencies
 function getStaticRoutes(siteUrl: string): MetadataRoute.Sitemap {
@@ -129,7 +124,7 @@ export default async function sitemap(props?: {
   }
   const chunkId = Number(rawId) || 0;
 
-  const siteUrl = getCanonicalSiteUrl();
+  const siteUrl = getSiteUrl();
   const { staticCount, listsCount, profilesCount, placesCount } = await getSegmentCounts();
 
   const chunkStart = chunkId * CHUNK_SIZE;

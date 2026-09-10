@@ -4,6 +4,7 @@ import './globals.css';
 import { Navbar } from '@/components/layout/Navbar';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { Footer } from '@/components/layout/Footer';
+import { getSiteUrl } from '@/lib/utils';
 
 const plusJakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -18,10 +19,10 @@ const newsreader = Newsreader({
   style: ['normal', 'italic'],
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://trackilio.com';
+const siteUrl = getSiteUrl();
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://trackilio.com'),
+  metadataBase: new URL(getSiteUrl()),
   title: {
     default: 'Trackilio | Find Places. Save Them. Plan Together.',
     template: '%s | Trackilio',
