@@ -10,20 +10,23 @@ interface TrackilioBalloonLogoProps {
 
 export function TrackilioBalloonLogo({
   className = '',
-  size = 40,
+  size = 48,
   animated = false,
   showClouds = true,
   showSparks = true,
 }: TrackilioBalloonLogoProps) {
+  // If clouds/sparks are hidden (e.g. Navbar icon badge), tighten the viewBox so the balloon is large and prominent
+  const viewBox = showClouds || showSparks ? '0 0 200 200' : '22 10 156 188';
+
   return (
     <div
-      className={`relative inline-flex items-center justify-center select-none ${className} ${
+      className={`relative inline-flex items-center justify-center select-none shrink-0 ${className} ${
         animated ? 'animate-balloon-wave' : ''
       }`}
       style={{ width: size, height: size }}
     >
       <svg
-        viewBox="0 0 200 200"
+        viewBox={viewBox}
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         className="w-full h-full overflow-visible drop-shadow-sm"
