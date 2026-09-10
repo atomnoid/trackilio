@@ -18,10 +18,10 @@ const newsreader = Newsreader({
   style: ['normal', 'italic'],
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://trackilio.com';
 
 export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://trackilio.com'),
   title: {
     default: 'Trackilio | Find Places. Save Them. Plan Together.',
     template: '%s | Trackilio',

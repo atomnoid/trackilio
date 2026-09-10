@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { SpinnerIcon, CheckCircleIcon, XCircleIcon, AtSignIcon, UserIcon, MailIcon, LockIcon, ArrowRightIcon } from '@/components/icons/Icons';
+import { SpinnerIcon, CheckCircleIcon, XCircleIcon, AtSignIcon, UserIcon, MailIcon, LockIcon, ArrowRightIcon, EyeIcon, EyeOffIcon } from '@/components/icons/Icons';
 import { validateUsernameFormat } from '@/lib/username';
 
 export function SignupForm() {
@@ -9,6 +9,7 @@ export function SignupForm() {
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'invalid' | 'taken'>('idle');
   const [usernameMessage, setUsernameMessage] = useState<string>('');
@@ -172,7 +173,7 @@ export function SignupForm() {
         <div className="relative">
           <LockIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <input
-            type="password"
+            type={showPassword ? 'text' : 'password'}
             name="password"
             required
             minLength={6}
@@ -180,8 +181,20 @@ export function SignupForm() {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Minimum 6 characters"
             autoComplete="new-password"
-            className={inputNormal}
+            className="w-full rounded-2xl border border-gray-200 bg-gray-50 pl-10 pr-11 py-3 text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#FF5841]/40 focus:border-[#FF5841]/50 focus:bg-white transition-all"
           />
+          <button
+            type="button"
+            aria-label="Toggle password visibility"
+            onClick={() => setShowPassword((v) => !v)}
+            className="absolute right-3.5 top-1/2 -translate-y-1/2 p-0.5 rounded-md text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+          >
+            {showPassword ? (
+              <EyeOffIcon className="h-4 w-4" />
+            ) : (
+              <EyeIcon className="h-4 w-4" />
+            )}
+          </button>
         </div>
       </div>
 

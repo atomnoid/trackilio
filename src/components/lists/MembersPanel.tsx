@@ -2,8 +2,7 @@
 
 import React, { useState } from 'react';
 import { MemberRole } from '@/types/database';
-import { UserPlusIcon, TrashIcon, SpinnerIcon, UsersIcon, CrownIcon, ExternalLinkIcon } from '@/components/icons/Icons';
-import { sanitizeUsername } from '@/lib/username';
+import { UserPlusIcon, TrashIcon, SpinnerIcon, UsersIcon, CrownIcon, ExternalLinkIcon, LinkIcon, CheckIcon, CopyIcon } from '@/components/icons/Icons';
 
 interface MemberEntry {
   id: string;
@@ -36,64 +35,44 @@ export function MembersPanel({
   currentUserId,
 }: MembersPanelProps) {
   const [members, setMembers] = useState<MemberEntry[]>(initialMembers);
-  const [inviteUsername, setInviteUsername] = useState('');
   const [inviteRole, setInviteRole] = useState<'editor' | 'viewer'>('editor');
-  const [inviting, setInviting] = useState(false);
+  const [inviteUrl, setInviteUrl] = useState<string | null>(null);
+  const [generating, setGenerating] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [inviteError, setInviteError] = useState<string | null>(null);
-  const [inviteSuccess, setInviteSuccess] = useState<string | null>(null);
   const [removingId, setRemovingId] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   const isOwner = currentUserId === ownerId;
 
-  const handleInvite = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const cleanUser = sanitizeUsername(inviteUsername);
-    if (!cleanUser) return;
-
-    setInviting(true);
+  const handleGenerateLink = async () => {
+    setGenerating(true);
     setInviteError(null);
-    setInviteSuccess(null);
-
+    setInviteUrl(null);
+    setCopied(false);
     try {
-      const res = await fetch('/api/members', {
+      const res = await fetch('/api/members/invite', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          listId,
-          username: cleanUser,
-          role: inviteRole,
-        }),
+        body: JSON.stringify({ listId, role: inviteRole }),
       });
       const data = await res.json();
-
-      if (!res.ok) {
-        setInviteError(data.error || 'Failed to invite member.');
-      } else {
-        const newMember: MemberEntry = {
-          id: data.member.id,
-          user_id: data.member.id,
-          role: data.member.role,
-          profile: {
-            display_name: data.member.display_name,
-            username: data.member.username,
-            avatar_url: null,
-          },
-        };
-        setMembers((prev) => [...prev, newMember]);
-        setInviteUsername('');
-        setInviteSuccess(
-          `@${data.member.username || data.member.display_name} added as ${
-            ROLE_LABELS[data.member.role as MemberRole] || data.member.role
-          }!`
-        );
-        setTimeout(() => setInviteSuccess(null), 4000);
-      }
+      if (!res.ok) { setInviteError(data.error || 'Failed to generate invite link.'); }
+      else { setInviteUrl(data.url); }
     } catch {
       setInviteError('Network error. Please try again.');
     } finally {
-      setInviting(false);
+      setGenerating(false);
     }
+  };
+
+  const handleCopy = async () => {
+    if (!inviteUrl) return;
+    try {
+      await navigator.clipboard.writeText(inviteUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    } catch {}
   };
 
   const handleRoleChange = async (userId: string, newRole: MemberRole) => {
@@ -243,58 +222,66 @@ export function MembersPanel({
       {/* Invite Form (owner only) */}
       {isOwner && (
         <div className="px-5 py-4 border-t border-gray-100 bg-gray-50 space-y-3">
-          {inviteSuccess && (
-            <p className="text-[11px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2">
-              ✓ {inviteSuccess}
-            </p>
-          )}
           {inviteError && (
             <p className="text-[11px] font-bold text-rose-800 bg-rose-50 border border-rose-200 rounded-xl px-3 py-2">
               {inviteError}
             </p>
           )}
 
-          <form onSubmit={handleInvite} className="flex flex-col gap-2">
+          <div className="space-y-2">
             <label className="text-[10px] font-extrabold uppercase tracking-wider text-gray-500 flex items-center gap-1">
-              <UserPlusIcon className="h-3 w-3 text-[#FA8112]" /> Invite by @username
+              <LinkIcon className="h-3 w-3 text-[#FA8112]" /> Generate Invite Link
             </label>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={inviteUsername}
-                onChange={(e) => setInviteUsername(e.target.value)}
-                placeholder="e.g. sara_travels"
-                autoComplete="off"
-                spellCheck={false}
-                className="flex-1 min-w-0 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#FF5841]/40 transition-all"
-              />
-              <select
-                value={inviteRole}
-                onChange={(e) => setInviteRole(e.target.value as 'editor' | 'viewer')}
-                className="rounded-xl border border-gray-200 bg-white px-2.5 py-2 text-xs font-bold text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#FF5841]/40 cursor-pointer shrink-0"
-              >
-                <option value="editor">Editor (Can add/edit)</option>
-                <option value="viewer">Viewer (View only)</option>
-              </select>
-            </div>
-            <button
-              type="submit"
-              disabled={inviting || !inviteUsername.trim()}
-              className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-[#FF5841] to-[#C53678] hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed text-white font-extrabold py-2 text-xs shadow-xs transition-all active-press"
-            >
-              {inviting ? (
-                <>
-                  <SpinnerIcon className="h-3.5 w-3.5 animate-spin" />
-                  Inviting…
-                </>
-              ) : (
-                <>
-                  <UserPlusIcon className="h-3.5 w-3.5" />
-                  Invite Collaborator
-                </>
-              )}
-            </button>
-          </form>
+
+            {inviteUrl ? (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <input
+                    readOnly
+                    value={inviteUrl}
+                    className="flex-1 min-w-0 rounded-xl border border-emerald-200 bg-white px-3 py-2 text-[10px] font-mono text-gray-700 focus:outline-none truncate"
+                  />
+                  <button
+                    onClick={handleCopy}
+                    className="shrink-0 inline-flex items-center gap-1 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2.5 py-2 text-[11px] transition-colors"
+                  >
+                    {copied ? <CheckIcon className="h-3 w-3" /> : <CopyIcon className="h-3 w-3" />}
+                    {copied ? 'Copied!' : 'Copy'}
+                  </button>
+                </div>
+                <p className="text-[10px] text-gray-400 font-medium">Expires in 7 days · Single use</p>
+                <button
+                  onClick={() => { setInviteUrl(null); setInviteError(null); }}
+                  className="text-[10px] font-bold text-[#FF5841] hover:underline"
+                >
+                  Generate new link
+                </button>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <select
+                  value={inviteRole}
+                  onChange={(e) => setInviteRole(e.target.value as 'editor' | 'viewer')}
+                  className="rounded-xl border border-gray-200 bg-white px-2.5 py-2 text-xs font-bold text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#FF5841]/40 cursor-pointer shrink-0"
+                >
+                  <option value="editor">Editor (Can add/edit)</option>
+                  <option value="viewer">Viewer (View only)</option>
+                </select>
+                <button
+                  type="button"
+                  onClick={handleGenerateLink}
+                  disabled={generating}
+                  className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-[#FF5841] to-[#C53678] hover:opacity-95 disabled:opacity-50 text-white font-extrabold py-2 text-xs shadow-xs transition-all active-press"
+                >
+                  {generating ? (
+                    <><SpinnerIcon className="h-3.5 w-3.5 animate-spin" />Generating…</>
+                  ) : (
+                    <><UserPlusIcon className="h-3.5 w-3.5" />Get Invite Link</>
+                  )}
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

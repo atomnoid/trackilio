@@ -13,7 +13,7 @@ import { ListHeaderActions } from '@/components/lists/ListHeaderActions';
 import { PinIcon, GlobeIcon, LockIcon, CalendarIcon, UsersIcon, SparklesIcon } from '@/components/icons/Icons';
 import { formatDate } from '@/lib/utils';
 
-export const revalidate = 10;
+export const revalidate = 60;
 
 interface WanderListPageProps {
   params: Promise<{ slug: string }>;

@@ -42,7 +42,7 @@ export default async function BlendPage({ searchParams }: BlendPageProps) {
           What&apos;s your <span className="text-[#FA8112]">Blend?</span>
         </h1>
         <p className="text-sm sm:text-base text-[#6B6862] font-normal max-w-md mx-auto leading-relaxed">
-          Enter any traveler&apos;s @username to calculate your compatibility score based on shared places and destinations.
+          Generate an invite link to compare travel tastes and calculate your compatibility score based on shared places and destinations.
         </p>
 
         <div className="pt-2 max-w-md mx-auto">
