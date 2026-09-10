@@ -23,6 +23,15 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async rewrites() {
+    return [
+      // Route /sitemap.xml to /sitemap/0.xml (Next.js generateSitemaps chunk)
+      {
+        source: '/sitemap.xml',
+        destination: '/sitemap/0.xml',
+      },
+    ];
+  },
 };
 
 export default nextConfig;
