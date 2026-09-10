@@ -1,4 +1,4 @@
-import React from 'react';
+import { getSiteUrl } from '@/lib/utils';
 import { Profile } from '@/types/database';
 
 interface ProfileJsonLdProps {
@@ -8,7 +8,7 @@ interface ProfileJsonLdProps {
 }
 
 export function ProfileJsonLd({ profile, publicListsCount, username }: ProfileJsonLdProps) {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  const siteUrl = getSiteUrl();
   const profileUrl = `${siteUrl}/u/${username}`;
 
   const personSchema = {

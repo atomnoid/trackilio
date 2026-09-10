@@ -8,6 +8,7 @@ import { SavePlaceButton } from '@/components/places/SavePlaceButton';
 import { AddToListModal } from '@/components/places/AddToListModal';
 import { PlaceDiscoveryCard } from '@/components/places/PlaceDiscoveryCard';
 import { getExternalMapUrl, getOpenStreetMapEmbedUrl } from '@/lib/maps';
+import { getSiteUrl } from '@/lib/utils';
 import {
   PinIcon,
   GlobeIcon,
@@ -39,7 +40,7 @@ export async function generateMetadata({
   }
 
   const { place } = result;
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  const siteUrl = getSiteUrl();
   const canonicalUrl = `${siteUrl}/place/${place.slug || slug}`;
   const loc = place.city || place.location || place.country || '';
   const title = `${place.name}${loc ? ` in ${loc}` : ''} — Recommendations | Trackilio`;

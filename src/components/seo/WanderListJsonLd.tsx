@@ -1,4 +1,4 @@
-import React from 'react';
+import { getSiteUrl } from '@/lib/utils';
 import { WanderList, ListPlace } from '@/types/database';
 
 interface JsonLdProps {
@@ -7,7 +7,7 @@ interface JsonLdProps {
 }
 
 export function WanderListJsonLd({ list, places }: JsonLdProps) {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  const siteUrl = getSiteUrl();
   const url = `${siteUrl}/l/${list.slug}`;
 
   const breadcrumbList = {

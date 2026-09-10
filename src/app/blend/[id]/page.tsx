@@ -5,6 +5,7 @@ import { getBlendSession } from '@/services/blend';
 import { AnimatedScore } from '@/components/blend/AnimatedScore';
 import { ShareBlendButton } from '@/components/blend/ShareBlendButton';
 import { PinIcon, ArrowRightIcon, RefreshIcon } from '@/components/icons/Icons';
+import { getSiteUrl } from '@/lib/utils';
 
 export const revalidate = 3600; // Blend results are immutable after creation
 
@@ -25,7 +26,7 @@ export async function generateMetadata({ params }: BlendResultPageProps): Promis
 
   const nameA = result.userA.display_name || result.userA.username || 'Traveler A';
   const nameB = result.userB.display_name || result.userB.username || 'Traveler B';
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  const siteUrl = getSiteUrl();
 
   return {
     title: `${nameA} & ${nameB} — ${result.score}% Travel Match | Trackilio`,

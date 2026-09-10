@@ -9,6 +9,7 @@ import { FollowButton } from '@/components/profile/FollowButton';
 import { FollowStats } from '@/components/profile/FollowStats';
 import { PinIcon, ArrowRightIcon } from '@/components/icons/Icons';
 import { createClient } from '@/lib/supabase/server';
+import { getSiteUrl } from '@/lib/utils';
 
 export const revalidate = 60;
 
@@ -28,7 +29,7 @@ export async function generateMetadata({ params }: ProfilePageProps): Promise<Me
   }
 
   const { profile } = result;
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  const siteUrl = getSiteUrl();
   const canonicalUrl = `${siteUrl}/u/${profile.username ?? username}`;
   const displayName = profile.display_name || profile.username || 'Traveler';
   const listCount = profile.public_lists_count ?? 0;

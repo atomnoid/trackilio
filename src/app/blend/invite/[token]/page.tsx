@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { BlendInviteAccept } from "@/components/blend/BlendInviteAccept";
+import { getSiteUrl } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +13,7 @@ interface BlendInvitePageProps {
 
 export async function generateMetadata({ params }: BlendInvitePageProps): Promise<Metadata> {
   const { token } = await params;
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const siteUrl = getSiteUrl();
   try {
     const res = await fetch(`${siteUrl}/api/blend/invite?token=${token}`, { cache: "no-store" });
     if (!res.ok) return { title: "Blend Invite | Trackilio", robots: { index: false, follow: false } };
@@ -33,7 +34,7 @@ export default async function BlendInvitePage({ params }: BlendInvitePageProps) 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const siteUrl = getSiteUrl();
   let invite: any = null;
   let fetchError: string | null = null;
 

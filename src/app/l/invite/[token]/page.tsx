@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { ListInviteAccept } from "@/components/lists/ListInviteAccept";
+import { getSiteUrl } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +13,7 @@ interface ListInvitePageProps {
 
 export async function generateMetadata({ params }: ListInvitePageProps): Promise<Metadata> {
   const { token } = await params;
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const siteUrl = getSiteUrl();
   try {
     const supabase = await createClient();
     const { data: invite } = await (supabase as any)

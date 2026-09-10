@@ -11,7 +11,7 @@ import { WanderListJsonLd } from '@/components/seo/WanderListJsonLd';
 import { MembersPanel } from '@/components/lists/MembersPanel';
 import { ListHeaderActions } from '@/components/lists/ListHeaderActions';
 import { PinIcon, GlobeIcon, LockIcon, CalendarIcon, UsersIcon, SparklesIcon } from '@/components/icons/Icons';
-import { formatDate } from '@/lib/utils';
+import { formatDate, getSiteUrl } from '@/lib/utils';
 
 export const revalidate = 60;
 
@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: WanderListPageProps): Promise
     };
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  const siteUrl = getSiteUrl();
   const canonicalUrl = `${siteUrl}/l/${list.slug}`;
   const placeCount = list.places_count || 0;
 

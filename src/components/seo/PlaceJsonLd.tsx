@@ -1,4 +1,4 @@
-import React from 'react';
+import { getSiteUrl } from '@/lib/utils';
 import { Place } from '@/types/database';
 
 interface PlaceJsonLdProps {
@@ -6,7 +6,7 @@ interface PlaceJsonLdProps {
 }
 
 export function PlaceJsonLd({ place }: PlaceJsonLdProps) {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  const siteUrl = getSiteUrl();
   const placeUrl = `${siteUrl}/place/${place.slug || place.id}`;
 
   const placeSchema = {
