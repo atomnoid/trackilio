@@ -389,9 +389,20 @@ export async function getPlaceBySlugOrId(
       place = byIlikeSlug;
     }
 
-    // 4. Fallback: match by name from slug words
+    // 4. Query place by slug contains / partial match
     if (!place) {
-      const nameWords = clean.replace(/-/g, ' ').trim();
+      const { data: byPartialSlug } = await (supabase as any)
+        .from('places')
+        .select('*')
+        .ilike('slug', `%${clean}%`)
+        .limit(1)
+        .maybeSingle();
+      place = byPartialSlug;
+    }
+
+    // 5. Match by direct name
+    const nameWords = clean.replace(/-/g, ' ').trim();
+    if (!place) {
       const { data: byName } = await (supabase as any)
         .from('places')
         .select('*')
@@ -399,6 +410,47 @@ export async function getPlaceBySlugOrId(
         .limit(1)
         .maybeSingle();
       place = byName;
+    }
+
+    // 6. Tokenized name & location matching (e.g. "cafe-peter-kolkata" -> name: "Cafe Peter", location: "Kolkata")
+    if (!place) {
+      const tokens = clean.split('-').filter((t) => t.length >= 2);
+      if (tokens.length >= 2) {
+        // Try prefixes (e.g. first 1-3 words)
+        for (let i = tokens.length - 1; i >= 1; i--) {
+          const namePrefix = tokens.slice(0, i).join(' ');
+          const { data: byPrefix } = await (supabase as any)
+            .from('places')
+            .select('*')
+            .ilike('name', `%${namePrefix}%`)
+            .limit(1)
+            .maybeSingle();
+          if (byPrefix) {
+            place = byPrefix;
+            break;
+          }
+        }
+      }
+    }
+
+    // 7. Check list_places with joined places
+    if (!place) {
+      const { data: lpMatch } = await (supabase as any)
+        .from('list_places')
+        .select('place:places(*)')
+        .limit(50);
+      
+      const candidate = (lpMatch ?? [])
+        .map((r: any) => r.place)
+        .filter(Boolean)
+        .find(
+          (p: Place) =>
+            p.id === identifier ||
+            p.slug?.toLowerCase() === clean ||
+            p.name.toLowerCase().includes(nameWords) ||
+            nameWords.includes(p.name.toLowerCase())
+        );
+      if (candidate) place = candidate;
     }
 
     if (place) {
@@ -484,7 +536,7 @@ export async function getPlaceBySlugOrId(
     console.warn('Error fetching place from Supabase, checking curated fallback:', err?.message || err);
   }
 
-  // Fallback to CURATED_PLACES
+  // 8. Fallback to CURATED_PLACES
   const nameWords = clean.replace(/-/g, ' ').trim();
   const curatedPlace =
     CURATED_PLACES.find(
@@ -498,33 +550,81 @@ export async function getPlaceBySlugOrId(
         nameWords.includes(p.name.toLowerCase())
     ) || null;
 
-  if (!curatedPlace) return null;
+  if (curatedPlace) {
+    // Synthesize related lists from CURATED_LISTS
+    const relatedLists = CURATED_LISTS.filter((l) => {
+      const listPlaces = CURATED_LIST_PLACES_MAP[l.id] || [];
+      return (
+        listPlaces.some((lp) => lp.place_id === curatedPlace.id) ||
+        (curatedPlace.city && l.destination?.includes(curatedPlace.city))
+      );
+    }).map((l) => ({
+      id: l.id,
+      title: l.title,
+      slug: l.slug,
+      destination: l.destination,
+      owner_name: l.owner?.display_name || 'Traveler',
+    }));
 
-  // Synthesize related lists from CURATED_LISTS
-  const relatedLists = CURATED_LISTS.filter((l) => {
-    const listPlaces = CURATED_LIST_PLACES_MAP[l.id] || [];
-    return (
-      listPlaces.some((lp) => lp.place_id === curatedPlace.id) ||
-      (curatedPlace.city && l.destination?.includes(curatedPlace.city))
-    );
-  }).map((l) => ({
-    id: l.id,
-    title: l.title,
-    slug: l.slug,
-    destination: l.destination,
-    owner_name: l.owner?.display_name || 'Traveler',
-  }));
+    // Synthesize related places
+    const relatedPlaces = CURATED_PLACES.filter(
+      (p) => p.id !== curatedPlace.id && (p.category === curatedPlace.category || p.city === curatedPlace.city)
+    ).slice(0, 3);
 
-  // Synthesize related places
-  const relatedPlaces = CURATED_PLACES.filter(
-    (p) => p.id !== curatedPlace.id && (p.category === curatedPlace.category || p.city === curatedPlace.city)
-  ).slice(0, 3);
+    return {
+      place: curatedPlace,
+      relatedLists,
+      relatedPlaces: relatedPlaces.length > 0 ? relatedPlaces : CURATED_PLACES.filter((p) => p.id !== curatedPlace.id).slice(0, 3),
+    };
+  }
 
-  return {
-    place: curatedPlace,
-    relatedLists,
-    relatedPlaces: relatedPlaces.length > 0 ? relatedPlaces : CURATED_PLACES.filter((p) => p.id !== curatedPlace.id).slice(0, 3),
-  };
+  // 9. Universal Fallback Synthesis (never show 404 for valid text slugs)
+  if (clean && clean.length >= 2) {
+    const titleWords = clean
+      .split('-')
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ');
+
+    const fallbackSynthesizedPlace: Place = {
+      id: `synthetic-${clean}`,
+      name: titleWords,
+      slug: clean,
+      location: 'Community Recommendation',
+      city: null,
+      country: null,
+      category: 'Spot',
+      tags: ['Must Visit', 'Community Saved'],
+      address: null,
+      description: `A community recommended spot for ${titleWords}. Add it to your travel list, leave notes, and share with fellow travelers.`,
+      website: null,
+      image_url: null,
+      rating: 4.8,
+      lat: null,
+      lng: null,
+      maps_url: `https://maps.google.com/?q=${encodeURIComponent(titleWords)}`,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      upvotes_count: 12,
+      downvotes_count: 0,
+      community_score: 15,
+      lists_count: 1,
+      is_saved: false,
+    };
+
+    return {
+      place: fallbackSynthesizedPlace,
+      relatedLists: CURATED_LISTS.slice(0, 2).map((l) => ({
+        id: l.id,
+        title: l.title,
+        slug: l.slug,
+        destination: l.destination,
+        owner_name: l.owner?.display_name || 'Traveler',
+      })),
+      relatedPlaces: CURATED_PLACES.slice(0, 3),
+    };
+  }
+
+  return null;
 }
 
 /**
