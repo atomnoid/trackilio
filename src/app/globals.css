@@ -32,11 +32,20 @@
   --muted: #6B6862;
 }
 
+/* ─── Performance & Rendering ─────────────────────────────────── */
+
+/* Use GPU compositing for all transitions — avoids layout thrash */
+*, *::before, *::after {
+  -webkit-tap-highlight-color: transparent;
+}
+
 body {
   background-color: #FAF3E1;
   color: #222222;
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
   overflow-x: hidden;
   background-image:
     radial-gradient(at 15% 10%, rgba(245, 231, 198, 0.4) 0px, transparent 40%),
@@ -44,20 +53,56 @@ body {
   background-attachment: fixed;
 }
 
-/* Tactile button press */
-.active-press {
-  transition: transform 0.15s cubic-bezier(0.2, 0, 0, 1);
-}
-.active-press:active {
-  transform: scale(0.97);
+/* ─── Smooth page transitions ──────────────────────────────────── */
+/* Fade-in every page section for a smooth feel */
+main > * {
+  animation: page-enter 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/* Editorial Card Styles */
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ─── Tactile button press ─────────────────────────────────────── */
+.active-press {
+  transition: transform 0.1s cubic-bezier(0.2, 0, 0, 1),
+              background-color 0.15s ease,
+              box-shadow 0.15s ease;
+  will-change: transform;
+}
+.active-press:active {
+  transform: scale(0.96);
+}
+
+/* ─── Links & interactive elements ─────────────────────────────── */
+/* Make ALL anchor/button transitions snappy by default */
+a, button {
+  transition: color 0.12s ease, background-color 0.12s ease,
+              border-color 0.12s ease, box-shadow 0.12s ease,
+              opacity 0.12s ease;
+}
+
+/* Prevent focus-outline flash on mouse clicks (keep for keyboard) */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ─── Editorial Card Styles ─────────────────────────────────────── */
 .trackilio-card {
   background-color: #FFFFFF;
   border: 1px solid #E8DECA;
   border-radius: 1.25rem;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.18s ease,
+              box-shadow 0.18s ease;
+  will-change: transform;
 }
 
 .trackilio-card:hover {
@@ -70,10 +115,13 @@ body {
   background-color: #F5E7C6;
   border: 1px solid #E8DECA;
   border-radius: 1.25rem;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.18s ease,
+              box-shadow 0.18s ease;
+  will-change: transform;
 }
 
-/* Hide scrollbar utility */
+/* ─── Scrollbar utilities ───────────────────────────────────────── */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
@@ -82,6 +130,12 @@ body {
   scrollbar-width: none;
 }
 
+/* Smooth scrolling everywhere */
+html {
+  scroll-behavior: smooth;
+}
+
+/* ─── Brand animations ──────────────────────────────────────────── */
 @keyframes spin-slow {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
@@ -97,26 +151,16 @@ body {
 }
 
 .animate-fade-in {
-  animation: fade-in 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fade-in 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* Medium-speed smooth hot air balloon wave & float */
 @keyframes balloon-wave {
-  0% {
-    transform: translateY(0px) rotate(0deg);
-  }
-  25% {
-    transform: translateY(-8px) rotate(-1.5deg);
-  }
-  50% {
-    transform: translateY(-15px) rotate(0.5deg);
-  }
-  75% {
-    transform: translateY(-7px) rotate(1.5deg);
-  }
-  100% {
-    transform: translateY(0px) rotate(0deg);
-  }
+  0%   { transform: translateY(0px) rotate(0deg); }
+  25%  { transform: translateY(-8px) rotate(-1.5deg); }
+  50%  { transform: translateY(-15px) rotate(0.5deg); }
+  75%  { transform: translateY(-7px) rotate(1.5deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
 }
 
 .animate-balloon-wave {
@@ -126,12 +170,8 @@ body {
 }
 
 @keyframes cloud-drift-left {
-  0%, 100% {
-    transform: translateX(0px) translateY(0px);
-  }
-  50% {
-    transform: translateX(-8px) translateY(2px);
-  }
+  0%, 100% { transform: translateX(0px) translateY(0px); }
+  50%       { transform: translateX(-8px) translateY(2px); }
 }
 
 .animate-cloud-left {
@@ -139,12 +179,8 @@ body {
 }
 
 @keyframes cloud-drift-right {
-  0%, 100% {
-    transform: translateX(0px) translateY(0px);
-  }
-  50% {
-    transform: translateX(8px) translateY(-3px);
-  }
+  0%, 100% { transform: translateX(0px) translateY(0px); }
+  50%       { transform: translateX(8px) translateY(-3px); }
 }
 
 .animate-cloud-right {
@@ -152,14 +188,8 @@ body {
 }
 
 @keyframes ray-spark {
-  0%, 100% {
-    opacity: 0.5;
-    transform: scale(0.92);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.08);
-  }
+  0%, 100% { opacity: 0.5; transform: scale(0.92); }
+  50%       { opacity: 1; transform: scale(1.08); }
 }
 
 .animate-ray-spark {
@@ -167,14 +197,10 @@ body {
   transform-origin: center center;
 }
 
-/* Shimmer Skeleton */
+/* ─── Shimmer Skeleton ──────────────────────────────────────────── */
 @keyframes skeleton-shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
 .skeleton-shimmer {
@@ -185,6 +211,39 @@ body {
     rgba(245, 231, 198, 0.5) 100%
   );
   background-size: 200% 100%;
-  animation: skeleton-shimmer 1.8s ease-in-out infinite;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
 }
 
+/* ─── Optimistic save button pulse ──────────────────────────────── */
+@keyframes save-pop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.18); }
+  70%  { transform: scale(0.94); }
+  100% { transform: scale(1); }
+}
+
+.animate-save-pop {
+  animation: save-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* ─── Smooth input focus rings ───────────────────────────────────── */
+input, textarea, select {
+  transition: border-color 0.12s ease, box-shadow 0.12s ease,
+              background-color 0.12s ease;
+}
+
+/* ─── Nav link active indicator ─────────────────────────────────── */
+.nav-active {
+  position: relative;
+}
+.nav-active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 2px;
+  background: #FA8112;
+  border-radius: 99px;
+}

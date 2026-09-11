@@ -102,7 +102,7 @@ export function Navbar() {
   return (
     <>
       <header
-        className={`sticky top-0 z-40 h-16 sm:h-18 flex items-center transition-colors duration-200 ${
+        className={`sticky top-0 z-40 h-16 sm:h-18 flex items-center transition-all duration-200 will-change-auto ${
           scrolled
             ? 'bg-[#FAF3E1]/95 backdrop-blur-md border-b border-[#E8DECA] shadow-2xs'
             : 'bg-[#FAF3E1] border-b border-transparent'
@@ -115,16 +115,17 @@ export function Navbar() {
 
             {/* Desktop Navigation Links */}
             <nav className="hidden md:flex items-center gap-6 text-sm font-semibold">
-              {navLinks.map((link) => {
+            {navLinks.map((link) => {
                 const isActive = mounted && pathname === link.href;
                 return (
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={`transition-colors py-1.5 px-3 rounded-xl ${
+                    prefetch={true}
+                    className={`transition-all duration-100 py-1.5 px-3 rounded-xl ${
                       isActive
                         ? 'text-[#222222] bg-[#F5E7C6] font-extrabold'
-                        : 'text-[#6B6862] hover:text-[#222222]'
+                        : 'text-[#6B6862] hover:text-[#222222] hover:bg-[#F5E7C6]/50'
                     }`}
                   >
                     {link.label}

@@ -30,6 +30,7 @@ export function BottomNav() {
               <Link
                 key={link.href}
                 href={link.href}
+                prefetch={true}
                 className="flex items-center justify-center px-4 py-2 rounded-xl bg-[#FA8112] text-white font-black text-xs active-press shadow-xs"
               >
                 + Create
@@ -41,7 +42,8 @@ export function BottomNav() {
             <Link
               key={link.href}
               href={link.href}
-              className={`py-2 px-3 rounded-xl text-xs font-bold transition-colors ${
+              prefetch={true}
+              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all duration-100 active-press ${
                 isActive ? 'text-[#FA8112] bg-[#F5E7C6]' : 'text-[#6B6862] hover:text-[#222222]'
               }`}
             >
