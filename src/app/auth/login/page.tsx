@@ -53,8 +53,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
       <p className="text-center text-xs text-gray-500 font-medium">
         Don&apos;t have an account?{' '}
-        <Link href="/auth/signup" className="font-extrabold text-[#C53678] hover:text-[#FF5841] transition-colors">
-          Sign up
+        <Link href="/auth/signup" className="font-extrabold text-[#FF5841] hover:text-[#E84430] transition-colors">
+          create one
         </Link>
       </p>
     </div>
