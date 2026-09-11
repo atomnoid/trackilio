@@ -2,7 +2,7 @@
 
 import Script from 'next/script';
 import { usePathname } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 // The GA Measurement ID is intentionally public — it is a client-side identifier
 // used only to send anonymous analytics data to Google Analytics 4.
@@ -11,10 +11,10 @@ const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 
 /**
  * Sends a page_view event to GA4.
- * Called manually on client-side navigations to avoid duplicate events.
+ * Only called after gtag has been confirmed loaded (via onLoad or ref guard).
  */
 function sendPageView(url: string) {
-  if (!GA_ID || typeof window === 'undefined' || !window.gtag) return;
+  if (!GA_ID || typeof window === 'undefined' || typeof window.gtag !== 'function') return;
   window.gtag('event', 'page_view', {
     page_path: url,
     send_to: GA_ID,
@@ -23,28 +23,28 @@ function sendPageView(url: string) {
 
 /**
  * GoogleAnalytics — a lightweight client component that:
- * 1. Loads the Google tag (gtag.js) script once via next/script (afterInteractive).
- * 2. Initialises GA4 with the Measurement ID from NEXT_PUBLIC_GA_ID.
- * 3. Tracks client-side navigations by watching usePathname().
- * 4. Does nothing when NEXT_PUBLIC_GA_ID is not set (safe in dev/preview).
+ * 1. Loads the Google tag (gtag.js) via next/script with strategy="afterInteractive".
+ * 2. Initialises GA4 with NEXT_PUBLIC_GA_ID and send_page_view: false.
+ * 3. Fires the initial page_view once gtag is ready (via onLoad on the init script).
+ * 4. Tracks every subsequent client-side route change via usePathname().
+ * 5. Does nothing when NEXT_PUBLIC_GA_ID is not set (safe in dev / preview).
  *
- * Place once in the root layout — renders no visible UI.
+ * Rendered once in the root layout — produces no visible UI.
  */
 export function GoogleAnalytics() {
   const pathname = usePathname();
+  // Tracks whether gtag has finished loading — prevents firing page_view before
+  // the script is ready on the initial mount.
+  const gtagReady = useRef(false);
 
-  // Track client-side navigation page views
+  // Track client-side navigation page views (subsequent navigations only).
+  // The initial page_view is fired in the Script onLoad callback below.
   useEffect(() => {
-    if (!GA_ID) return;
-    // The initial page_view is already fired by the gtag('config') call in the
-    // inline init script below. We only fire manually on subsequent navigations.
-    // To detect "subsequent" we could track a ref, but because the init script
-    // sets send_page_view: false we always fire manually — keeping it simple and
-    // duplicate-free.
+    if (!GA_ID || !gtagReady.current) return;
     sendPageView(pathname);
   }, [pathname]);
 
-  // Do not render any scripts if the env var is missing
+  // Do not render any scripts when the env var is missing
   if (!GA_ID) return null;
 
   return (
@@ -55,22 +55,24 @@ export function GoogleAnalytics() {
         strategy="afterInteractive"
       />
 
-      {/* 2. Inline init — must run immediately after the library loads.
-              send_page_view: false — we control page_view ourselves via useEffect
-              to avoid a duplicate on the first render. */}
+      {/* 2. Inline init script — runs after the library above is loaded.
+              send_page_view: false — we control page_view manually to avoid duplicates.
+              onLoad fires the initial page_view and marks gtag as ready. */}
       <Script
         id="gtag-init"
         strategy="afterInteractive"
+        onLoad={() => {
+          gtagReady.current = true;
+          // Fire the initial page_view now that gtag is confirmed ready
+          sendPageView(window.location.pathname);
+        }}
         dangerouslySetInnerHTML={{
           __html: `
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             window.gtag = gtag;
             gtag('js', new Date());
-            gtag('config', '${GA_ID}', {
-              send_page_view: false,
-              page_path: window.location.pathname
-            });
+            gtag('config', '${GA_ID}', { send_page_view: false });
           `,
         }}
       />
