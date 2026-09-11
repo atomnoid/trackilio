@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import {
   SpinnerIcon,
   CheckCircleIcon,
@@ -25,9 +26,19 @@ export function SignupForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverError, setServerError] = useState('');
+  const [emailTaken, setEmailTaken] = useState(false);
 
   const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'invalid' | 'taken'>('idle');
   const [usernameMessage, setUsernameMessage] = useState<string>('');
+
+  // Clear email-taken error when the user edits the email field
+  useEffect(() => {
+    if (emailTaken) {
+      setEmailTaken(false);
+      setServerError('');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [email]);
 
   useEffect(() => {
     const raw = username.trim();
@@ -79,6 +90,7 @@ export function SignupForm() {
 
     setIsSubmitting(true);
     setServerError('');
+    setEmailTaken(false);
 
     try {
       const formData = new FormData();
@@ -95,6 +107,9 @@ export function SignupForm() {
       const data = await res.json();
 
       if (!res.ok || data.error) {
+        if (data.emailTaken) {
+          setEmailTaken(true);
+        }
         setServerError(data.error || 'Something went wrong. Please try again.');
         return;
       }
@@ -112,10 +127,11 @@ export function SignupForm() {
 
   const inputBase = 'w-full rounded-2xl border bg-gray-50 pl-10 pr-4 py-3 text-sm font-medium text-gray-900 focus:outline-none focus:bg-white transition-all';
   const inputNormal = `${inputBase} border-gray-200 focus:ring-2 focus:ring-[#FF5841]/40 focus:border-[#FF5841]/50`;
+  const inputError = `${inputBase} border-rose-300 bg-rose-50/40 focus:ring-2 focus:ring-rose-400`;
 
   return (
     <form onSubmit={handleSubmit} className="bg-white border border-gray-100 rounded-3xl p-6 sm:p-8 shadow-sm space-y-5">
-      {serverError && (
+      {serverError && !emailTaken && (
         <div className="rounded-2xl bg-rose-50 border border-rose-200 p-3 text-xs font-semibold text-rose-700 text-center">
           {serverError}
         </div>
@@ -209,7 +225,11 @@ export function SignupForm() {
           Email Address <span className="text-rose-400">*</span>
         </label>
         <div className="relative">
-          <MailIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <MailIcon
+            className={`absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 transition-colors ${
+              emailTaken ? 'text-rose-400' : 'text-gray-400'
+            }`}
+          />
           <input
             type="email"
             name="email"
@@ -218,9 +238,27 @@ export function SignupForm() {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
             autoComplete="email"
-            className={inputNormal}
+            className={emailTaken ? inputError : inputNormal}
           />
+          {emailTaken && (
+            <div className="absolute right-3.5 top-1/2 -translate-y-1/2">
+              <XCircleIcon className="h-4 w-4 text-rose-500" />
+            </div>
+          )}
         </div>
+
+        {/* Email-taken inline error with login link */}
+        {emailTaken && (
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-rose-600">
+            <span>This email is already registered.</span>
+            <Link
+              href="/auth/login"
+              className="underline underline-offset-2 font-extrabold text-[#C53678] hover:text-[#FF5841] transition-colors"
+            >
+              Log in instead →
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* Password */}

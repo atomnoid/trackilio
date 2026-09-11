@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { checkUsernameAvailability } from '@/services/profiles';
-import { sanitizeUsername } from '@/lib/username';
 
 export async function POST(request: Request) {
   const formData = await request.formData();
@@ -39,6 +38,15 @@ export async function POST(request: Request) {
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });
+  }
+
+  // Supabase silently "succeeds" for existing emails but returns an empty identities array.
+  // Detect this and surface a clear, user-friendly error instead.
+  if (!authData.user || (authData.user.identities && authData.user.identities.length === 0)) {
+    return NextResponse.json(
+      { error: 'This email is already registered. Try logging in instead.', emailTaken: true },
+      { status: 400 }
+    );
   }
 
   return NextResponse.json({
