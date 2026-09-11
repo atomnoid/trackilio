@@ -20,7 +20,6 @@ export function SettingsForm({ initialProfile, userEmail, userId }: SettingsForm
   const [username, setUsername] = useState(initialProfile?.username || '');
   const [bio, setBio] = useState(initialProfile?.bio || '');
   const [location, setLocation] = useState(initialProfile?.location || '');
-  const [avatarUrl, setAvatarUrl] = useState(initialProfile?.avatar_url || '');
 
   const [usernameStatus, setUsernameStatus] = useState<
     'idle' | 'checking' | 'available' | 'invalid' | 'taken' | 'same'
@@ -101,7 +100,7 @@ export function SettingsForm({ initialProfile, userEmail, userId }: SettingsForm
           username: sanitizeUsername(username),
           bio: bio.trim(),
           location: location.trim(),
-          avatarUrl: avatarUrl.trim(),
+          avatarUrl: initialProfile?.avatar_url || null,
         }),
       });
 
@@ -269,17 +268,6 @@ export function SettingsForm({ initialProfile, userEmail, userId }: SettingsForm
           </div>
         </div>
 
-        {/* Avatar Image URL */}
-        <div className="space-y-1.5">
-          <label className="block text-xs font-bold text-gray-800">Avatar URL (Optional)</label>
-          <input
-            type="url"
-            value={avatarUrl}
-            onChange={(e) => setAvatarUrl(e.target.value)}
-            placeholder="https://images.unsplash.com/photo-..."
-            className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#FF5841]/40 focus:border-[#FF5841]/50 focus:bg-white transition-all"
-          />
-        </div>
 
         {/* Email Address (Read-Only) */}
         <div className="space-y-1.5">

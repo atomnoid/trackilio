@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { BookmarkIcon, SpinnerIcon } from '@/components/icons/Icons';
 
@@ -22,6 +22,10 @@ export function SavePlaceButton({
   const router = useRouter();
   const [saved, setSaved] = useState(initialSaved);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setSaved(initialSaved);
+  }, [initialSaved]);
 
   const handleToggle = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -56,10 +60,9 @@ export function SavePlaceButton({
   return (
     <button
       onClick={handleToggle}
-      disabled={loading}
       className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition-all active-press cursor-pointer ${
         saved
-          ? 'bg-[#222222] text-white'
+          ? 'bg-[#18181B] text-white border border-[#18181B] hover:bg-black shadow-xs'
           : 'bg-[#F5E7C6] hover:bg-[#EFE2C2] text-[#222222] border border-[#E8DECA]'
       } ${className}`}
       title={saved ? 'Saved in your places' : 'Save place'}

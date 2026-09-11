@@ -14,10 +14,15 @@ interface PlaceFormProps {
 const AVAILABLE_TAGS = [
   { label: 'Cafés', emoji: '☕' },
   { label: 'Restaurants', emoji: '🍽️' },
+  { label: 'Waterfall', emoji: '🌊' },
+  { label: 'Mountain', emoji: '⛰️' },
+  { label: 'Forest', emoji: '🌲' },
+  { label: 'Spiritual Sights', emoji: '🛕' },
   { label: 'Hidden Gems', emoji: '💎' },
   { label: 'Date Spots', emoji: '❤️' },
   { label: 'Sightseeing', emoji: '🏛️' },
   { label: 'Nature', emoji: '🌿' },
+  { label: 'Beach', emoji: '🏖️' },
   { label: 'Bars & Nightlife', emoji: '🍸' },
   { label: 'Shopping', emoji: '🛍️' },
   { label: 'Weekend Trips', emoji: '🚗' },
@@ -130,10 +135,17 @@ export function PlaceForm({ listId, onSuccess }: PlaceFormProps) {
           >
             <option value="Cafe">☕ Cafe</option>
             <option value="Restaurant">🍽️ Restaurant</option>
+            <option value="Waterfall">🌊 Waterfall</option>
+            <option value="Mountain">⛰️ Mountain & Hills</option>
+            <option value="Forest">🌲 Forest & Nature</option>
+            <option value="Spiritual Sight">🛕 Spiritual Sight / Sacred</option>
             <option value="Sight">🏛️ Sight / Landmark</option>
-            <option value="Hotel">🏨 Hotel / Stay</option>
             <option value="Hidden Gem">💎 Hidden Gem</option>
-            <option value="Activity">🎡 Activity / Experience</option>
+            <option value="Hotel">🏨 Hotel / Stay</option>
+            <option value="Activity">🎡 Activity / Trek</option>
+            <option value="Beach">🏖️ Beach & Coastal</option>
+            <option value="Nightlife">🍸 Bars & Nightlife</option>
+            <option value="Shopping">🛍️ Shopping</option>
           </select>
         </div>
 

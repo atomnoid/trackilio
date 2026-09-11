@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { Place } from '@/types/database';
 import { SavePlaceButton } from './SavePlaceButton';
-import { PinIcon, ArrowRightIcon } from '@/components/icons/Icons';
+import { PinIcon, ArrowRightIcon, ExternalLinkIcon } from '@/components/icons/Icons';
 
 interface PlaceDiscoveryCardProps {
   place: Place;
@@ -17,8 +17,14 @@ const CATEGORY_EMOJIS: Record<string, string> = {
   Café: '☕',
   Restaurant: '🍽️',
   Food: '🍜',
+  Waterfall: '🌊',
+  Mountain: '⛰️',
+  Forest: '🌲',
+  'Spiritual Sight': '🛕',
+  Spiritual: '🛕',
+  Temple: '🛕',
   Bar: '🍸',
-  Nightlife: '✨',
+  Nightlife: '🍸',
   Park: '🌿',
   Nature: '🌲',
   Sight: '🏛️',
@@ -28,6 +34,8 @@ const CATEGORY_EMOJIS: Record<string, string> = {
   Hotel: '🏨',
   'Date Spot': '❤️',
   'Hidden Gem': '💎',
+  Beach: '🏖️',
+  Activity: '🥾',
 };
 
 export function PlaceDiscoveryCard({ place, currentUserId, initialSaved }: PlaceDiscoveryCardProps) {
@@ -36,6 +44,12 @@ export function PlaceDiscoveryCard({ place, currentUserId, initialSaved }: Place
   const slug = place.slug || place.id;
   const locationText = place.city || place.location || place.country || '';
   const upvotes = place.upvotes_count ?? 0;
+
+  const mapUrl =
+    place.maps_url ||
+    `https://maps.google.com/?q=${encodeURIComponent(
+      place.name + (locationText ? `, ${locationText}` : '')
+    )}`;
 
   return (
     <div className="group relative block rounded-2xl bg-white border border-[#E8DECA] p-5 hover:border-[#222222] transition-all duration-200 space-y-3">
@@ -81,19 +95,25 @@ export function PlaceDiscoveryCard({ place, currentUserId, initialSaved }: Place
         )}
       </Link>
 
-      {/* Card Footer: Real Upvotes Count + Lists Count + Detail CTA */}
-      <div className="pt-3 border-t border-[#E8DECA]/60 flex items-center justify-between text-xs text-[#6B6862]">
-        <div className="flex items-center gap-3">
+      {/* Card Footer: Upvotes Count + See on Map + View CTA */}
+      <div className="pt-3 border-t border-[#E8DECA]/60 flex items-center justify-between gap-2 text-xs text-[#6B6862]">
+        <div className="flex items-center gap-2.5">
           <span className="inline-flex items-center gap-1 font-bold text-[#222222]">
             <span className="text-[#FA8112]">▲</span>
             <span className="font-mono font-black">{upvotes}</span>
           </span>
 
-          {(place.lists_count ?? 0) > 0 && (
-            <span className="text-[11px]">
-              In {place.lists_count} list{place.lists_count !== 1 ? 's' : ''}
-            </span>
-          )}
+          <a
+            href={mapUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            title="Open location directly on Google Maps"
+            className="inline-flex items-center gap-1 rounded-xl bg-[#FAF3E1] hover:bg-[#222222] hover:text-white text-[#222222] px-2.5 py-1 text-[11px] font-bold border border-[#E8DECA] transition-all cursor-pointer"
+          >
+            <PinIcon className="w-3 h-3 text-[#FA8112]" />
+            <span>See on map</span>
+          </a>
         </div>
 
         <Link

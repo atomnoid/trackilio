@@ -627,6 +627,97 @@ export async function getPlaceBySlugOrId(
   return null;
 }
 
+const isUUID = (str: string) =>
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str.trim());
+
+export async function ensurePlaceIdInDb(supabase: any, placeIdOrSlug: string): Promise<string | null> {
+  const clean = placeIdOrSlug.trim();
+
+  // 1. If it's a valid UUID, check if it exists in DB
+  if (isUUID(clean)) {
+    const { data } = await supabase.from('places').select('id').eq('id', clean).maybeSingle();
+    if (data) return data.id;
+  }
+
+  // 2. Check if slug or id matches a place in DB
+  const { data: bySlug } = await supabase
+    .from('places')
+    .select('id')
+    .or(`slug.eq.${clean},id.eq.${clean}`)
+    .maybeSingle();
+
+  if (bySlug) return bySlug.id;
+
+  // 3. Look up in CURATED_PLACES
+  const curated = CURATED_PLACES.find(
+    (p) =>
+      p.id === clean ||
+      p.slug === clean ||
+      p.slug?.toLowerCase() === clean.toLowerCase()
+  );
+
+  if (curated) {
+    const { data: existingCurated } = await supabase
+      .from('places')
+      .select('id')
+      .eq('slug', curated.slug)
+      .maybeSingle();
+
+    if (existingCurated) return existingCurated.id;
+
+    const { data: inserted } = await supabase
+      .from('places')
+      .insert({
+        name: curated.name,
+        slug: curated.slug,
+        location: curated.location,
+        city: curated.city,
+        country: curated.country,
+        category: curated.category,
+        tags: curated.tags,
+        address: curated.address,
+        description: curated.description,
+        website: curated.website,
+        rating: curated.rating,
+        lat: curated.lat,
+        lng: curated.lng,
+        maps_url: curated.maps_url,
+      })
+      .select('id')
+      .maybeSingle();
+
+    if (inserted) return inserted.id;
+  }
+
+  // 4. If synthetic place or text slug, create canonical spot
+  if (clean.length >= 2) {
+    const title = clean
+      .replace(/^synthetic-/, '')
+      .split('-')
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ');
+
+    const synthSlug = clean.replace(/^synthetic-/, '');
+    const { data: synthRow } = await supabase
+      .from('places')
+      .insert({
+        name: title,
+        slug: synthSlug,
+        location: 'Community Recommendation',
+        category: 'Spot',
+        tags: ['Community Saved'],
+        description: `A community recommended spot for ${title}.`,
+        maps_url: `https://maps.google.com/?q=${encodeURIComponent(title)}`,
+      })
+      .select('id')
+      .maybeSingle();
+
+    if (synthRow) return synthRow.id;
+  }
+
+  return null;
+}
+
 /**
  * Save a place for a user
  */
@@ -634,15 +725,29 @@ export async function savePlace(
   userId: string,
   placeId: string
 ): Promise<{ success: boolean; error?: string }> {
-  const supabase = await createClient();
+  try {
+    const supabase = await createClient();
+    const resolvedId = await ensurePlaceIdInDb(supabase, placeId);
+    if (!resolvedId) {
+      return { success: false, error: 'Place could not be found' };
+    }
 
-  const { error } = await (supabase as any).from('saved_places').insert({
-    user_id: userId,
-    place_id: placeId,
-  });
+    const { error } = await (supabase as any).from('saved_places').insert({
+      user_id: userId,
+      place_id: resolvedId,
+    });
 
-  if (error) return { success: false, error: error.message };
-  return { success: true };
+    if (error) {
+      // Duplicate save is treated as success
+      if (error.code === '23505' || error.message?.includes('duplicate')) {
+        return { success: true };
+      }
+      return { success: false, error: error.message };
+    }
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err?.message || 'Failed to save place' };
+  }
 }
 
 /**
@@ -652,32 +757,46 @@ export async function unsavePlace(
   userId: string,
   placeId: string
 ): Promise<{ success: boolean; error?: string }> {
-  const supabase = await createClient();
+  try {
+    const supabase = await createClient();
+    const resolvedId = await ensurePlaceIdInDb(supabase, placeId);
+    if (!resolvedId) {
+      return { success: false, error: 'Place could not be found' };
+    }
 
-  const { error } = await (supabase as any)
-    .from('saved_places')
-    .delete()
-    .eq('user_id', userId)
-    .eq('place_id', placeId);
+    const { error } = await (supabase as any)
+      .from('saved_places')
+      .delete()
+      .eq('user_id', userId)
+      .eq('place_id', resolvedId);
 
-  if (error) return { success: false, error: error.message };
-  return { success: true };
+    if (error) return { success: false, error: error.message };
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err?.message || 'Failed to unsave place' };
+  }
 }
 
 /**
  * Check if a place is saved by a user
  */
 export async function isPlaceSaved(userId: string, placeId: string): Promise<boolean> {
-  const supabase = await createClient();
+  try {
+    const supabase = await createClient();
+    const resolvedId = await ensurePlaceIdInDb(supabase, placeId);
+    if (!resolvedId) return false;
 
-  const { data } = await (supabase as any)
-    .from('saved_places')
-    .select('id')
-    .eq('user_id', userId)
-    .eq('place_id', placeId)
-    .maybeSingle();
+    const { data } = await (supabase as any)
+      .from('saved_places')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('place_id', resolvedId)
+      .maybeSingle();
 
-  return !!data;
+    return !!data;
+  } catch {
+    return false;
+  }
 }
 
 /**

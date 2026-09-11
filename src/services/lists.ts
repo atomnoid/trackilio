@@ -15,23 +15,72 @@ export function generateSlug(title: string): string {
 
 export async function getUniqueSlug(baseTitle: string): Promise<string> {
   const supabase = await createClient();
-  let slug = generateSlug(baseTitle);
-  let counter = 1;
+  const slug = generateSlug(baseTitle);
 
-  // eslint-disable-next-line no-constant-condition
-  while (true) {
+  try {
     const { data } = await (supabase as any)
       .from('wander_lists')
       .select('id')
       .eq('slug', slug)
       .maybeSingle();
 
-    if (!data) break;
-    counter += 1;
-    slug = `${generateSlug(baseTitle)}-${counter}`;
+    if (!data) return slug;
+
+    const randomSuffix = Math.random().toString(36).substring(2, 6);
+    return `${slug}-${randomSuffix}`;
+  } catch {
+    return slug;
+  }
+}
+
+const isUUID = (str: string) =>
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str.trim());
+
+export async function ensureListIdInDb(supabase: any, listIdOrSlug: string): Promise<string | null> {
+  const clean = listIdOrSlug.trim();
+  if (isUUID(clean)) {
+    const { data } = await supabase.from('wander_lists').select('id').eq('id', clean).maybeSingle();
+    if (data) return data.id;
   }
 
-  return slug;
+  const { data: bySlug } = await supabase
+    .from('wander_lists')
+    .select('id')
+    .or(`slug.eq.${clean},id.eq.${clean}`)
+    .maybeSingle();
+
+  if (bySlug) return bySlug.id;
+
+  const curated = CURATED_LISTS.find(
+    (l) => l.id === clean || l.slug === clean || l.slug.toLowerCase() === clean.toLowerCase()
+  );
+
+  if (curated) {
+    const { data: existingCurated } = await supabase
+      .from('wander_lists')
+      .select('id')
+      .eq('slug', curated.slug)
+      .maybeSingle();
+
+    if (existingCurated) return existingCurated.id;
+
+    const { data: insertedList } = await supabase
+      .from('wander_lists')
+      .insert({
+        title: curated.title,
+        slug: curated.slug,
+        description: curated.description,
+        destination: curated.destination,
+        cover_image: curated.cover_image,
+        is_public: true,
+      })
+      .select('id')
+      .maybeSingle();
+
+    if (insertedList) return insertedList.id;
+  }
+
+  return null;
 }
 
 /**
@@ -286,11 +335,14 @@ export async function getUserCollaboratedLists(userId: string): Promise<WanderLi
 export async function isListSaved(userId: string, listId: string): Promise<boolean> {
   try {
     const supabase = await createClient();
+    const resolvedId = await ensureListIdInDb(supabase, listId);
+    if (!resolvedId) return false;
+
     const { data } = await (supabase as any)
       .from('saved_lists')
       .select('id')
       .eq('user_id', userId)
-      .eq('list_id', listId)
+      .eq('list_id', resolvedId)
       .maybeSingle();
 
     return !!data;
@@ -305,12 +357,16 @@ export async function toggleSaveList(
 ): Promise<{ saved: boolean; error?: string }> {
   try {
     const supabase = await createClient();
+    const resolvedId = await ensureListIdInDb(supabase, listId);
+    if (!resolvedId) {
+      return { saved: false, error: 'List could not be resolved' };
+    }
 
     const { data: existing } = await (supabase as any)
       .from('saved_lists')
       .select('id')
       .eq('user_id', userId)
-      .eq('list_id', listId)
+      .eq('list_id', resolvedId)
       .maybeSingle();
 
     if (existing) {
@@ -326,7 +382,7 @@ export async function toggleSaveList(
         .from('saved_lists')
         .insert({
           user_id: userId,
-          list_id: listId,
+          list_id: resolvedId,
         });
 
       if (error) return { saved: false, error: error.message };

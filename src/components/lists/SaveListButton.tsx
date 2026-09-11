@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BookmarkIcon, SpinnerIcon } from '@/components/icons/Icons';
 import { useRouter } from 'next/navigation';
 
@@ -21,6 +21,10 @@ export function SaveListButton({
   const [saved, setSaved] = useState(initialSaved);
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    setSaved(initialSaved);
+  }, [initialSaved]);
+
   const handleToggle = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -38,6 +42,7 @@ export function SaveListButton({
 
       if (res.status === 401) {
         router.push(`/auth/login?redirect=/l/${listId}`);
+        setSaved(!nextState);
         return;
       }
 
@@ -58,12 +63,11 @@ export function SaveListButton({
     return (
       <button
         onClick={handleToggle}
-        disabled={loading}
         title={saved ? 'Saved to your lists' : 'Save this list'}
-        className={`p-2 rounded-xl transition-all duration-200 active-press ${
+        className={`p-2 rounded-xl transition-all duration-200 active-press cursor-pointer ${
           saved
-            ? 'bg-[#FF5841] text-white shadow-xs'
-            : 'bg-white/90 text-[#4F4B5E] hover:text-[#FF5841] hover:bg-white border border-[#EFE9EC]'
+            ? 'bg-[#18181B] text-white border border-[#18181B] hover:bg-black shadow-xs'
+            : 'bg-white/90 text-[#4F4B5E] hover:text-[#18181B] hover:bg-white border border-[#EFE9EC]'
         } ${className}`}
       >
         {loading ? (
@@ -78,11 +82,10 @@ export function SaveListButton({
   return (
     <button
       onClick={handleToggle}
-      disabled={loading}
-      className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-black shadow-xs active-press transition-all duration-200 ${
+      className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-black shadow-xs active-press transition-all duration-200 cursor-pointer ${
         saved
-          ? 'bg-gradient-to-r from-[#FF5841] to-[#C53678] text-white border border-transparent'
-          : 'bg-white hover:bg-[#FFF5F3] text-[#1A1723] hover:text-[#FF5841] border border-[#EFE9EC] hover:border-[#FF5841]'
+          ? 'bg-[#18181B] text-white border border-[#18181B] hover:bg-black'
+          : 'bg-white hover:bg-[#FAF8F3] text-[#1A1723] hover:text-[#18181B] border border-[#E8DECA] hover:border-[#18181B]'
       } ${className}`}
     >
       {loading ? (

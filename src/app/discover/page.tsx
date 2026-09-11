@@ -6,6 +6,7 @@ import { searchUsers } from '@/services/search';
 import { parseSearchIntent } from '@/services/search.utils';
 import { createClient } from '@/lib/supabase/server';
 import { WanderListCard } from '@/components/lists/WanderListCard';
+import { DiscoverListsSection } from '@/components/discover/DiscoverListsSection';
 import { PlaceDiscoveryCard } from '@/components/places/PlaceDiscoveryCard';
 import { FollowButton } from '@/components/profile/FollowButton';
 import { isFollowing as checkIsFollowing } from '@/services/follows';
@@ -73,7 +74,7 @@ export default async function DiscoverPage({ searchParams }: DiscoverPageProps) 
       query: effectiveKeywords || effectiveCategory || undefined,
       destination: effectiveCity || undefined,
       sort: (currentSort === 'popular' ? 'popular' : currentSort === 'trending' ? 'trending' : 'recent'),
-      limit: 24,
+      limit: 100,
     }),
     currentTab === 'people' || rawSearchText
       ? searchUsers(rawSearchText || 'a', 24)
@@ -95,6 +96,10 @@ export default async function DiscoverPage({ searchParams }: DiscoverPageProps) 
     { label: 'All', emoji: '✨' },
     { label: 'Cafés', emoji: '☕' },
     { label: 'Restaurants', emoji: '🍽️' },
+    { label: 'Waterfall', emoji: '🌊' },
+    { label: 'Mountain', emoji: '⛰️' },
+    { label: 'Forest', emoji: '🌲' },
+    { label: 'Spiritual Sights', emoji: '🛕' },
     { label: 'Hidden Gems', emoji: '💎' },
     { label: 'Date Spots', emoji: '❤️' },
     { label: 'Sightseeing', emoji: '🏛️' },
@@ -362,28 +367,7 @@ export default async function DiscoverPage({ searchParams }: DiscoverPageProps) 
             </div>
           )
         ) : currentTab === 'lists' ? (
-          lists.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {lists.map((list) => (
-                <WanderListCard key={list.id} list={list} />
-              ))}
-            </div>
-          ) : (
-            <div className="rounded-2xl bg-white border border-[#E8DECA] p-12 text-center space-y-3 max-w-md mx-auto">
-              <h3 className="font-sans text-base font-extrabold text-[#222222]">
-                No lists found
-              </h3>
-              <p className="text-xs text-[#6B6862]">
-                Be the first traveler to create a list for this destination!
-              </p>
-              <Link
-                href="/create"
-                className="inline-block rounded-xl bg-[#FA8112] text-white font-extrabold px-5 py-2 text-xs active-press transition-colors"
-              >
-                Create a list
-              </Link>
-            </div>
-          )
+          <DiscoverListsSection lists={lists} />
         ) : (
           people.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
