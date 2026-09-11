@@ -2,7 +2,17 @@
 
 import React, { useState } from 'react';
 import { MemberRole } from '@/types/database';
-import { UserPlusIcon, TrashIcon, SpinnerIcon, UsersIcon, CrownIcon, ExternalLinkIcon, LinkIcon, CheckIcon, CopyIcon } from '@/components/icons/Icons';
+import {
+  UserPlusIcon,
+  TrashIcon,
+  SpinnerIcon,
+  UsersIcon,
+  CrownIcon,
+  ExternalLinkIcon,
+  LinkIcon,
+  CheckIcon,
+  CopyIcon,
+} from '@/components/icons/Icons';
 
 interface MemberEntry {
   id: string;
@@ -57,8 +67,11 @@ export function MembersPanel({
         body: JSON.stringify({ listId, role: inviteRole }),
       });
       const data = await res.json();
-      if (!res.ok) { setInviteError(data.error || 'Failed to generate invite link.'); }
-      else { setInviteUrl(data.url); }
+      if (!res.ok) {
+        setInviteError(data.error || 'Failed to generate invite link.');
+      } else {
+        setInviteUrl(data.url);
+      }
     } catch {
       setInviteError('Network error. Please try again.');
     } finally {
@@ -72,7 +85,9 @@ export function MembersPanel({
       await navigator.clipboard.writeText(inviteUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
-    } catch {}
+    } catch {
+      // silent
+    }
   };
 
   const handleRoleChange = async (userId: string, newRole: MemberRole) => {
@@ -119,20 +134,20 @@ export function MembersPanel({
   };
 
   return (
-    <div className="rounded-3xl bg-white border border-gray-100 shadow-xs overflow-hidden">
+    <div className="rounded-3xl bg-white border border-[#E8DECA] shadow-xs overflow-hidden">
       {/* Header */}
-      <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-[#FFEAE6] to-[#F9E2EE] flex items-center justify-between">
+      <div className="px-6 py-4 border-b border-[#E8DECA] bg-[#FAF3E1] flex items-center justify-between">
         <div className="flex items-center gap-2">
           <UsersIcon className="h-4 w-4 text-[#FA8112]" />
-          <h3 className="font-sans text-sm font-black text-gray-900">
+          <h3 className="font-sans text-sm font-black text-[#222222]">
             Collaborators ({members.length})
           </h3>
         </div>
-        <span className="text-[11px] font-bold text-[#C53678]">Shared Workspace</span>
+        <span className="text-[11px] font-bold text-[#6B6862]">Shared Itinerary</span>
       </div>
 
       {/* Member List */}
-      <ul className="divide-y divide-gray-50">
+      <ul className="divide-y divide-[#E8DECA]/50">
         {members.map((m) => {
           const name = m.profile?.display_name || m.profile?.username || 'Traveler';
           const initials = name.slice(0, 2).toUpperCase();
@@ -151,36 +166,36 @@ export function MembersPanel({
                 <img
                   src={m.profile.avatar_url}
                   alt={name}
-                  className="h-8 w-8 rounded-xl object-cover border border-gray-200 shrink-0"
+                  className="h-8 w-8 rounded-xl object-cover border border-[#E8DECA] shrink-0"
                 />
               ) : (
-                <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-[#FF5841] to-[#C53678] text-white font-bold text-[11px] flex items-center justify-center shrink-0 shadow-sm">
+                <div className="h-8 w-8 rounded-xl bg-[#222222] text-white font-bold text-[11px] flex items-center justify-center shrink-0 shadow-xs">
                   {initials}
                 </div>
               )}
 
               {/* Name + username */}
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-bold text-gray-900 truncate">{name}</p>
+                <p className="text-xs font-bold text-[#222222] truncate">{name}</p>
                 {m.profile?.username ? (
                   <a
                     href={`/u/${m.profile.username}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[10px] text-[#FF5841] hover:underline font-semibold inline-flex items-center gap-0.5"
+                    className="text-[10px] text-[#FA8112] hover:underline font-semibold inline-flex items-center gap-0.5"
                   >
                     @{m.profile.username}
                     <ExternalLinkIcon className="h-2.5 w-2.5 opacity-60" />
                   </a>
                 ) : (
-                  <p className="text-[10px] text-gray-400 font-medium">Collaborator</p>
+                  <p className="text-[10px] text-[#6B6862] font-medium">Collaborator</p>
                 )}
               </div>
 
               {/* Role badge / selector */}
               {isThisOwner ? (
-                <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-[#FF5841] to-[#C53678] text-white px-2.5 py-0.5 text-[10px] font-extrabold shrink-0 shadow-sm">
-                  <CrownIcon className="h-2.5 w-2.5" /> Owner
+                <span className="inline-flex items-center gap-1 rounded-full bg-[#222222] text-white px-2.5 py-0.5 text-[10px] font-extrabold shrink-0 shadow-xs">
+                  <CrownIcon className="h-2.5 w-2.5 text-[#FA8112]" /> Owner
                 </span>
               ) : isOwner ? (
                 <div className="relative shrink-0 flex items-center gap-1.5">
@@ -188,7 +203,7 @@ export function MembersPanel({
                     value={m.role}
                     onChange={(e) => handleRoleChange(m.user_id, e.target.value as MemberRole)}
                     disabled={updatingId === m.user_id}
-                    className="rounded-lg border border-gray-200 bg-gray-50 px-2 py-1 text-[11px] font-bold text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#FF5841]/40 cursor-pointer"
+                    className="rounded-lg border border-[#E8DECA] bg-[#FAF3E1]/60 px-2 py-1 text-[11px] font-bold text-[#222222] focus:outline-none focus:bg-white cursor-pointer"
                   >
                     <option value="editor">Editor</option>
                     <option value="viewer">Viewer</option>
@@ -198,7 +213,7 @@ export function MembersPanel({
                   )}
                 </div>
               ) : (
-                <span className="inline-flex items-center rounded-full bg-[#FFEAE6] border border-[#FFD3CC] text-[#FF5841] px-2.5 py-0.5 text-[10px] font-bold shrink-0">
+                <span className="inline-flex items-center rounded-full bg-[#F5E7C6] border border-[#E8DECA] text-[#222222] px-2.5 py-0.5 text-[10px] font-bold shrink-0">
                   {ROLE_LABELS[m.role] || m.role}
                 </span>
               )}
@@ -209,7 +224,7 @@ export function MembersPanel({
                   onClick={() => handleRemove(m.user_id)}
                   disabled={removingId === m.user_id}
                   title={m.user_id === currentUserId ? 'Leave list' : 'Remove member'}
-                  className="shrink-0 p-1.5 rounded-lg text-gray-400 hover:text-rose-600 hover:bg-rose-50 disabled:opacity-40 transition-colors"
+                  className="shrink-0 p-1.5 rounded-lg text-[#6B6862] hover:text-rose-600 hover:bg-rose-50 disabled:opacity-40 transition-colors cursor-pointer"
                 >
                   <TrashIcon className="h-3.5 w-3.5" />
                 </button>
@@ -221,7 +236,7 @@ export function MembersPanel({
 
       {/* Invite Form (owner only) */}
       {isOwner && (
-        <div className="px-5 py-4 border-t border-gray-100 bg-gray-50 space-y-3">
+        <div className="px-5 py-4 border-t border-[#E8DECA] bg-[#FAF3E1]/40 space-y-3">
           {inviteError && (
             <p className="text-[11px] font-bold text-rose-800 bg-rose-50 border border-rose-200 rounded-xl px-3 py-2">
               {inviteError}
@@ -229,8 +244,8 @@ export function MembersPanel({
           )}
 
           <div className="space-y-2">
-            <label className="text-[10px] font-extrabold uppercase tracking-wider text-gray-500 flex items-center gap-1">
-              <LinkIcon className="h-3 w-3 text-[#FA8112]" /> Generate Invite Link
+            <label className="text-[10px] font-extrabold uppercase tracking-wider text-[#6B6862] flex items-center gap-1">
+              <LinkIcon className="h-3 w-3 text-[#FA8112]" /> 1-Click Invite Link
             </label>
 
             {inviteUrl ? (
@@ -239,22 +254,25 @@ export function MembersPanel({
                   <input
                     readOnly
                     value={inviteUrl}
-                    className="flex-1 min-w-0 rounded-xl border border-emerald-200 bg-white px-3 py-2 text-[10px] font-mono text-gray-700 focus:outline-none truncate"
+                    className="flex-1 min-w-0 rounded-xl border border-[#E8DECA] bg-white px-3 py-2 text-[10px] font-mono text-[#222222] focus:outline-none truncate"
                   />
                   <button
                     onClick={handleCopy}
-                    className="shrink-0 inline-flex items-center gap-1 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2.5 py-2 text-[11px] transition-colors"
+                    className="shrink-0 inline-flex items-center gap-1 rounded-xl bg-[#222222] hover:bg-[#FA8112] text-white font-bold px-3 py-2 text-[11px] transition-colors cursor-pointer"
                   >
-                    {copied ? <CheckIcon className="h-3 w-3" /> : <CopyIcon className="h-3 w-3" />}
-                    {copied ? 'Copied!' : 'Copy'}
+                    {copied ? <CheckIcon className="h-3 w-3 text-[#FA8112]" /> : <CopyIcon className="h-3 w-3" />}
+                    <span>{copied ? 'Copied!' : 'Copy'}</span>
                   </button>
                 </div>
-                <p className="text-[10px] text-gray-400 font-medium">Expires in 7 days · Single use</p>
+                <p className="text-[10px] text-[#6B6862] font-medium">Valid for 7 days · Anyone with link can join</p>
                 <button
-                  onClick={() => { setInviteUrl(null); setInviteError(null); }}
-                  className="text-[10px] font-bold text-[#FF5841] hover:underline"
+                  onClick={() => {
+                    setInviteUrl(null);
+                    setInviteError(null);
+                  }}
+                  className="text-[10px] font-bold text-[#FA8112] hover:underline cursor-pointer"
                 >
-                  Generate new link
+                  Generate another link
                 </button>
               </div>
             ) : (
@@ -262,7 +280,7 @@ export function MembersPanel({
                 <select
                   value={inviteRole}
                   onChange={(e) => setInviteRole(e.target.value as 'editor' | 'viewer')}
-                  className="rounded-xl border border-gray-200 bg-white px-2.5 py-2 text-xs font-bold text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#FF5841]/40 cursor-pointer shrink-0"
+                  className="rounded-xl border border-[#E8DECA] bg-white px-2.5 py-2 text-xs font-bold text-[#222222] focus:outline-none focus:border-[#222222] cursor-pointer shrink-0"
                 >
                   <option value="editor">Editor (Can add/edit)</option>
                   <option value="viewer">Viewer (View only)</option>
@@ -271,12 +289,18 @@ export function MembersPanel({
                   type="button"
                   onClick={handleGenerateLink}
                   disabled={generating}
-                  className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-[#FF5841] to-[#C53678] hover:opacity-95 disabled:opacity-50 text-white font-extrabold py-2 text-xs shadow-xs transition-all active-press"
+                  className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#222222] hover:bg-[#FA8112] disabled:opacity-50 text-white font-extrabold py-2 text-xs shadow-xs transition-all active-press cursor-pointer"
                 >
                   {generating ? (
-                    <><SpinnerIcon className="h-3.5 w-3.5 animate-spin" />Generating…</>
+                    <>
+                      <SpinnerIcon className="h-3.5 w-3.5 animate-spin text-[#FA8112]" />
+                      <span>Generating…</span>
+                    </>
                   ) : (
-                    <><UserPlusIcon className="h-3.5 w-3.5" />Get Invite Link</>
+                    <>
+                      <UserPlusIcon className="h-3.5 w-3.5 text-[#FA8112]" />
+                      <span>Get Invite Link</span>
+                    </>
                   )}
                 </button>
               </div>

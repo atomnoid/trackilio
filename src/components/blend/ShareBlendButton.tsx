@@ -21,7 +21,7 @@ export function ShareBlendButton({ blendId, score, label, nameA, nameB }: ShareB
   const handleShare = async () => {
     if (navigator.share) {
       try {
-        await navigator.share({ title: 'Trackilio Blend', text, url });
+        await navigator.share({ title: 'Trackilio Blend Match', text, url });
         return;
       } catch {
         // fallthrough to copy
@@ -35,10 +35,10 @@ export function ShareBlendButton({ blendId, score, label, nameA, nameB }: ShareB
   return (
     <button
       onClick={handleShare}
-      className="inline-flex items-center gap-2 rounded-xl bg-[#2C2A29] hover:bg-black text-white font-bold px-6 py-3 text-sm shadow-sm active-press transition-all"
+      className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#222222] hover:bg-[#FA8112] text-white font-extrabold px-6 py-3 text-xs shadow-xs active-press transition-colors cursor-pointer"
     >
-      {copied ? <CheckIcon className="h-4 w-4 text-green-400" /> : <ShareIcon className="h-4 w-4" />}
-      {copied ? 'Copied link!' : 'Share your Blend'}
+      {copied ? <CheckIcon className="h-4 w-4 text-[#FA8112]" /> : <ShareIcon className="h-4 w-4" />}
+      <span>{copied ? 'Copied Link!' : 'Share Blend'}</span>
       {!copied && <CopyIcon className="h-3.5 w-3.5 opacity-60" />}
     </button>
   );
