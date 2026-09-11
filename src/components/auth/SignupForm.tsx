@@ -1,15 +1,30 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { SpinnerIcon, CheckCircleIcon, XCircleIcon, AtSignIcon, UserIcon, MailIcon, LockIcon, ArrowRightIcon, EyeIcon, EyeOffIcon } from '@/components/icons/Icons';
+import { useRouter } from 'next/navigation';
+import {
+  SpinnerIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+  AtSignIcon,
+  UserIcon,
+  MailIcon,
+  LockIcon,
+  ArrowRightIcon,
+  EyeIcon,
+  EyeOffIcon,
+} from '@/components/icons/Icons';
 import { validateUsernameFormat } from '@/lib/username';
 
 export function SignupForm() {
+  const router = useRouter();
   const [username, setUsername] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [serverError, setServerError] = useState('');
 
   const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'invalid' | 'taken'>('idle');
   const [usernameMessage, setUsernameMessage] = useState<string>('');
@@ -58,11 +73,54 @@ export function SignupForm() {
     password.length >= 6 &&
     usernameStatus === 'available';
 
-  const inputBase = "w-full rounded-2xl border bg-gray-50 pl-10 pr-4 py-3 text-sm font-medium text-gray-900 focus:outline-none focus:bg-white transition-all";
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!isFormValid || isSubmitting) return;
+
+    setIsSubmitting(true);
+    setServerError('');
+
+    try {
+      const formData = new FormData();
+      formData.append('displayName', displayName.trim());
+      formData.append('username', username.trim());
+      formData.append('email', email.trim());
+      formData.append('password', password);
+
+      const res = await fetch('/auth/signup/action', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || data.error) {
+        setServerError(data.error || 'Something went wrong. Please try again.');
+        return;
+      }
+
+      // Success — navigate to login with the verification message banner
+      router.push(
+        `/auth/login?message=${encodeURIComponent(data.message || 'Verification email sent to your mail. Please verify your email before logging in.')}`
+      );
+    } catch {
+      setServerError('Network error. Please check your connection and try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const inputBase = 'w-full rounded-2xl border bg-gray-50 pl-10 pr-4 py-3 text-sm font-medium text-gray-900 focus:outline-none focus:bg-white transition-all';
   const inputNormal = `${inputBase} border-gray-200 focus:ring-2 focus:ring-[#FF5841]/40 focus:border-[#FF5841]/50`;
 
   return (
-    <form action="/auth/signup/action" method="POST" className="bg-white border border-gray-100 rounded-3xl p-6 sm:p-8 shadow-sm space-y-5">
+    <form onSubmit={handleSubmit} className="bg-white border border-gray-100 rounded-3xl p-6 sm:p-8 shadow-sm space-y-5">
+      {serverError && (
+        <div className="rounded-2xl bg-rose-50 border border-rose-200 p-3 text-xs font-semibold text-rose-700 text-center">
+          {serverError}
+        </div>
+      )}
+
       {/* Display Name */}
       <div className="space-y-1.5">
         <label className="block text-xs font-bold text-gray-800">
@@ -201,11 +259,20 @@ export function SignupForm() {
       {/* Submit Button */}
       <button
         type="submit"
-        disabled={!isFormValid}
+        disabled={!isFormValid || isSubmitting}
         className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-[#FF5841] hover:bg-[#E84430] disabled:opacity-50 disabled:cursor-not-allowed text-white font-black py-3.5 text-sm shadow-sm active-press transition-all mt-2"
       >
-        <span>Create Account</span>
-        <ArrowRightIcon className="h-4 w-4" />
+        {isSubmitting ? (
+          <>
+            <SpinnerIcon className="h-4 w-4 animate-spin" />
+            <span>Creating Account…</span>
+          </>
+        ) : (
+          <>
+            <span>Create Account</span>
+            <ArrowRightIcon className="h-4 w-4" />
+          </>
+        )}
       </button>
     </form>
   );

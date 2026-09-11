@@ -1,4 +1,4 @@
-import { redirect } from 'next/navigation';
+import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { checkUsernameAvailability } from '@/services/profiles';
 import { sanitizeUsername } from '@/lib/username';
@@ -11,13 +11,16 @@ export async function POST(request: Request) {
   const password = formData.get('password') as string;
 
   if (!displayName) {
-    redirect(`/auth/signup?error=${encodeURIComponent('Display name is required.')}`);
+    return NextResponse.json({ error: 'Display name is required.' }, { status: 400 });
   }
 
   // Validate username
   const usernameCheck = await checkUsernameAvailability(rawUsername || '');
   if (!usernameCheck.available) {
-    redirect(`/auth/signup?error=${encodeURIComponent(usernameCheck.error || 'Invalid username.')}`);
+    return NextResponse.json(
+      { error: usernameCheck.error || 'Invalid username.' },
+      { status: 400 }
+    );
   }
 
   const cleanUser = usernameCheck.cleanUsername;
@@ -35,9 +38,11 @@ export async function POST(request: Request) {
   });
 
   if (error) {
-    redirect(`/auth/signup?error=${encodeURIComponent(error.message)}`);
+    return NextResponse.json({ error: error.message }, { status: 400 });
   }
 
-  // If user signed up successfully, prompt for email verification on login page
-  redirect(`/auth/login?message=${encodeURIComponent('Verification email sent to your mail. Please verify your email before logging in.')}`);
+  return NextResponse.json({
+    success: true,
+    message: 'Verification email sent to your mail. Please verify your email before logging in.',
+  });
 }

@@ -60,7 +60,7 @@ export default async function BlendPage({ searchParams }: BlendPageProps) {
             Saved to both of your profiles automatically.
           </p>
         </div>
-        <BlendForm prefillUsername={prefillUsername} />
+        <BlendForm />
       </div>
 
       {/* Saved Blends Section */}
