@@ -632,87 +632,199 @@ const isUUID = (str: string) =>
 
 export async function ensurePlaceIdInDb(supabase: any, placeIdOrSlug: string): Promise<string | null> {
   const clean = placeIdOrSlug.trim();
+  if (!clean) return null;
 
-  // 1. If it's a valid UUID, check if it exists in DB
-  if (isUUID(clean)) {
-    const { data } = await supabase.from('places').select('id').eq('id', clean).maybeSingle();
-    if (data) return data.id;
-  }
+  try {
+    // 1. If it's a valid UUID, check if it exists in DB
+    if (isUUID(clean)) {
+      const { data, error } = await supabase.from('places').select('id').eq('id', clean).maybeSingle();
+      if (!error && data?.id) return data.id;
+    }
 
-  // 2. Check if slug or id matches a place in DB
-  const { data: bySlug } = await supabase
-    .from('places')
-    .select('id')
-    .or(`slug.eq.${clean},id.eq.${clean}`)
-    .maybeSingle();
+    // 2. Check if slug matches a place in DB (safe slug equality check)
+    try {
+      const { data: bySlug, error: slugErr } = await supabase
+        .from('places')
+        .select('id')
+        .eq('slug', clean.toLowerCase())
+        .maybeSingle();
 
-  if (bySlug) return bySlug.id;
+      if (!slugErr && bySlug?.id) return bySlug.id;
+    } catch {
+      // Ignore if slug query fails
+    }
 
-  // 3. Look up in CURATED_PLACES
-  const curated = CURATED_PLACES.find(
-    (p) =>
-      p.id === clean ||
-      p.slug === clean ||
-      p.slug?.toLowerCase() === clean.toLowerCase()
-  );
+    // 3. Look up in CURATED_PLACES
+    const curated = CURATED_PLACES.find(
+      (p) =>
+        p.id.toLowerCase() === clean.toLowerCase() ||
+        p.slug?.toLowerCase() === clean.toLowerCase() ||
+        p.name.toLowerCase() === clean.replace(/-/g, ' ').toLowerCase() ||
+        clean.toLowerCase().includes(p.slug?.toLowerCase() || '___')
+    );
 
-  if (curated) {
-    const { data: existingCurated } = await supabase
-      .from('places')
-      .select('id')
-      .eq('slug', curated.slug)
-      .maybeSingle();
+    if (curated) {
+      const targetSlug = curated.slug || generatePlaceSlug(curated.name, curated.location || curated.city);
 
-    if (existingCurated) return existingCurated.id;
+      // Check by targetSlug
+      try {
+        const { data: existingCurated } = await supabase
+          .from('places')
+          .select('id')
+          .eq('slug', targetSlug)
+          .maybeSingle();
 
-    const { data: inserted } = await supabase
-      .from('places')
-      .insert({
-        name: curated.name,
-        slug: curated.slug,
-        location: curated.location,
-        city: curated.city,
-        country: curated.country,
-        category: curated.category,
-        tags: curated.tags,
-        address: curated.address,
-        description: curated.description,
-        website: curated.website,
-        rating: curated.rating,
-        lat: curated.lat,
-        lng: curated.lng,
-        maps_url: curated.maps_url,
-      })
-      .select('id')
-      .maybeSingle();
+        if (existingCurated?.id) return existingCurated.id;
+      } catch {
+        // Fallthrough
+      }
 
-    if (inserted) return inserted.id;
-  }
+      // Check by exact name
+      try {
+        const { data: existingByName } = await supabase
+          .from('places')
+          .select('id')
+          .ilike('name', curated.name)
+          .maybeSingle();
 
-  // 4. If synthetic place or text slug, create canonical spot
-  if (clean.length >= 2) {
-    const title = clean
-      .replace(/^synthetic-/, '')
-      .split('-')
-      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-      .join(' ');
+        if (existingByName?.id) return existingByName.id;
+      } catch {
+        // Fallthrough
+      }
 
-    const synthSlug = clean.replace(/^synthetic-/, '');
-    const { data: synthRow } = await supabase
-      .from('places')
-      .insert({
-        name: title,
-        slug: synthSlug,
-        location: 'Community Recommendation',
-        category: 'Spot',
-        tags: ['Community Saved'],
-        description: `A community recommended spot for ${title}.`,
-        maps_url: `https://maps.google.com/?q=${encodeURIComponent(title)}`,
-      })
-      .select('id')
-      .maybeSingle();
+      // Try insert with full columns
+      try {
+        const { data: insFull, error: insFullErr } = await supabase
+          .from('places')
+          .insert({
+            name: curated.name,
+            slug: targetSlug,
+            location: curated.location || null,
+            city: curated.city || null,
+            country: curated.country || null,
+            category: curated.category || 'Spot',
+            tags: curated.tags || [],
+            address: curated.address || null,
+            description: curated.description || null,
+            website: curated.website || null,
+            rating: curated.rating ? Number(curated.rating.toFixed(2)) : 4.8,
+            lat: curated.lat ?? null,
+            lng: curated.lng ?? null,
+            maps_url: curated.maps_url || `https://maps.google.com/?q=${encodeURIComponent(curated.name)}`,
+          })
+          .select('id');
 
-    if (synthRow) return synthRow.id;
+        const insertedId = Array.isArray(insFull) ? insFull[0]?.id : (insFull as any)?.id;
+        if (!insFullErr && insertedId) return insertedId;
+      } catch {
+        // Fallback to minimal insert
+      }
+
+      // Fallback minimal insert if full schema columns fail
+      try {
+        const { data: insMin, error: insMinErr } = await supabase
+          .from('places')
+          .insert({
+            name: curated.name,
+            location: curated.location || null,
+            category: curated.category || 'Spot',
+            tags: curated.tags || [],
+            maps_url: curated.maps_url || `https://maps.google.com/?q=${encodeURIComponent(curated.name)}`,
+          })
+          .select('id');
+
+        const minId = Array.isArray(insMin) ? insMin[0]?.id : (insMin as any)?.id;
+        if (!insMinErr && minId) return minId;
+      } catch {
+        // Fallthrough
+      }
+
+      // Final re-check by name if already inserted concurrently
+      const { data: finalNameCheck } = await supabase
+        .from('places')
+        .select('id')
+        .ilike('name', curated.name)
+        .maybeSingle();
+
+      if (finalNameCheck?.id) return finalNameCheck.id;
+    }
+
+    // 4. If synthetic place or text slug, create canonical spot
+    if (clean.length >= 2) {
+      const title = clean
+        .replace(/^synthetic-/, '')
+        .split('-')
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(' ');
+
+      const synthSlug = clean.replace(/^synthetic-/, '').toLowerCase();
+
+      try {
+        const { data: existingSynth } = await supabase
+          .from('places')
+          .select('id')
+          .eq('slug', synthSlug)
+          .maybeSingle();
+
+        if (existingSynth?.id) return existingSynth.id;
+      } catch {
+        // Fallthrough
+      }
+
+      try {
+        const { data: existingByName } = await supabase
+          .from('places')
+          .select('id')
+          .ilike('name', title)
+          .maybeSingle();
+
+        if (existingByName?.id) return existingByName.id;
+      } catch {
+        // Fallthrough
+      }
+
+      try {
+        const { data: synthRow, error: synthErr } = await supabase
+          .from('places')
+          .insert({
+            name: title,
+            slug: synthSlug,
+            location: 'Community Recommendation',
+            category: 'Spot',
+            tags: ['Community Saved'],
+            description: `A community recommended spot for ${title}.`,
+            maps_url: `https://maps.google.com/?q=${encodeURIComponent(title)}`,
+          })
+          .select('id');
+
+        const synthId = Array.isArray(synthRow) ? synthRow[0]?.id : (synthRow as any)?.id;
+        if (!synthErr && synthId) return synthId;
+      } catch {
+        // Minimal insert
+        const { data: minRow } = await supabase
+          .from('places')
+          .insert({
+            name: title,
+            location: 'Community Recommendation',
+            category: 'Spot',
+            tags: ['Community Saved'],
+          })
+          .select('id');
+
+        const minSynthId = Array.isArray(minRow) ? minRow[0]?.id : (minRow as any)?.id;
+        if (minSynthId) return minSynthId;
+      }
+
+      const { data: finalSynthCheck } = await supabase
+        .from('places')
+        .select('id')
+        .ilike('name', title)
+        .maybeSingle();
+
+      if (finalSynthCheck?.id) return finalSynthCheck.id;
+    }
+  } catch (err: any) {
+    console.error('ensurePlaceIdInDb error:', err?.message || err);
   }
 
   return null;
@@ -729,9 +841,23 @@ export async function savePlace(
     const supabase = await createClient();
     const resolvedId = await ensurePlaceIdInDb(supabase, placeId);
     if (!resolvedId) {
-      return { success: false, error: 'Place could not be found' };
+      console.error('savePlace: could not resolve placeId:', placeId);
+      return { success: false, error: 'Place could not be initialized or found in database' };
     }
 
+    // 1. Check if already saved
+    const { data: existing } = await (supabase as any)
+      .from('saved_places')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('place_id', resolvedId)
+      .maybeSingle();
+
+    if (existing) {
+      return { success: true };
+    }
+
+    // 2. Insert into saved_places
     const { error } = await (supabase as any).from('saved_places').insert({
       user_id: userId,
       place_id: resolvedId,
@@ -739,13 +865,15 @@ export async function savePlace(
 
     if (error) {
       // Duplicate save is treated as success
-      if (error.code === '23505' || error.message?.includes('duplicate')) {
+      if (error.code === '23505' || error.message?.includes('duplicate') || error.message?.includes('unique')) {
         return { success: true };
       }
+      console.error('savePlace DB error:', error);
       return { success: false, error: error.message };
     }
     return { success: true };
   } catch (err: any) {
+    console.error('savePlace exception:', err);
     return { success: false, error: err?.message || 'Failed to save place' };
   }
 }
@@ -770,7 +898,10 @@ export async function unsavePlace(
       .eq('user_id', userId)
       .eq('place_id', resolvedId);
 
-    if (error) return { success: false, error: error.message };
+    if (error) {
+      console.error('unsavePlace DB error:', error);
+      return { success: false, error: error.message };
+    }
     return { success: true };
   } catch (err: any) {
     return { success: false, error: err?.message || 'Failed to unsave place' };

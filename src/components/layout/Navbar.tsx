@@ -12,6 +12,7 @@ import { SearchIcon, PlusIcon } from '@/components/icons/Icons';
 export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [username, setUsername] = useState<string | null>(null);
@@ -21,6 +22,7 @@ export function Navbar() {
   const [searchOpen, setSearchOpen] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const handleScroll = () => {
       setScrolled(window.scrollY > 15);
     };
@@ -114,7 +116,7 @@ export function Navbar() {
             {/* Desktop Navigation Links */}
             <nav className="hidden md:flex items-center gap-6 text-sm font-semibold">
               {navLinks.map((link) => {
-                const isActive = pathname === link.href;
+                const isActive = mounted && pathname === link.href;
                 return (
                   <Link
                     key={link.href}
@@ -142,7 +144,7 @@ export function Navbar() {
                 <SearchIcon className="w-4.5 h-4.5" />
               </button>
 
-              {!loading && (
+              {mounted && !loading && (
                 <>
                   {user ? (
                     <div className="flex items-center gap-2">

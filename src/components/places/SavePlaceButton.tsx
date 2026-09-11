@@ -15,7 +15,6 @@ interface SavePlaceButtonProps {
 export function SavePlaceButton({
   placeId,
   initialSaved = false,
-  currentUserId,
   className = '',
   showText = false,
 }: SavePlaceButtonProps) {
@@ -31,11 +30,6 @@ export function SavePlaceButton({
     e.preventDefault();
     e.stopPropagation();
 
-    if (!currentUserId) {
-      router.push(`/auth/login?redirect=${encodeURIComponent(window.location.pathname)}`);
-      return;
-    }
-
     const nextState = !saved;
     setSaved(nextState);
     setLoading(true);
@@ -47,7 +41,14 @@ export function SavePlaceButton({
         body: JSON.stringify({ placeId }),
       });
 
-      if (!res.ok) {
+      if (res.status === 401) {
+        router.push(`/auth/login?redirect=${encodeURIComponent(window.location.pathname)}`);
+        setSaved(!nextState);
+        return;
+      }
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
         setSaved(!nextState);
       }
     } catch {

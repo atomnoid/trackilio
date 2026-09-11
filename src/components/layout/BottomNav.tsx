@@ -1,10 +1,15 @@
 'use client';
-
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 export function BottomNav() {
   const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const links = [
     { href: '/', label: 'Home' },
@@ -18,7 +23,7 @@ export function BottomNav() {
     <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 px-4 pb-3 pt-1 bg-gradient-to-t from-[#FAF3E1] via-[#FAF3E1]/95 to-transparent pointer-events-none">
       <nav className="pointer-events-auto mx-auto max-w-sm bg-[#FAF3E1] border border-[#E8DECA] rounded-2xl shadow-lg p-1.5 flex items-center justify-around">
         {links.map((link) => {
-          const isActive = pathname === link.href;
+          const isActive = mounted && pathname === link.href;
 
           if (link.isPrimary) {
             return (
