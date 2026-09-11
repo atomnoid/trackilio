@@ -27,10 +27,18 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json();
-  const { placeId } = body;
+  const { placeId, action } = body;
 
   if (!placeId) {
     return NextResponse.json({ error: 'placeId is required' }, { status: 400 });
+  }
+
+  if (action === 'unsave') {
+    const result = await unsavePlace(user.id, placeId);
+    if (!result.success) {
+      return NextResponse.json({ error: result.error }, { status: 500 });
+    }
+    return NextResponse.json({ success: true, saved: false });
   }
 
   const result = await savePlace(user.id, placeId);
@@ -38,7 +46,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: result.error }, { status: 500 });
   }
 
-  return NextResponse.json({ success: true });
+  return NextResponse.json({ success: true, saved: true });
 }
 
 export async function DELETE(request: Request) {
@@ -63,5 +71,5 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: result.error }, { status: 500 });
   }
 
-  return NextResponse.json({ success: true });
+  return NextResponse.json({ success: true, saved: false });
 }

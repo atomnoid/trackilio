@@ -45,11 +45,11 @@ export function PlaceDiscoveryCard({ place, currentUserId, initialSaved }: Place
   const locationText = place.city || place.location || place.country || '';
   const upvotes = place.upvotes_count ?? 0;
 
-  const mapUrl =
-    place.maps_url ||
-    `https://maps.google.com/?q=${encodeURIComponent(
-      place.name + (locationText ? `, ${locationText}` : '')
-    )}`;
+  const hasMapUrl = Boolean(
+    place.maps_url &&
+    place.maps_url.trim().length > 0 &&
+    /^https?:\/\//i.test(place.maps_url.trim())
+  );
 
   return (
     <div className="group relative block rounded-2xl bg-white border border-[#E8DECA] p-5 hover:border-[#222222] transition-all duration-200 space-y-3">
@@ -103,17 +103,19 @@ export function PlaceDiscoveryCard({ place, currentUserId, initialSaved }: Place
             <span className="font-mono font-black">{upvotes}</span>
           </span>
 
-          <a
-            href={mapUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => e.stopPropagation()}
-            title="Open location directly on Google Maps"
-            className="inline-flex items-center gap-1 rounded-xl bg-[#FAF3E1] hover:bg-[#222222] hover:text-white text-[#222222] px-2.5 py-1 text-[11px] font-bold border border-[#E8DECA] transition-all cursor-pointer"
-          >
-            <PinIcon className="w-3 h-3 text-[#FA8112]" />
-            <span>See on map</span>
-          </a>
+          {hasMapUrl && (
+            <a
+              href={place.maps_url!}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              title="Open location directly on Google Maps"
+              className="inline-flex items-center gap-1 rounded-xl bg-[#FAF3E1] hover:bg-[#222222] hover:text-white text-[#222222] px-2.5 py-1 text-[11px] font-bold border border-[#E8DECA] transition-all cursor-pointer"
+            >
+              <PinIcon className="w-3 h-3 text-[#FA8112]" />
+              <span>See on map</span>
+            </a>
+          )}
         </div>
 
         <Link

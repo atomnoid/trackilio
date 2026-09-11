@@ -3,11 +3,11 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { getPlaceBySlugOrId } from '@/services/places';
+import { ScrollToTop } from '@/components/common/ScrollToTop';
 import { PlaceJsonLd } from '@/components/seo/PlaceJsonLd';
 import { SavePlaceButton } from '@/components/places/SavePlaceButton';
 import { AddToListModal } from '@/components/places/AddToListModal';
 import { PlaceDiscoveryCard } from '@/components/places/PlaceDiscoveryCard';
-import { getExternalMapUrl, getOpenStreetMapEmbedUrl } from '@/lib/maps';
 import { getSiteUrl } from '@/lib/utils';
 import {
   PinIcon,
@@ -77,8 +77,11 @@ export default async function PlaceDetailPage({ params }: PlaceDetailPageProps) 
   if (!data) notFound();
 
   const { place, relatedLists, relatedPlaces } = data;
-  const mapUrl = getExternalMapUrl(place);
-  const embedUrl = getOpenStreetMapEmbedUrl({ lat: place.lat, lng: place.lng });
+  const hasMapUrl = Boolean(
+    place.maps_url &&
+    place.maps_url.trim().length > 0 &&
+    /^https?:\/\//i.test(place.maps_url.trim())
+  );
   const locationDisplay = [place.address, place.city || place.location, place.country]
     .filter(Boolean)
     .join(', ');
@@ -86,6 +89,9 @@ export default async function PlaceDetailPage({ params }: PlaceDetailPageProps) 
 
   return (
     <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-10 bg-[#FAF3E1]">
+      {/* Auto Scroll to Top on Mount */}
+      <ScrollToTop />
+
       {/* Structured Data */}
       <PlaceJsonLd place={place} />
 
@@ -173,42 +179,34 @@ export default async function PlaceDetailPage({ params }: PlaceDetailPageProps) 
           </p>
         )}
 
-        {/* Map Links & Website */}
-        <div className="flex flex-wrap items-center gap-3 pt-2 text-xs font-bold">
-          <a
-            href={mapUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-2xl bg-[#FAF3E1] border border-[#E8DECA] hover:bg-white hover:border-[#222222] text-[#222222] px-4 py-2.5 transition-colors active-press shadow-2xs"
-          >
-            <PinIcon className="h-3.5 w-3.5 text-[#FA8112]" />
-            <span>Open in Maps</span>
-            <ExternalLinkIcon className="h-3 w-3 text-[#6B6862]" />
-          </a>
+        {/* Map Links & Website — ONLY shown if provided */}
+        {(hasMapUrl || place.website) && (
+          <div className="flex flex-wrap items-center gap-3 pt-2 text-xs font-bold">
+            {hasMapUrl && (
+              <a
+                href={place.maps_url!}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-2xl bg-[#FAF3E1] border border-[#E8DECA] hover:bg-white hover:border-[#222222] text-[#222222] px-4 py-2.5 transition-colors active-press shadow-2xs"
+              >
+                <PinIcon className="h-3.5 w-3.5 text-[#FA8112]" />
+                <span>Open in Maps</span>
+                <ExternalLinkIcon className="h-3 w-3 text-[#6B6862]" />
+              </a>
+            )}
 
-          {place.website && (
-            <a
-              href={place.website}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-2xl bg-[#FAF3E1] border border-[#E8DECA] hover:bg-white hover:border-[#222222] text-[#222222] px-4 py-2.5 transition-colors active-press shadow-2xs"
-            >
-              <GlobeIcon className="h-3.5 w-3.5 text-[#222222]" />
-              <span>Official Website</span>
-              <ExternalLinkIcon className="h-3 w-3 text-[#6B6862]" />
-            </a>
-          )}
-        </div>
-
-        {/* Optional Interactive Map Embed */}
-        {embedUrl && (
-          <div className="rounded-2xl overflow-hidden border border-[#E8DECA] h-56 sm:h-72 w-full mt-4">
-            <iframe
-              title={`Map of ${place.name}`}
-              src={embedUrl}
-              className="w-full h-full border-0"
-              loading="lazy"
-            />
+            {place.website && (
+              <a
+                href={place.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-2xl bg-[#FAF3E1] border border-[#E8DECA] hover:bg-white hover:border-[#222222] text-[#222222] px-4 py-2.5 transition-colors active-press shadow-2xs"
+              >
+                <GlobeIcon className="h-3.5 w-3.5 text-[#222222]" />
+                <span>Official Website</span>
+                <ExternalLinkIcon className="h-3 w-3 text-[#6B6862]" />
+              </a>
+            )}
           </div>
         )}
       </section>

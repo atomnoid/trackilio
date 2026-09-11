@@ -332,6 +332,112 @@ export async function getUserCollaboratedLists(userId: string): Promise<WanderLi
   }
 }
 
+export async function ensureListIdInDb(supabase: any, listIdOrSlug: string): Promise<string | null> {
+  const clean = listIdOrSlug.trim();
+  if (!clean) return null;
+
+  try {
+    // 1. If valid UUID, check in wander_lists
+    if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(clean)) {
+      const { data, error } = await supabase
+        .from('wander_lists')
+        .select('id')
+        .eq('id', clean)
+        .maybeSingle();
+
+      if (!error && data?.id) return data.id;
+    }
+
+    // 2. Check by slug
+    try {
+      const { data: bySlug, error: slugErr } = await supabase
+        .from('wander_lists')
+        .select('id')
+        .eq('slug', clean.toLowerCase())
+        .maybeSingle();
+
+      if (!slugErr && bySlug?.id) return bySlug.id;
+    } catch {
+      // Fallthrough
+    }
+
+    // 3. Look up in CURATED_LISTS
+    const curated = CURATED_LISTS.find(
+      (l) =>
+        l.id.toLowerCase() === clean.toLowerCase() ||
+        l.slug.toLowerCase() === clean.toLowerCase() ||
+        clean.toLowerCase().includes(l.slug.toLowerCase()) ||
+        l.slug.toLowerCase().includes(clean.toLowerCase())
+    );
+
+    if (curated) {
+      // Check if already in DB by slug
+      try {
+        const { data: existingCurated } = await supabase
+          .from('wander_lists')
+          .select('id')
+          .eq('slug', curated.slug)
+          .maybeSingle();
+
+        if (existingCurated?.id) return existingCurated.id;
+      } catch {
+        // Fallthrough
+      }
+
+      // Check by title
+      try {
+        const { data: existingByTitle } = await supabase
+          .from('wander_lists')
+          .select('id')
+          .ilike('title', curated.title)
+          .maybeSingle();
+
+        if (existingByTitle?.id) return existingByTitle.id;
+      } catch {
+        // Fallthrough
+      }
+
+      // Try inserting curated list
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        const ownerId = user?.id || curated.owner_id || null;
+
+        if (ownerId) {
+          const { data: insList, error: insErr } = await supabase
+            .from('wander_lists')
+            .insert({
+              owner_id: ownerId,
+              title: curated.title,
+              slug: curated.slug,
+              description: curated.description || null,
+              destination: curated.destination || null,
+              cover_image: curated.cover_image || null,
+              is_public: true,
+            })
+            .select('id');
+
+          const insId = Array.isArray(insList) ? insList[0]?.id : (insList as any)?.id;
+          if (!insErr && insId) return insId;
+        }
+      } catch {
+        // Fallthrough
+      }
+
+      const { data: finalCheck } = await supabase
+        .from('wander_lists')
+        .select('id')
+        .ilike('title', curated.title)
+        .maybeSingle();
+
+      if (finalCheck?.id) return finalCheck.id;
+    }
+  } catch (err: any) {
+    console.error('ensureListIdInDb error:', err?.message || err);
+  }
+
+  return null;
+}
+
 export async function isListSaved(userId: string, listId: string): Promise<boolean> {
   try {
     const supabase = await createClient();
