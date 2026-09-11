@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Plus_Jakarta_Sans, Newsreader } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/next';
 import { GoogleAnalytics } from '@/components/analytics/GoogleAnalytics';
+import { NavigationLoader } from '@/components/layout/NavigationLoader';
 import './globals.css';
 import { Navbar } from '@/components/layout/Navbar';
 import { BottomNav } from '@/components/layout/BottomNav';
@@ -69,6 +70,8 @@ export default function RootLayout({
         <main className="flex-1">{children}</main>
         <Footer />
         <BottomNav />
+        {/* Global hot-air balloon loader — shows on slow navigations only */}
+        <NavigationLoader />
         {/* Vercel Web Analytics */}
         <Analytics />
         {/* Google Analytics 4 — reads NEXT_PUBLIC_GA_ID, no-ops if unset */}
