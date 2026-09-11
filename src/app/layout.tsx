@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Plus_Jakarta_Sans, Newsreader } from 'next/font/google';
+import { Analytics } from '@vercel/analytics/next';
 import './globals.css';
 import { Navbar } from '@/components/layout/Navbar';
 import { BottomNav } from '@/components/layout/BottomNav';
@@ -67,6 +68,7 @@ export default function RootLayout({
         <main className="flex-1">{children}</main>
         <Footer />
         <BottomNav />
+        <Analytics />
       </body>
     </html>
   );
