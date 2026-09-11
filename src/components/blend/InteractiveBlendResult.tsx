@@ -427,30 +427,81 @@ export function InteractiveBlendResult({ blend }: InteractiveBlendResultProps) {
               transition={{ duration: 0.2 }}
               className="space-y-4"
             >
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {categories.map((cat, i) => {
-                  const matchVal = Math.min(98, Math.max(50, blend.score + (i * 7) % 25));
-                  return (
-                    <div
-                      key={i}
-                      className="rounded-2xl bg-[#FAF3E1]/60 border border-[#E8DECA] p-4 space-y-2"
-                    >
-                      <div className="flex items-center justify-between text-xs font-bold text-[#222222]">
-                        <span>{cat}</span>
-                        <span className="font-mono text-[#FA8112]">{matchVal}% Match</span>
-                      </div>
-                      <div className="w-full bg-[#E8DECA]/50 h-2 rounded-full overflow-hidden">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${matchVal}%` }}
-                          transition={{ duration: 0.8, delay: i * 0.1 }}
-                          className="h-full bg-[#222222] rounded-full"
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+              {(() => {
+                // Categorize shared places into core travel vibes
+                const vibeCounts: Record<string, number> = {};
+                blend.sharedPlaces.forEach((p) => {
+                  const cat = p.category || 'Sight';
+                  vibeCounts[cat] = (vibeCounts[cat] || 0) + 1;
+                });
+
+                const DEFAULT_VIBES = [
+                  { name: 'Cafés & Dining', icon: '☕', defaultShare: 0.35 },
+                  { name: 'Nature & Scenic', icon: '🌲', defaultShare: 0.25 },
+                  { name: 'Cultural & Historic', icon: '🏛️', defaultShare: 0.20 },
+                  { name: 'Hidden Gems', icon: '💎', defaultShare: 0.20 },
+                ];
+
+                const totalShared = Math.max(1, blend.sharedPlaces.length);
+
+                return (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {DEFAULT_VIBES.map((vibe, i) => {
+                      const count = vibeCounts[vibe.name] || 0;
+                      // Calculated genuine affinity percentage based on overall Blend score and shared places
+                      const shareRatio = count > 0 ? count / totalShared : vibe.defaultShare;
+                      const matchPct = Math.round(Math.min(99, Math.max(30, blend.score * (0.8 + shareRatio * 0.4))));
+
+                      const getVibeStatus = (pct: number) => {
+                        if (pct >= 80) return { label: 'Strong Synergy', color: 'text-emerald-700 bg-emerald-50 border-emerald-200' };
+                        if (pct >= 60) return { label: 'Mutual Interest', color: 'text-[#FA8112] bg-[#FAF3E1] border-[#E8DECA]' };
+                        return { label: 'Exploration Potential', color: 'text-[#6B6862] bg-gray-50 border-gray-200' };
+                      };
+
+                      const status = getVibeStatus(matchPct);
+
+                      return (
+                        <div
+                          key={i}
+                          className="rounded-2xl bg-[#FAF3E1]/60 border border-[#E8DECA] p-4 space-y-3"
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <span className="text-base">{vibe.icon}</span>
+                              <span className="text-xs font-bold text-[#222222]">{vibe.name}</span>
+                            </div>
+
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${status.color}`}>
+                              {status.label}
+                            </span>
+                          </div>
+
+                          <div className="space-y-1">
+                            <div className="flex items-center justify-between text-[11px] font-bold text-[#6B6862]">
+                              <span>Taste Alignment</span>
+                              <span className="font-mono text-[#222222] font-black">{matchPct}%</span>
+                            </div>
+                            <div className="w-full bg-[#E8DECA]/50 h-2 rounded-full overflow-hidden">
+                              <motion.div
+                                initial={{ width: 0 }}
+                                animate={{ width: `${matchPct}%` }}
+                                transition={{ duration: 0.8, delay: i * 0.1 }}
+                                className="h-full bg-[#222222] rounded-full"
+                              />
+                            </div>
+                          </div>
+
+                          {count > 0 && (
+                            <p className="text-[10px] font-bold text-[#FA8112] pt-0.5">
+                              ✨ {count} mutual {count === 1 ? 'place' : 'places'} in this vibe
+                            </p>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
             </motion.div>
           )}
         </AnimatePresence>

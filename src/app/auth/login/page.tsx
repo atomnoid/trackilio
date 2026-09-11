@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 interface LoginPageProps {
-  searchParams: Promise<{ redirect?: string; error?: string }>;
+  searchParams: Promise<{ redirect?: string; error?: string; message?: string }>;
 }
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
@@ -30,6 +30,18 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         <h1 className="font-sans text-3xl font-black text-[#222222]">Welcome Back</h1>
         <p className="text-xs sm:text-sm text-[#6B6862] font-normal">Sign in to your Trackilio account</p>
       </div>
+
+      {resolvedParams.message && (
+        <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-4 text-xs font-bold text-emerald-800 text-center space-y-1 shadow-2xs">
+          <div className="flex items-center justify-center gap-1.5 text-emerald-700">
+            <span>✉️</span>
+            <span>Verification email sent to your mail</span>
+          </div>
+          <p className="font-medium text-emerald-600 text-[11px]">
+            {resolvedParams.message}
+          </p>
+        </div>
+      )}
 
       {resolvedParams.error && (
         <div className="rounded-2xl bg-rose-50 border border-rose-200 p-4 text-xs font-semibold text-rose-700 text-center">

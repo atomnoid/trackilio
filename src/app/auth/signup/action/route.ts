@@ -38,5 +38,6 @@ export async function POST(request: Request) {
     redirect(`/auth/signup?error=${encodeURIComponent(error.message)}`);
   }
 
-  redirect('/dashboard');
+  // If user signed up successfully, prompt for email verification on login page
+  redirect(`/auth/login?message=${encodeURIComponent('Verification email sent to your mail. Please verify your email before logging in.')}`);
 }
