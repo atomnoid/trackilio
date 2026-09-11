@@ -33,55 +33,7 @@ export async function getUniqueSlug(baseTitle: string): Promise<string> {
   }
 }
 
-const isUUID = (str: string) =>
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str.trim());
 
-export async function ensureListIdInDb(supabase: any, listIdOrSlug: string): Promise<string | null> {
-  const clean = listIdOrSlug.trim();
-  if (isUUID(clean)) {
-    const { data } = await supabase.from('wander_lists').select('id').eq('id', clean).maybeSingle();
-    if (data) return data.id;
-  }
-
-  const { data: bySlug } = await supabase
-    .from('wander_lists')
-    .select('id')
-    .or(`slug.eq.${clean},id.eq.${clean}`)
-    .maybeSingle();
-
-  if (bySlug) return bySlug.id;
-
-  const curated = CURATED_LISTS.find(
-    (l) => l.id === clean || l.slug === clean || l.slug.toLowerCase() === clean.toLowerCase()
-  );
-
-  if (curated) {
-    const { data: existingCurated } = await supabase
-      .from('wander_lists')
-      .select('id')
-      .eq('slug', curated.slug)
-      .maybeSingle();
-
-    if (existingCurated) return existingCurated.id;
-
-    const { data: insertedList } = await supabase
-      .from('wander_lists')
-      .insert({
-        title: curated.title,
-        slug: curated.slug,
-        description: curated.description,
-        destination: curated.destination,
-        cover_image: curated.cover_image,
-        is_public: true,
-      })
-      .select('id')
-      .maybeSingle();
-
-    if (insertedList) return insertedList.id;
-  }
-
-  return null;
-}
 
 /**
  * Helper to enrich WanderLists with places_count
