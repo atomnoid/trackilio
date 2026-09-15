@@ -125,46 +125,57 @@ export const FALLBACK_FUN_FACTS: DailyFact[] = [
 ];
 
 /**
- * Returns today's travel fact (keyed by published_date = today's UTC date).
- * Falls back to the curated random fact pool if DB is empty or fails.
+ * Returns today's travel fact.
+ * First checks DB for exact date match or latest published date.
+ * If DB returns empty/error, deterministically cycles through the fallback facts array
+ * using the day-of-year so that every calendar day (updating at midnight) a new fact is shown!
  */
 export async function getTodaysFact(): Promise<DailyFact> {
+  const todayStr = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
   try {
     const supabase = await createClient();
-    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
 
-    // Try today's exact date first
+    // 1. Try today's exact date in Supabase DB
     const { data: todayFact } = await (supabase as any)
       .from('daily_facts')
       .select('*')
-      .eq('published_date', today)
+      .eq('published_date', todayStr)
       .maybeSingle();
 
     if (todayFact) return todayFact as DailyFact;
 
-    // Fallback: most recent published fact from DB
+    // 2. Try latest published fact prior to or equal to today
     const { data: latestFact } = await (supabase as any)
       .from('daily_facts')
       .select('*')
-      .lte('published_date', today)
+      .lte('published_date', todayStr)
       .order('published_date', { ascending: false })
       .limit(1)
       .maybeSingle();
 
     if (latestFact) return latestFact as DailyFact;
   } catch {
-    // Proceed to fallback pool
+    // DB unreachable or table empty
   }
 
-  // Deterministic daily fallback based on day of year so all users get the same daily fact without database
-  const dayOfYear = Math.floor(
-    (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24)
-  );
-  return FALLBACK_FUN_FACTS[dayOfYear % FALLBACK_FUN_FACTS.length];
+  // 3. Fallback: Deterministic daily rotation using UTC midnight epoch timestamp / day count
+  const now = new Date();
+  const startOfYear = new Date(Date.UTC(now.getUTCFullYear(), 0, 0));
+  const diff = now.getTime() - startOfYear.getTime();
+  const oneDay = 1000 * 60 * 60 * 24;
+  const dayOfYear = Math.floor(diff / oneDay);
+
+  const selectedFact = FALLBACK_FUN_FACTS[dayOfYear % FALLBACK_FUN_FACTS.length];
+
+  return {
+    ...selectedFact,
+    published_date: todayStr,
+  };
 }
 
 /**
- * Returns a random fun fact from the pool
+ * Returns a random fun fact from the combined pool (DB + fallback list),
+ * optionally excluding a specified fact ID.
  */
 export async function getRandomFact(excludeId?: string): Promise<DailyFact> {
   try {
@@ -184,3 +195,4 @@ export async function getRandomFact(excludeId?: string): Promise<DailyFact> {
     return pool[Math.floor(Math.random() * pool.length)];
   }
 }
+

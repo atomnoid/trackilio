@@ -336,9 +336,20 @@ CREATE POLICY "Authenticated users can create places"
   WITH CHECK (auth.uid() IS NOT NULL);
 
 DROP POLICY IF EXISTS "Authenticated users can update places" ON public.places;
-CREATE POLICY "Authenticated users can update places"
+DROP POLICY IF EXISTS "Only list editors/owners can update their places" ON public.places;
+CREATE POLICY "Only list editors/owners can update their places"
   ON public.places FOR UPDATE
-  USING (auth.uid() IS NOT NULL);
+  USING (
+    auth.uid() IS NOT NULL
+    AND EXISTS (
+      SELECT 1
+      FROM public.list_places lp
+      JOIN public.wander_lists wl ON wl.id = lp.list_id
+      WHERE lp.place_id = places.id
+        AND public.can_write_list(wl.id, auth.uid())
+    )
+  );
+
 
 -- List Places Policies
 DROP POLICY IF EXISTS "List places readable if list is readable" ON public.list_places;
