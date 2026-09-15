@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { WanderList } from '@/types/database';
 import { WanderListCard } from '@/components/lists/WanderListCard';
 import { SparklesIcon, CompassIcon } from '@/components/icons/Icons';
@@ -11,20 +11,13 @@ interface DiscoverListsSectionProps {
 }
 
 export function DiscoverListsSection({ lists }: DiscoverListsSectionProps) {
-  // Mobile initial: 6, Desktop initial: 9
+  // Show 9 lists initially on all devices (phone & desktop), then load 9 more on click
   const [visibleCount, setVisibleCount] = useState<number>(9);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    if (typeof window !== 'undefined' && window.innerWidth < 640) {
-      setVisibleCount(6);
-    }
-  }, []);
 
   const handleLoadMore = () => {
     setVisibleCount((prev) => prev + 9);
   };
+
 
   if (!lists || lists.length === 0) {
     return (

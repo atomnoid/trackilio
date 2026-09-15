@@ -7,6 +7,7 @@ import { parseSearchIntent } from '@/services/search.utils';
 import { createClient } from '@/lib/supabase/server';
 import { WanderListCard } from '@/components/lists/WanderListCard';
 import { DiscoverListsSection } from '@/components/discover/DiscoverListsSection';
+import { DiscoverPlacesSection } from '@/components/discover/DiscoverPlacesSection';
 import { PlaceDiscoveryCard } from '@/components/places/PlaceDiscoveryCard';
 import { FollowButton } from '@/components/profile/FollowButton';
 import { isFollowing as checkIsFollowing } from '@/services/follows';
@@ -346,29 +347,11 @@ export default async function DiscoverPage({ searchParams }: DiscoverPageProps) 
       {/* Results Section */}
       <div className="space-y-6">
         {currentTab === 'places' ? (
-          places.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {places.map((place) => (
-                <PlaceDiscoveryCard
-                  key={place.id}
-                  place={place}
-                  currentUserId={user?.id}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="rounded-2xl bg-white border border-[#E8DECA] p-12 text-center space-y-2 max-w-md mx-auto">
-              <h3 className="font-sans text-base font-extrabold text-[#222222]">
-                No places found
-              </h3>
-              <p className="text-xs text-[#6B6862]">
-                Try searching with broader terms or exploring another city above.
-              </p>
-            </div>
-          )
+          <DiscoverPlacesSection places={places} currentUserId={user?.id} />
         ) : currentTab === 'lists' ? (
           <DiscoverListsSection lists={lists} />
         ) : (
+
           people.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {people.map((p) => {
