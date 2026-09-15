@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { Place } from '@/types/database';
 import { PlaceDiscoveryCard } from '@/components/places/PlaceDiscoveryCard';
-import { CompassIcon } from '@/components/icons/Icons';
 
 interface DiscoverPlacesSectionProps {
   places: Place[];
@@ -15,16 +14,7 @@ export function DiscoverPlacesSection({ places, currentUserId }: DiscoverPlacesS
   const [visibleCount, setVisibleCount] = useState<number>(15);
 
   if (!places || places.length === 0) {
-    return (
-      <div className="rounded-2xl bg-white border border-[#E8DECA] p-12 text-center space-y-2 max-w-md mx-auto">
-        <h3 className="font-sans text-base font-extrabold text-[#222222]">
-          No places found
-        </h3>
-        <p className="text-xs text-[#6B6862]">
-          Try searching with broader terms or exploring another city above.
-        </p>
-      </div>
-    );
+    return <NoPlacesFound />;
   }
 
   const displayedPlaces = places.slice(0, visibleCount);
@@ -51,7 +41,7 @@ export function DiscoverPlacesSection({ places, currentUserId }: DiscoverPlacesS
           <button
             onClick={handleLoadMore}
             suppressHydrationWarning
-            className="group relative inline-flex items-center gap-2.5 rounded-xl bg-white border border-[#E8DECA] hover:border-[#222222] px-6 py-3 text-xs font-extrabold text-[#222222] shadow-2xs hover:shadow-xs active-press transition-all cursor-pointer"
+            className="group relative inline-flex items-center gap-2.5 rounded-xl bg-white border border-[#E8DECA] hover:border-[#222222] px-6 py-3 text-xs font-extrabold text-[#222222] shadow-2xs hover:shadow-xs active:scale-95 transition-all cursor-pointer"
           >
             <span className="text-base group-hover:rotate-12 transition-transform duration-200">✨</span>
             <span>Show more places</span>

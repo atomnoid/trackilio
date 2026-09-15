@@ -247,3 +247,24 @@ input, textarea, select {
   background: #FA8112;
   border-radius: 99px;
 }
+
+/* ─── Balloon rope sway ──────────────────────────────────────────── */
+@keyframes rope-sway {
+  0%, 100% { transform: rotate(-4deg) skewX(2deg); }
+  50%       { transform: rotate(4deg) skewX(-2deg); }
+}
+.animate-rope-sway {
+  animation: rope-sway 3s ease-in-out infinite;
+  transform-origin: top center;
+}
+
+/* ─── Gentle sparkle float ───────────────────────────────────────── */
+@keyframes spark-float {
+  0%   { opacity: 0; transform: translateY(0px) scale(0.6); }
+  40%  { opacity: 1; transform: translateY(-12px) scale(1.1); }
+  100% { opacity: 0; transform: translateY(-24px) scale(0.7); }
+}
+.animate-spark-1 { animation: spark-float 2.4s ease-in-out infinite; }
+.animate-spark-2 { animation: spark-float 2.4s ease-in-out 0.8s infinite; }
+.animate-spark-3 { animation: spark-float 2.4s ease-in-out 1.6s infinite; }
+

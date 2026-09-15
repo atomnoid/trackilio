@@ -3,8 +3,6 @@
 import React, { useState } from 'react';
 import { WanderList } from '@/types/database';
 import { WanderListCard } from '@/components/lists/WanderListCard';
-import { SparklesIcon, CompassIcon } from '@/components/icons/Icons';
-import Link from 'next/link';
 
 interface DiscoverListsSectionProps {
   lists: WanderList[];
@@ -17,26 +15,6 @@ export function DiscoverListsSection({ lists }: DiscoverListsSectionProps) {
   const handleLoadMore = () => {
     setVisibleCount((prev) => prev + 9);
   };
-
-
-  if (!lists || lists.length === 0) {
-    return (
-      <div className="rounded-2xl bg-white border border-[#E8DECA] p-12 text-center space-y-3 max-w-md mx-auto">
-        <h3 className="font-sans text-base font-extrabold text-[#222222]">
-          No lists found
-        </h3>
-        <p className="text-xs text-[#6B6862]">
-          Be the first traveler to create a list for this destination!
-        </p>
-        <Link
-          href="/create"
-          className="inline-block rounded-xl bg-[#FA8112] text-white font-extrabold px-5 py-2 text-xs active-press transition-colors"
-        >
-          Create a list
-        </Link>
-      </div>
-    );
-  }
 
   const displayedLists = lists.slice(0, visibleCount);
   const hasMore = visibleCount < lists.length;

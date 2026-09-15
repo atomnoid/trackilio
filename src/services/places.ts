@@ -285,28 +285,39 @@ export async function getPublicPlaces(params?: {
 
     const { data: rawPlaces, error } = await q;
 
-    if (!error && rawPlaces && rawPlaces.length > 0) {
-      const enriched = await enrichPlacesWithStats(supabase, rawPlaces as Place[], params?.currentUserId);
+    if (!error) {
+      // DB responded — trust the result even if it's empty.
+      // If a filter was applied and DB returned 0 rows, return [] so the
+      // empty state renders instead of silently falling back to curated data.
+      if (rawPlaces && rawPlaces.length > 0) {
+        const enriched = await enrichPlacesWithStats(supabase, rawPlaces as Place[], params?.currentUserId);
 
-      // Sort by requested ranking — always stable (tiebreak on id) to prevent
-      // non-deterministic ordering that causes SSR/client hydration mismatches.
-      const sort = params?.sort ?? 'trending';
-      if (sort === 'popular' || sort === 'trending') {
-        enriched.sort((a, b) =>
-          (b.upvotes_count ?? 0) - (a.upvotes_count ?? 0) ||
-          a.id.localeCompare(b.id)
-        );
-      } else if (sort === 'rated') {
-        enriched.sort((a, b) =>
-          (b.rating ?? 0) - (a.rating ?? 0) ||
-          a.id.localeCompare(b.id)
-        );
-      } else {
-        // 'recent' — already ordered by created_at from DB, but stabilise anyway
-        enriched.sort((a, b) => a.id.localeCompare(b.id));
+        // Sort by requested ranking — always stable (tiebreak on id) to prevent
+        // non-deterministic ordering that causes SSR/client hydration mismatches.
+        const sort = params?.sort ?? 'trending';
+        if (sort === 'popular' || sort === 'trending') {
+          enriched.sort((a, b) =>
+            (b.upvotes_count ?? 0) - (a.upvotes_count ?? 0) ||
+            a.id.localeCompare(b.id)
+          );
+        } else if (sort === 'rated') {
+          enriched.sort((a, b) =>
+            (b.rating ?? 0) - (a.rating ?? 0) ||
+            a.id.localeCompare(b.id)
+          );
+        } else {
+          // 'recent' — already ordered by created_at from DB, but stabilise anyway
+          enriched.sort((a, b) => a.id.localeCompare(b.id));
+        }
+
+        return enriched.slice(offset, offset + limit);
       }
 
-      return enriched.slice(offset, offset + limit);
+      // DB returned 0 rows — if the user applied a filter, honour the empty result.
+      const hasFilter = params?.query || params?.city || (params?.category && params.category !== 'All') || params?.tag;
+      if (hasFilter) return [];
+
+      // No filter + DB empty → fall through to curated showcase below.
     }
   } catch (err: any) {
     console.warn('Error fetching public places from Supabase, using curated fallback:', err?.message || err);

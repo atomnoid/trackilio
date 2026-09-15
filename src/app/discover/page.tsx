@@ -8,6 +8,8 @@ import { createClient } from '@/lib/supabase/server';
 import { WanderListCard } from '@/components/lists/WanderListCard';
 import { DiscoverListsSection } from '@/components/discover/DiscoverListsSection';
 import { DiscoverPlacesSection } from '@/components/discover/DiscoverPlacesSection';
+import { NoPlacesEmptyState } from '@/components/discover/NoPlacesEmptyState';
+import { NoListsEmptyState } from '@/components/discover/NoListsEmptyState';
 import { PlaceDiscoveryCard } from '@/components/places/PlaceDiscoveryCard';
 import { FollowButton } from '@/components/profile/FollowButton';
 import { isFollowing as checkIsFollowing } from '@/services/follows';
@@ -352,9 +354,13 @@ export default async function DiscoverPage({ searchParams }: DiscoverPageProps) 
       {/* Results Section */}
       <div className="space-y-6">
         {currentTab === 'places' ? (
-          <DiscoverPlacesSection places={places} currentUserId={user?.id} />
+          places.length === 0
+            ? <NoPlacesEmptyState />
+            : <DiscoverPlacesSection places={places} currentUserId={user?.id} />
         ) : currentTab === 'lists' ? (
-          <DiscoverListsSection lists={lists} />
+          lists.length === 0
+            ? <NoListsEmptyState />
+            : <DiscoverListsSection lists={lists} />
         ) : (
 
           people.length > 0 ? (
