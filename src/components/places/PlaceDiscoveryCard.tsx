@@ -12,12 +12,41 @@ interface PlaceDiscoveryCardProps {
   initialSaved?: boolean;
 }
 
+/**
+ * Safely parse tags — Postgres arrays can arrive as either a JS string[]
+ * OR as a raw '{tag1,tag2}' string depending on the rendering context.
+ * Normalising here prevents server/client hydration mismatches.
+ */
+function parseTags(raw: unknown): string[] {
+  if (!raw) return [];
+  if (Array.isArray(raw)) return raw.filter(Boolean) as string[];
+  if (typeof raw === 'string') {
+    // Strip Postgres literal braces: "{Sea,Beach}" → ["Sea", "Beach"]
+    const cleaned = raw.replace(/^\{|\}$/g, '').trim();
+    if (!cleaned) return [];
+    return cleaned.split(',').map((t) => t.trim()).filter(Boolean);
+  }
+  return [];
+}
+
 const CATEGORY_EMOJIS: Record<string, string> = {
   Cafe: '☕',
   Café: '☕',
   Restaurant: '🍽️',
   Food: '🍜',
-  Waterfall: '🌊',
+  Sea: '🏖️',
+  'Sea & Beaches': '🏖️',
+  Beach: '🏖️',
+  Beaches: '🏖️',
+  Lake: '🌊',
+  Lakes: '🌊',
+  Ocean: '🌊',
+  Park: '🪴',
+  Garden: '🪴',
+  'Park / Garden': '🪴',
+  Parks: '🪴',
+  Gardens: '🪴',
+  Waterfall: '🏞️',
   Mountain: '⛰️',
   Forest: '🌲',
   'Spiritual Sight': '🛕',
@@ -25,8 +54,7 @@ const CATEGORY_EMOJIS: Record<string, string> = {
   Temple: '🛕',
   Bar: '🍸',
   Nightlife: '🍸',
-  Park: '🌿',
-  Nature: '🌲',
+  Nature: '🌿',
   Sight: '🏛️',
   Sightseeing: '🏛️',
   Attraction: '🎡',
@@ -34,9 +62,9 @@ const CATEGORY_EMOJIS: Record<string, string> = {
   Hotel: '🏨',
   'Date Spot': '❤️',
   'Hidden Gem': '💎',
-  Beach: '🏖️',
   Activity: '🥾',
 };
+
 
 export function PlaceDiscoveryCard({ place, currentUserId, initialSaved }: PlaceDiscoveryCardProps) {
   const category = place.category || 'Place';
@@ -56,16 +84,23 @@ export function PlaceDiscoveryCard({ place, currentUserId, initialSaved }: Place
       {/* Top Header: Category Tag + Save Action */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-1.5 overflow-hidden">
-          <span className="inline-flex items-center gap-1 rounded-full bg-[#FAF3E1] border border-[#E8DECA] px-2.5 py-0.5 text-[11px] font-bold text-[#222222]">
-            <span>{emoji}</span>
-            <span>{category}</span>
+          <span
+            suppressHydrationWarning
+            className="inline-flex items-center gap-1 rounded-full bg-[#FAF3E1] border border-[#E8DECA] px-2.5 py-0.5 text-[11px] font-bold text-[#222222]"
+          >
+            <span suppressHydrationWarning>{emoji}</span>
+            <span suppressHydrationWarning>{category}</span>
           </span>
 
-          {place.tags && place.tags.length > 0 && (
-            <span className="inline-flex items-center rounded-full bg-[#F5E7C6] px-2 py-0.5 text-[10px] font-bold text-[#222222]">
-              {place.tags[0]}
+          {parseTags(place.tags).slice(0, 1).map((tag) => (
+            <span
+              key={tag}
+              suppressHydrationWarning
+              className="inline-flex items-center rounded-full bg-[#F5E7C6] px-2 py-0.5 text-[10px] font-bold text-[#222222]"
+            >
+              {tag}
             </span>
-          )}
+          ))}
         </div>
 
         <SavePlaceButton

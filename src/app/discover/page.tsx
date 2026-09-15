@@ -97,7 +97,11 @@ export default async function DiscoverPage({ searchParams }: DiscoverPageProps) 
     { label: 'All', emoji: '✨' },
     { label: 'Cafés', emoji: '☕' },
     { label: 'Restaurants', emoji: '🍽️' },
-    { label: 'Waterfall', emoji: '🌊' },
+    { label: 'Sea & Beaches', emoji: '🏖️' },
+    { label: 'Lake', emoji: '🌊' },
+    { label: 'Ocean', emoji: '🌊' },
+    { label: 'Park / Garden', emoji: '🪴' },
+    { label: 'Waterfall', emoji: '🏞️' },
     { label: 'Mountain', emoji: '⛰️' },
     { label: 'Forest', emoji: '🌲' },
     { label: 'Spiritual Sights', emoji: '🛕' },
@@ -109,6 +113,7 @@ export default async function DiscoverPage({ searchParams }: DiscoverPageProps) 
     { label: 'Shopping', emoji: '🛍️' },
     { label: 'Weekend Trips', emoji: '🚗' },
   ];
+
 
   const popularCities = ['Kolkata', 'Goa', 'Tokyo', 'Paris', 'Kyoto', 'London', 'Mumbai', 'New York'];
 

@@ -104,8 +104,9 @@ export const CURATED_PLACES: Place[] = [
     location: 'Strand Rd, Kolkata',
     city: 'Kolkata',
     country: 'India',
-    category: 'Sightseeing',
-    tags: ['Sunset', 'Heritage', 'Riverbank', 'Romantic'],
+    category: 'Park / Garden',
+    tags: ['Sunset', 'Garden Walk', 'Riverbank', 'Lake & Waters', 'Romantic'],
+
     address: 'Strand Rd, Vidyasagar Setu, Kolkata, West Bengal 700021, India',
     description: 'Historic Greek monument overlooking the majestic Hooghly River. Famous for traditional wooden boat rides during golden hour while the grand Vidyasagar Setu illuminates overhead.',
     website: null,
@@ -296,8 +297,9 @@ export const CURATED_PLACES: Place[] = [
     location: 'Furore, Amalfi Coast',
     city: 'Amalfi Coast',
     country: 'Italy',
-    category: 'Nature',
-    tags: ['Sea Fjord', 'Swimming', 'Hidden Cove', 'Arch Bridge'],
+    category: 'Sea & Beaches',
+    tags: ['Sea Fjord', 'Ocean Swim', 'Beach', 'Hidden Cove', 'Arch Bridge'],
+
     address: 'Via Marina di Praia, 84010 Furore SA, Italy',
     description: 'A dramatic natural sea fjord tucked underneath a soaring arched highway bridge. Crystal clear turquoise water and colourful traditional fishing boats on pebble shores.',
     website: null,

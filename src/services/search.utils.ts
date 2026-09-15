@@ -77,11 +77,15 @@ const CATEGORY_SYNONYMS: Record<string, string> = {
   date: 'date spot', 'date spot': 'date spot', 'date spots': 'date spot',
   romantic: 'date spot', romance: 'date spot',
 
-  // Nature & Parks
-  nature: 'nature', park: 'nature', parks: 'nature',
-  garden: 'nature', gardens: 'nature', forest: 'nature',
-  outdoor: 'nature', outdoors: 'nature', lake: 'nature',
-  beach: 'nature', beaches: 'nature',
+  // Nature, Water & Parks
+  nature: 'nature', park: 'park / garden', parks: 'park / garden',
+  garden: 'park / garden', gardens: 'park / garden', botanical: 'park / garden',
+  forest: 'nature', outdoor: 'nature', outdoors: 'nature',
+  lake: 'lake', lakes: 'lake',
+  sea: 'sea & beaches', ocean: 'ocean', oceans: 'ocean',
+  beach: 'sea & beaches', beaches: 'sea & beaches', seaside: 'sea & beaches',
+  coast: 'sea & beaches', coastal: 'sea & beaches',
+
 
   // Hiking
   hike: 'hiking', hiking: 'hiking', trek: 'hiking', trekking: 'hiking',

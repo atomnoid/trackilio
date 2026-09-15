@@ -259,7 +259,13 @@ export async function getPublicPlaces(params?: {
     let q = (supabase as any).from('places').select('*');
 
     if (params?.query) {
-      q = q.or(`name.ilike.%${params.query}%,location.ilike.%${params.query}%,category.ilike.%${params.query}%`);
+      const tokens = params.query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+      const mainToken = tokens[0];
+      
+      // Multi-column OR query matching name, location, city, category, description, and tags
+      q = q.or(
+        `name.ilike.%${params.query}%,location.ilike.%${params.query}%,city.ilike.%${params.query}%,category.ilike.%${params.query}%,description.ilike.%${params.query}%,tags.cs.{${mainToken}}`
+      );
     }
 
     if (params?.city) {
@@ -267,11 +273,12 @@ export async function getPublicPlaces(params?: {
     }
 
     if (params?.category && params.category !== 'All') {
-      q = q.ilike('category', `%${params.category}%`);
+      const catClean = params.category.toLowerCase().split('&')[0].trim();
+      q = q.or(`category.ilike.%${catClean}%,tags.cs.{${catClean}}`);
     }
 
     if (params?.tag) {
-      q = q.contains('tags', [params.tag]);
+      q = q.or(`tags.cs.{${params.tag}},category.ilike.%${params.tag}%`);
     }
 
     q = q.order('created_at', { ascending: false }).limit(100);
@@ -281,12 +288,22 @@ export async function getPublicPlaces(params?: {
     if (!error && rawPlaces && rawPlaces.length > 0) {
       const enriched = await enrichPlacesWithStats(supabase, rawPlaces as Place[], params?.currentUserId);
 
-      // Sort by requested ranking
+      // Sort by requested ranking — always stable (tiebreak on id) to prevent
+      // non-deterministic ordering that causes SSR/client hydration mismatches.
       const sort = params?.sort ?? 'trending';
       if (sort === 'popular' || sort === 'trending') {
-        enriched.sort((a, b) => (b.upvotes_count ?? 0) - (a.upvotes_count ?? 0));
+        enriched.sort((a, b) =>
+          (b.upvotes_count ?? 0) - (a.upvotes_count ?? 0) ||
+          a.id.localeCompare(b.id)
+        );
       } else if (sort === 'rated') {
-        enriched.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+        enriched.sort((a, b) =>
+          (b.rating ?? 0) - (a.rating ?? 0) ||
+          a.id.localeCompare(b.id)
+        );
+      } else {
+        // 'recent' — already ordered by created_at from DB, but stabilise anyway
+        enriched.sort((a, b) => a.id.localeCompare(b.id));
       }
 
       return enriched.slice(offset, offset + limit);
@@ -295,23 +312,41 @@ export async function getPublicPlaces(params?: {
     console.warn('Error fetching public places from Supabase, using curated fallback:', err?.message || err);
   }
 
-  // Fallback to curated places with filtering
+  // Fallback to curated places with rich multi-token matching
   let filtered = [...CURATED_PLACES];
 
   if (params?.query) {
-    const qLower = params.query.toLowerCase();
-    filtered = filtered.filter(
-      (p) =>
-        p.name.toLowerCase().includes(qLower) ||
-        (p.location && p.location.toLowerCase().includes(qLower)) ||
-        (p.city && p.city.toLowerCase().includes(qLower)) ||
-        (p.category && p.category.toLowerCase().includes(qLower)) ||
-        (p.description && p.description.toLowerCase().includes(qLower))
-    );
+    const qLower = params.query.toLowerCase().trim();
+    const tokens = qLower.split(/\s+/).filter(Boolean);
+
+    filtered = filtered.filter((p) => {
+      const name = (p.name || '').toLowerCase();
+      const loc = (p.location || '').toLowerCase();
+      const city = (p.city || '').toLowerCase();
+      const cat = (p.category || '').toLowerCase();
+      const desc = (p.description || '').toLowerCase();
+      const tags = (p.tags || []).map((t) => t.toLowerCase());
+
+      return (
+        name.includes(qLower) ||
+        loc.includes(qLower) ||
+        city.includes(qLower) ||
+        cat.includes(qLower) ||
+        desc.includes(qLower) ||
+        tags.some((t) => t.includes(qLower) || qLower.includes(t)) ||
+        tokens.some((token) =>
+          name.includes(token) ||
+          loc.includes(token) ||
+          city.includes(token) ||
+          cat.includes(token) ||
+          tags.some((t) => t.includes(token))
+        )
+      );
+    });
   }
 
   if (params?.city) {
-    const cLower = params.city.toLowerCase();
+    const cLower = params.city.toLowerCase().trim();
     filtered = filtered.filter(
       (p) =>
         (p.city && p.city.toLowerCase().includes(cLower)) ||
@@ -320,24 +355,38 @@ export async function getPublicPlaces(params?: {
   }
 
   if (params?.category && params.category !== 'All') {
-    const catLower = params.category.toLowerCase();
-    filtered = filtered.filter(
-      (p) => p.category && p.category.toLowerCase().includes(catLower)
-    );
+    const catLower = params.category.toLowerCase().split('&')[0].trim();
+    filtered = filtered.filter((p) => {
+      const pCat = (p.category || '').toLowerCase();
+      const pTags = (p.tags || []).map((t) => t.toLowerCase());
+      return pCat.includes(catLower) || pTags.some((t) => t.includes(catLower));
+    });
   }
 
   if (params?.tag) {
-    filtered = filtered.filter((p) => p.tags && p.tags.includes(params.tag!));
+    const tLower = params.tag.toLowerCase().trim();
+    filtered = filtered.filter((p) => {
+      const pCat = (p.category || '').toLowerCase();
+      const pTags = (p.tags || []).map((t) => t.toLowerCase());
+      return pCat.includes(tLower) || pTags.some((t) => t.includes(tLower));
+    });
   }
 
   const sort = params?.sort ?? 'trending';
   if (sort === 'popular' || sort === 'trending') {
-    filtered.sort((a, b) => (b.upvotes_count ?? 0) - (a.upvotes_count ?? 0));
+    filtered.sort((a, b) =>
+      (b.upvotes_count ?? 0) - (a.upvotes_count ?? 0) ||
+      (a.id ?? '').localeCompare(b.id ?? '')
+    );
   } else if (sort === 'rated') {
-    filtered.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+    filtered.sort((a, b) =>
+      (b.rating ?? 0) - (a.rating ?? 0) ||
+      (a.id ?? '').localeCompare(b.id ?? '')
+    );
   }
 
   return filtered.slice(offset, offset + limit);
+
 }
 
 /**
