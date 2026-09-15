@@ -2,6 +2,70 @@ import { createClient } from '@/lib/supabase/server';
 import { ListPlace, Place, PriorityLevel, SavedPlace, VisitStatus, VoteType } from '@/types/database';
 import { CURATED_PLACES, CURATED_LISTS, CURATED_LIST_PLACES_MAP } from '@/services/curatedData';
 
+/**
+ * Maps every UI category label to the list of terms to search in the DB.
+ * Handles plurals, accented chars, and alternate spellings so tags always return results.
+ */
+const CATEGORY_SEARCH_TERMS: Record<string, string[]> = {
+  // Cafés
+  'cafés':        ['cafe', 'caf\u00e9', 'cafes', 'caf\u00e9s', 'coffee', 'coffee shop'],
+  'cafes':        ['cafe', 'caf\u00e9', 'cafes', 'caf\u00e9s', 'coffee', 'coffee shop'],
+  'café':         ['cafe', 'caf\u00e9', 'cafes', 'caf\u00e9s', 'coffee'],
+  'cafe':         ['cafe', 'caf\u00e9', 'cafes', 'caf\u00e9s', 'coffee'],
+  // Restaurants
+  'restaurants':  ['restaurant', 'dining', 'food', 'eatery', 'bistro'],
+  'restaurant':   ['restaurant', 'dining', 'food', 'eatery', 'bistro'],
+  // Sea & Beaches
+  'sea':          ['sea', 'beach', 'beaches', 'coastal', 'seaside', 'shore'],
+  'sea & beaches':['sea', 'beach', 'beaches', 'coastal', 'seaside', 'shore'],
+  'beach':        ['beach', 'beaches', 'sea', 'coastal', 'seaside'],
+  'beaches':      ['beach', 'beaches', 'sea', 'coastal', 'seaside'],
+  // Lake
+  'lake':         ['lake', 'lakes', 'lagoon', 'waterway'],
+  'lakes':        ['lake', 'lakes', 'lagoon'],
+  // Ocean
+  'ocean':        ['ocean', 'sea', 'beach', 'coastal'],
+  // Park / Garden
+  'park':         ['park', 'garden', 'gardens', 'park / garden', 'parks'],
+  'garden':       ['garden', 'gardens', 'park', 'park / garden'],
+  'park / garden':['park', 'garden', 'gardens', 'parks'],
+  'parks':        ['park', 'garden', 'parks'],
+  'gardens':      ['garden', 'gardens', 'park'],
+  // Nature
+  'nature':       ['nature', 'outdoor', 'scenic', 'green'],
+  // Waterfall
+  'waterfall':    ['waterfall', 'falls', 'cascade'],
+  // Mountain
+  'mountain':     ['mountain', 'mountains', 'hill', 'peak', 'hiking', 'trek'],
+  // Forest
+  'forest':       ['forest', 'jungle', 'woods', 'woodland'],
+  // Spiritual
+  'spiritual sights': ['spiritual', 'temple', 'shrine', 'mosque', 'church', 'religious'],
+  'spiritual':    ['spiritual', 'temple', 'shrine', 'mosque', 'church'],
+  // Hidden Gems
+  'hidden gems':  ['hidden gem', 'hidden gems', 'offbeat', 'secret'],
+  'hidden gem':   ['hidden gem', 'hidden gems', 'offbeat', 'secret'],
+  // Date Spots
+  'date spots':   ['date spot', 'date spots', 'romantic', 'romance'],
+  'date spot':    ['date spot', 'date spots', 'romantic'],
+  // Sightseeing
+  'sightseeing':  ['sightseeing', 'landmark', 'tourist', 'attraction', 'museum', 'heritage', 'historical'],
+  // Bars & Nightlife
+  'bars & nightlife': ['bar', 'pub', 'nightlife', 'club', 'lounge', 'cocktail'],
+  'bars':         ['bar', 'pub', 'nightlife', 'club', 'lounge'],
+  // Shopping
+  'shopping':     ['shopping', 'market', 'mall', 'boutique', 'shop'],
+  // Weekend Trips
+  'weekend trips':['weekend trip', 'day trip', 'getaway', 'road trip'],
+  'weekend trip': ['weekend trip', 'day trip', 'getaway'],
+};
+
+/** Expand a UI category label into all its searchable DB terms */
+function expandCategoryTerms(label: string): string[] {
+  const key = label.toLowerCase().trim();
+  return CATEGORY_SEARCH_TERMS[key] ?? [key];
+}
+
 export function generatePlaceSlug(name: string, location?: string | null): string {
   const base = location ? `${name}-${location}` : name;
   const clean = base
@@ -273,8 +337,13 @@ export async function getPublicPlaces(params?: {
     }
 
     if (params?.category && params.category !== 'All') {
-      const catClean = params.category.toLowerCase().split('&')[0].trim();
-      q = q.or(`category.ilike.%${catClean}%,tags.cs.{${catClean}}`);
+      // Expand UI label → all DB variant terms (handles plurals, accents, alternates)
+      const terms = expandCategoryTerms(params.category);
+      const orParts = terms.flatMap((t) => [
+        `category.ilike.%${t}%`,
+        `tags.cs.{${t}}`,
+      ]);
+      q = q.or(orParts.join(','));
     }
 
     if (params?.tag) {
@@ -366,11 +435,14 @@ export async function getPublicPlaces(params?: {
   }
 
   if (params?.category && params.category !== 'All') {
-    const catLower = params.category.toLowerCase().split('&')[0].trim();
+    // Use same expanded terms as the DB path for consistency
+    const terms = expandCategoryTerms(params.category);
     filtered = filtered.filter((p) => {
       const pCat = (p.category || '').toLowerCase();
-      const pTags = (p.tags || []).map((t) => t.toLowerCase());
-      return pCat.includes(catLower) || pTags.some((t) => t.includes(catLower));
+      const pTags = (p.tags || []).map((t: string) => t.toLowerCase());
+      return terms.some((t) =>
+        pCat.includes(t) || pTags.some((tag) => tag.includes(t) || t.includes(tag))
+      );
     });
   }
 

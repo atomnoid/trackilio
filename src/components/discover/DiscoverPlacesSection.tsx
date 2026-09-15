@@ -13,10 +13,7 @@ export function DiscoverPlacesSection({ places, currentUserId }: DiscoverPlacesS
   // Show 15 places initially across all devices (phone and desktop), then load 15 more on button click
   const [visibleCount, setVisibleCount] = useState<number>(15);
 
-  if (!places || places.length === 0) {
-    return <NoPlacesFound />;
-  }
-
+  // Empty state is handled at the server level (page.tsx) via NoPlacesEmptyState
   const displayedPlaces = places.slice(0, visibleCount);
   const hasMore = visibleCount < places.length;
 
@@ -37,7 +34,10 @@ export function DiscoverPlacesSection({ places, currentUserId }: DiscoverPlacesS
       </div>
 
       {hasMore && (
-        <div className="flex flex-col items-center justify-center pt-6 pb-2">
+        <div
+          suppressHydrationWarning
+          className="flex flex-col items-center justify-center pt-4 pb-2"
+        >
           <button
             onClick={handleLoadMore}
             suppressHydrationWarning
