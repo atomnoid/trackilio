@@ -121,7 +121,6 @@ export function Navbar() {
                   <Link
                     key={link.href}
                     href={link.href}
-                    prefetch={true}
                     className={`transition-all duration-100 py-1.5 px-3 rounded-xl ${
                       isActive
                         ? 'text-[#222222] bg-[#F5E7C6] font-extrabold'

@@ -16,7 +16,7 @@ export function BottomNav() {
 
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 px-4 pb-3 pt-1 bg-gradient-to-t from-[#FAF3E1] via-[#FAF3E1]/95 to-transparent pointer-events-none">
-      <nav className="pointer-events-auto mx-auto max-w-sm bg-[#FAF3E1] border border-[#E8DECA] rounded-2xl shadow-lg p-1.5 flex items-center justify-around">
+      <nav className="pointer-events-auto mx-auto max-w-sm bg-[#FAF3E1] border border-[#E8DECA] rounded-2xl shadow-lg p-1.5 flex items-center justify-between px-3">
         {links.map((link) => {
           const isActive = pathname === link.href;
 
@@ -25,7 +25,6 @@ export function BottomNav() {
               <Link
                 key={link.href}
                 href={link.href}
-                prefetch={true}
                 className="flex items-center justify-center px-4 py-2 rounded-xl bg-[#FA8112] text-white font-black text-xs active-press shadow-xs shrink-0"
               >
                 {link.label}
@@ -37,11 +36,8 @@ export function BottomNav() {
             <Link
               key={link.href}
               href={link.href}
-              prefetch={true}
               className={`py-2 px-3 rounded-xl text-xs font-extrabold transition-all duration-100 active-press shrink-0 ${
-                isActive
-                  ? 'text-[#FA8112] bg-[#F5E7C6]'
-                  : 'text-[#6B6862] hover:text-[#222222]'
+                isActive ? 'text-[#FA8112] bg-[#F5E7C6]' : 'text-[#6B6862] hover:text-[#222222]'
               }`}
             >
               {link.label}
