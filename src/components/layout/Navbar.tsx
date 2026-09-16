@@ -109,7 +109,7 @@ export function Navbar() {
         }`}
       >
         <div className="w-full mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between gap-6">
+          <div className="flex items-center justify-between gap-2 sm:gap-6">
             {/* Brand Logo */}
             <TrackilioLogo />
 
@@ -134,11 +134,11 @@ export function Navbar() {
             </nav>
 
             {/* Actions & Dynamic Auth Button */}
-            <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
               <button
                 type="button"
                 onClick={() => setSearchOpen(true)}
-                className="p-2 text-[#6B6862] hover:text-[#222222] hover:bg-[#F5E7C6] rounded-xl transition-colors cursor-pointer"
+                className="p-1.5 sm:p-2 text-[#6B6862] hover:text-[#222222] hover:bg-[#F5E7C6] rounded-xl transition-colors cursor-pointer shrink-0"
                 title="Search Places, Lists & Travelers"
               >
                 <SearchIcon className="w-4.5 h-4.5" />
@@ -147,10 +147,10 @@ export function Navbar() {
               {mounted && !loading && (
                 <>
                   {user ? (
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1 sm:gap-2 shrink-0">
                       <Link
                         href={profileHref}
-                        className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white border border-[#E8DECA] hover:border-[#222222] transition-colors"
+                        className="flex items-center gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-white border border-[#E8DECA] hover:border-[#222222] transition-colors"
                         title="View Public Profile"
                       >
                         {avatarUrl ? (
@@ -179,7 +179,7 @@ export function Navbar() {
 
                       <button
                         onClick={handleSignOut}
-                        className="px-2 py-1.5 text-xs font-bold text-[#6B6862] hover:text-rose-600 transition-colors"
+                        className="px-1.5 sm:px-2 py-1 sm:py-1.5 text-xs font-bold text-[#6B6862] hover:text-rose-600 transition-colors"
                         title="Sign Out"
                       >
                         Exit
@@ -198,7 +198,7 @@ export function Navbar() {
 
               <Link
                 href="/create"
-                className="inline-flex items-center gap-1.5 rounded-xl bg-[#FA8112] hover:bg-[#E4720A] text-white px-4 py-2 text-xs font-extrabold active-press transition-colors shadow-xs"
+                className="inline-flex items-center gap-1 sm:gap-1.5 rounded-xl bg-[#FA8112] hover:bg-[#E4720A] text-white px-2.5 sm:px-4 py-1.5 sm:py-2 text-xs font-extrabold active-press transition-colors shadow-xs shrink-0 whitespace-nowrap"
               >
                 <PlusIcon className="w-3.5 h-3.5" />
                 <span>Create</span>
