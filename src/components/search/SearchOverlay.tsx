@@ -110,7 +110,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
     fetchResults(trendingQ);
   };
 
-  if (!mounted || !isOpen) return null;
+  if (!mounted || !isOpen || typeof document === 'undefined' || !document.body) return null;
 
   const totalResults = places.length + lists.length + users.length;
   const hasResults = totalResults > 0;

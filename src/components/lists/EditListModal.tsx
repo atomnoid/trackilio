@@ -53,7 +53,7 @@ export function EditListModal({
     };
   }, [isOpen]);
 
-  if (!isOpen || !mounted) return null;
+  if (!isOpen || !mounted || typeof document === 'undefined' || !document.body) return null;
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();

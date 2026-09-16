@@ -63,7 +63,7 @@ export function QuickInviteModal({
     };
   }, [isOpen]);
 
-  if (!isOpen || !mounted) return null;
+  if (!isOpen || !mounted || typeof document === 'undefined' || !document.body) return null;
 
   const handleGenerateLink = async () => {
     setGeneratingLink(true);

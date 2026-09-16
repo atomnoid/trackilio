@@ -62,7 +62,7 @@ export function FollowListModal({
     };
   }, [isOpen, onClose]);
 
-  if (!mounted || !isOpen) return null;
+  if (!mounted || !isOpen || typeof document === 'undefined' || !document.body) return null;
 
   const title = type === 'followers' ? 'Followers' : 'Following';
 

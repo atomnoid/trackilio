@@ -57,7 +57,9 @@ export function NavigationLoader() {
   /** Intercept link clicks to detect navigation start */
   useEffect(() => {
     const handleLinkClick = (e: MouseEvent) => {
-      const anchor = (e.target as Element).closest('a');
+      const target = e.target as Node | null;
+      if (!target || !(target instanceof Element) || !target.parentNode) return;
+      const anchor = target.closest('a');
       if (!anchor) return;
 
       const href = anchor.getAttribute('href');

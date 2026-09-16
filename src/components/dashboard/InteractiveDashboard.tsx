@@ -31,12 +31,6 @@ interface InteractiveDashboardProps {
   userId: string;
 }
 
-const TEMPLATE_SUGGESTIONS = [
-  { title: '7 Days in Kyoto: Cafes & Shrines', dest: 'Kyoto, Japan', emoji: '⛩️' },
-  { title: 'Paris Pastry & Wine Tour', dest: 'Paris, France', emoji: '🥐' },
-  { title: 'Kolkata Heritage Cafes & Street Art', dest: 'Kolkata, India', emoji: '☕' },
-  { title: 'Amalfi Coast Sunset Spots', dest: 'Amalfi, Italy', emoji: '🍋' },
-];
 
 export function InteractiveDashboard({
   userDisplayName,
@@ -190,22 +184,6 @@ export function InteractiveDashboard({
               {createdSuccess}
             </p>
           )}
-
-          {/* Inspiration Chips */}
-          <div className="flex flex-wrap items-center gap-2 pt-3">
-            <span className="text-[11px] font-bold text-[#7E7890]">Quick Ideas:</span>
-            {TEMPLATE_SUGGESTIONS.map((sug) => (
-              <button
-                key={sug.title}
-                type="button"
-                onClick={() => handleQuickCreate(sug.title, sug.dest)}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white border border-[#EFE9EC] hover:border-[#FF5841] text-[11px] font-medium text-[#4F4B5E] active-press transition-all"
-              >
-                <span>{sug.emoji}</span>
-                <span>{sug.title.split(':')[0]}</span>
-              </button>
-            ))}
-          </div>
         </div>
       </div>
 
