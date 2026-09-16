@@ -585,3 +585,33 @@ export const CURATED_LIST_PLACES_MAP: Record<string, ListPlace[]> = {
     },
   ],
 };
+
+export function getCuratedNotesForPlace(placeId: string): Array<{
+  note: string;
+  author_name?: string;
+  list_title?: string;
+  list_slug?: string;
+}> {
+  const results: Array<{
+    note: string;
+    author_name?: string;
+    list_title?: string;
+    list_slug?: string;
+  }> = [];
+
+  Object.entries(CURATED_LIST_PLACES_MAP).forEach(([listId, listPlaces]) => {
+    const matchingList = CURATED_LISTS.find((l) => l.id === listId);
+    listPlaces.forEach((lp) => {
+      if (lp.place_id === placeId && lp.note && lp.note.trim()) {
+        results.push({
+          note: lp.note,
+          author_name: matchingList?.owner?.display_name || 'Traveler',
+          list_title: matchingList?.title,
+          list_slug: matchingList?.slug,
+        });
+      }
+    });
+  });
+
+  return results;
+}

@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { ListPlace, Place, PriorityLevel, SavedPlace, VisitStatus, VoteType } from '@/types/database';
-import { CURATED_PLACES, CURATED_LISTS, CURATED_LIST_PLACES_MAP } from '@/services/curatedData';
+import { CURATED_PLACES, CURATED_LISTS, CURATED_LIST_PLACES_MAP, getCuratedNotesForPlace } from '@/services/curatedData';
 
 /**
  * Maps every UI category label to the list of terms to search in the DB.
@@ -233,8 +233,10 @@ async function enrichPlacesWithStats(
       (supabase as any)
         .from('list_places')
         .select(`
+          id,
           place_id,
-          list:wander_lists(is_public),
+          note,
+          list:wander_lists(id, title, slug, is_public, owner:profiles(display_name, username)),
           votes(vote_type)
         `)
         .in('place_id', placeIds),
@@ -251,7 +253,12 @@ async function enrichPlacesWithStats(
 
     const statsMap = new Map<
       string,
-      { upvotes: number; downvotes: number; lists: number }
+      {
+        upvotes: number;
+        downvotes: number;
+        lists: number;
+        notes: Array<{ id?: string; note: string; author_name?: string; list_title?: string; list_slug?: string }>;
+      }
     >();
 
     (listPlacesRes.data ?? []).forEach((lp: any) => {
@@ -259,10 +266,22 @@ async function enrichPlacesWithStats(
         upvotes: 0,
         downvotes: 0,
         lists: 0,
+        notes: [],
       };
 
       if (lp.list?.is_public) {
         current.lists += 1;
+      }
+
+      if (lp.note && lp.note.trim()) {
+        const authorName = lp.list?.owner?.display_name || lp.list?.owner?.username || 'Traveler';
+        current.notes.push({
+          id: lp.id,
+          note: lp.note.trim(),
+          author_name: authorName,
+          list_title: lp.list?.title,
+          list_slug: lp.list?.slug,
+        });
       }
 
       const votes = lp.votes || [];
@@ -275,9 +294,13 @@ async function enrichPlacesWithStats(
     });
 
     return rawPlaces.map((p) => {
-      const stats = statsMap.get(p.id) || { upvotes: 0, downvotes: 0, lists: 0 };
+      const stats = statsMap.get(p.id) || { upvotes: 0, downvotes: 0, lists: 0, notes: [] };
       const communityScore = stats.upvotes - stats.downvotes + stats.lists * 3;
       const slug = p.slug || generatePlaceSlug(p.name, p.location || p.city);
+
+      const curatedNotes = getCuratedNotesForPlace(p.id);
+      const combinedNotes = stats.notes.length > 0 ? stats.notes : curatedNotes;
+      const primaryNote = p.note || (combinedNotes.length > 0 ? combinedNotes[0].note : null);
 
       return {
         ...p,
@@ -287,17 +310,24 @@ async function enrichPlacesWithStats(
         community_score: communityScore,
         lists_count: stats.lists,
         is_saved: userSavedSet.has(p.id),
+        note: primaryNote,
+        notes: combinedNotes,
       };
     });
   } catch (err: any) {
     console.warn('Error enriching places with stats:', err?.message || err);
-    return rawPlaces.map((p) => ({
-      ...p,
-      upvotes_count: 0,
-      downvotes_count: 0,
-      lists_count: 0,
-      is_saved: false,
-    }));
+    return rawPlaces.map((p) => {
+      const curatedNotes = getCuratedNotesForPlace(p.id);
+      return {
+        ...p,
+        upvotes_count: 0,
+        downvotes_count: 0,
+        lists_count: 0,
+        is_saved: false,
+        note: p.note || (curatedNotes.length > 0 ? curatedNotes[0].note : null),
+        notes: curatedNotes,
+      };
+    });
   }
 }
 
@@ -594,6 +624,7 @@ export async function getPlaceBySlugOrId(
           .from('list_places')
           .select(`
             id,
+            note,
             list:wander_lists(id, title, slug, destination, is_public, owner:profiles(display_name, username)),
             votes(id, user_id, vote_type)
           `)
@@ -622,6 +653,7 @@ export async function getPlaceBySlugOrId(
       let downvotes = 0;
       let userVoteType: VoteType | null = null;
       const relatedLists: Array<{ id: string; title: string; slug: string; destination: string | null; owner_name: string }> = [];
+      const fetchedNotes: Array<{ id?: string; note: string; author_name?: string; list_title?: string; list_slug?: string }> = [];
 
       (listPlacesRes.data ?? []).forEach((lp: any) => {
         if (lp.list && lp.list.is_public) {
@@ -631,6 +663,16 @@ export async function getPlaceBySlugOrId(
             slug: lp.list.slug,
             destination: lp.list.destination,
             owner_name: lp.list.owner?.display_name || lp.list.owner?.username || 'Traveler',
+          });
+        }
+
+        if (lp.note && lp.note.trim()) {
+          fetchedNotes.push({
+            id: lp.id,
+            note: lp.note.trim(),
+            author_name: lp.list?.owner?.display_name || lp.list?.owner?.username || 'Traveler',
+            list_title: lp.list?.title,
+            list_slug: lp.list?.slug,
           });
         }
 
@@ -649,6 +691,10 @@ export async function getPlaceBySlugOrId(
       const rawRelated = (relatedRes.data ?? []) as Place[];
       const enrichedRelated = await enrichPlacesWithStats(supabase, rawRelated, currentUserId);
 
+      const curatedNotes = getCuratedNotesForPlace(place.id);
+      const allNotes = fetchedNotes.length > 0 ? fetchedNotes : curatedNotes;
+      const primaryNote = place.note || (allNotes.length > 0 ? allNotes[0].note : null);
+
       return {
         place: {
           ...place,
@@ -659,6 +705,8 @@ export async function getPlaceBySlugOrId(
           lists_count: relatedLists.length,
           is_saved: isSaved,
           user_vote_type: userVoteType,
+          note: primaryNote,
+          notes: allNotes,
         },
         relatedLists,
         relatedPlaces: enrichedRelated.length > 0 ? enrichedRelated : CURATED_PLACES.slice(0, 3),

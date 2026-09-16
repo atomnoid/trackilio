@@ -179,6 +179,19 @@ export default async function PlaceDetailPage({ params }: PlaceDetailPageProps) 
           </p>
         )}
 
+        {/* Featured Insider Note */}
+        {place.note && (
+          <div className="rounded-2xl bg-[#FFF9EE] border border-[#F5E7C6] p-4 text-sm space-y-1.5 shadow-2xs">
+            <div className="flex items-center gap-2 text-xs font-black text-[#FA8112] uppercase tracking-wide">
+              <span>💬</span>
+              <span>Featured Insider Tip</span>
+            </div>
+            <p className="text-[#222222] font-semibold italic leading-relaxed">
+              &ldquo;{place.note}&rdquo;
+            </p>
+          </div>
+        )}
+
         {/* Map Links & Website — ONLY shown if provided */}
         {(hasMapUrl || place.website) && (
           <div className="flex flex-wrap items-center gap-3 pt-2 text-xs font-bold">
@@ -210,6 +223,44 @@ export default async function PlaceDetailPage({ params }: PlaceDetailPageProps) 
           </div>
         )}
       </section>
+
+      {/* Traveler & Community Notes Section */}
+      {place.notes && place.notes.length > 0 && (
+        <section className="space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-[#E8DECA]">
+            <h2 className="font-sans text-xl font-black text-[#222222] flex items-center gap-2">
+              <span className="text-xl">💬</span>
+              Traveler Notes & Tips ({place.notes.length})
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {place.notes.map((n, idx) => (
+              <div
+                key={n.id || idx}
+                className="rounded-2xl bg-white border border-[#E8DECA] p-5 space-y-3 shadow-2xs flex flex-col justify-between"
+              >
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs font-bold text-[#6B6862]">
+                    <span className="text-[#FA8112] font-black">{n.author_name || 'Traveler'}</span>
+                    {n.list_title && n.list_slug && (
+                      <Link
+                        href={`/l/${n.list_slug}`}
+                        className="hover:underline text-[#6B6862] hover:text-[#222222] truncate max-w-[180px]"
+                      >
+                        From: {n.list_title}
+                      </Link>
+                    )}
+                  </div>
+                  <p className="text-sm font-medium text-[#222222] leading-relaxed italic">
+                    &ldquo;{n.note}&rdquo;
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Found in Curated Collections */}
       <section className="space-y-6">

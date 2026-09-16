@@ -123,11 +123,21 @@ export function PlaceDiscoveryCard({ place, currentUserId, initialSaved }: Place
           </div>
         )}
 
-        {place.description && (
+        {place.note ? (
+          <div className="mt-1.5 rounded-xl bg-[#FAF3E1]/80 border border-[#E8DECA] p-2.5 text-xs space-y-0.5">
+            <div className="flex items-center gap-1 text-[11px] font-black text-[#FA8112]">
+              <span>💬</span>
+              <span>Traveler Note</span>
+            </div>
+            <p className="text-[#222222] font-medium italic line-clamp-2 leading-snug">
+              &ldquo;{place.note}&rdquo;
+            </p>
+          </div>
+        ) : place.description ? (
           <p className="text-xs text-[#6B6862] line-clamp-2 leading-relaxed pt-0.5">
             {place.description}
           </p>
-        )}
+        ) : null}
       </Link>
 
       {/* Card Footer: Upvotes Count + See on Map + View CTA */}

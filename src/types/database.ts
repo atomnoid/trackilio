@@ -92,6 +92,14 @@ export interface Place {
   lists_count?: number;
   is_saved?: boolean;
   user_vote_type?: VoteType | null;
+  note?: string | null;
+  notes?: Array<{
+    id?: string;
+    note: string;
+    author_name?: string;
+    list_title?: string;
+    list_slug?: string;
+  }> | null;
 }
 
 export interface SavedPlace {

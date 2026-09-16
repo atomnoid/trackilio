@@ -34,21 +34,14 @@ export function DiscoverPlacesSection({ places, currentUserId }: DiscoverPlacesS
       </div>
 
       {hasMore && (
-        <div
-          suppressHydrationWarning
-          className="flex flex-col items-center justify-center pt-4 pb-2"
-        >
+        <div className="flex flex-col items-center justify-center pt-4 pb-2">
           <button
             onClick={handleLoadMore}
-            suppressHydrationWarning
             className="group relative inline-flex items-center gap-2.5 rounded-xl bg-white border border-[#E8DECA] hover:border-[#222222] px-6 py-3 text-xs font-extrabold text-[#222222] shadow-2xs hover:shadow-xs active:scale-95 transition-all cursor-pointer"
           >
             <span className="text-base group-hover:rotate-12 transition-transform duration-200">✨</span>
             <span>Show more places</span>
-            <span
-              suppressHydrationWarning
-              className="ml-1 rounded-full bg-[#F5E7C6] text-[#FA8112] px-2 py-0.5 text-[11px] font-black group-hover:bg-[#FA8112] group-hover:text-white transition-colors"
-            >
+            <span className="ml-1 rounded-full bg-[#F5E7C6] text-[#FA8112] px-2 py-0.5 text-[11px] font-black group-hover:bg-[#FA8112] group-hover:text-white transition-colors">
               +{places.length - visibleCount}
             </span>
           </button>
