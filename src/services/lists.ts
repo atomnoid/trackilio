@@ -38,7 +38,7 @@ export async function getUniqueSlug(baseTitle: string): Promise<string> {
 /**
  * Helper to enrich WanderLists with places_count
  */
-async function enrichListsWithCounts(
+export async function enrichListsWithCounts(
   supabase: any,
   lists: WanderList[]
 ): Promise<WanderList[]> {

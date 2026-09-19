@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { Profile, WanderList } from '@/types/database';
 import { validateUsernameFormat, sanitizeUsername } from '@/lib/username';
+import { enrichListsWithCounts } from '@/services/lists';
 
 export async function getProfile(userId: string): Promise<Profile | null> {
   try {
@@ -140,7 +141,8 @@ export async function getPublicProfileByUsernameOrId(
         .eq('follower_id', profile.id),
     ]);
 
-    const publicLists = (publicListsRes.data ?? []) as WanderList[];
+    const rawPublicLists = (publicListsRes.data ?? []) as WanderList[];
+    const publicLists = await enrichListsWithCounts(supabase, rawPublicLists);
 
     return {
       profile: {
