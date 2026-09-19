@@ -15,8 +15,8 @@ export function BottomNav() {
   ];
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 px-4 pb-3 pt-1 bg-gradient-to-t from-[#FAF3E1] via-[#FAF3E1]/95 to-transparent pointer-events-none">
-      <nav className="pointer-events-auto mx-auto max-w-sm bg-[#FAF3E1] border border-[#E8DECA] rounded-2xl shadow-lg p-1.5 flex items-center justify-between px-3">
+    <div suppressHydrationWarning className="md:hidden fixed bottom-0 left-0 right-0 z-50 px-4 pb-3 pt-1 bg-gradient-to-t from-[#FAF3E1] via-[#FAF3E1]/95 to-transparent pointer-events-none">
+      <nav suppressHydrationWarning className="pointer-events-auto mx-auto max-w-sm bg-[#FAF3E1] border border-[#E8DECA] rounded-2xl shadow-lg p-1.5 flex items-center justify-between px-3">
         {links.map((link) => {
           const isActive = pathname === link.href;
 

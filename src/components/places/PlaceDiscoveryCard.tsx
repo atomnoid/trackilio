@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Place } from '@/types/database';
 import { SavePlaceButton } from './SavePlaceButton';
@@ -67,6 +67,14 @@ const CATEGORY_EMOJIS: Record<string, string> = {
 
 
 export function PlaceDiscoveryCard({ place, currentUserId, initialSaved }: PlaceDiscoveryCardProps) {
+  // Client mount state guarantees 100% hydration matching between SSR and initial client DOM
+  const [mounted, setMounted] = useState(false);
+  const [photoError, setPhotoError] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const category = place.category || 'Place';
   const emoji = CATEGORY_EMOJIS[category] || '📍';
   const slug = place.slug || place.id;
@@ -80,7 +88,7 @@ export function PlaceDiscoveryCard({ place, currentUserId, initialSaved }: Place
   );
 
   return (
-    <div className="group relative block rounded-2xl bg-white border border-[#E8DECA] p-5 hover:border-[#222222] transition-all duration-200 space-y-3">
+    <div suppressHydrationWarning className="group relative flex flex-col justify-between rounded-2xl bg-white border border-[#E8DECA] p-4 sm:p-5 hover:border-[#222222] transition-all duration-200 space-y-3 h-full">
       {/* Top Header: Category Tag + Save Action */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-1.5 overflow-hidden">
@@ -110,34 +118,51 @@ export function PlaceDiscoveryCard({ place, currentUserId, initialSaved }: Place
         />
       </div>
 
-      {/* Place Main Info */}
-      <Link href={`/place/${slug}`} className="block space-y-1">
-        <h3 className="font-sans text-base font-black text-[#222222] group-hover:text-[#FA8112] transition-colors line-clamp-1">
-          {place.name}
-        </h3>
-
-        {locationText && (
-          <div className="flex items-center gap-1 text-xs font-semibold text-[#6B6862] truncate">
-            <PinIcon className="w-3 h-3 text-[#FA8112] shrink-0" />
-            <span className="truncate">{locationText}</span>
+      {/* Main Place Content (Google Photo + Place Details) */}
+      <Link href={`/place/${slug}`} className="block space-y-3 flex-1">
+        {/* Google Place Photo Banner */}
+        {mounted && place.google_place_id && !photoError && (
+          <div className="relative aspect-[2/1] sm:aspect-[16/9] w-full overflow-hidden rounded-xl bg-[#FAF3E1] border border-[#E8DECA] transition-all">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`/api/places/google/photos?placeId=${encodeURIComponent(place.google_place_id)}&index=0`}
+              alt={place.name}
+              loading="lazy"
+              onError={() => setPhotoError(true)}
+              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            />
           </div>
         )}
 
-        {place.note ? (
-          <div className="mt-1.5 rounded-xl bg-[#FAF3E1]/80 border border-[#E8DECA] p-2.5 text-xs space-y-0.5">
-            <div className="flex items-center gap-1 text-[11px] font-black text-[#FA8112]">
-              <span>💬</span>
-              <span>Traveler Note</span>
-            </div>
-            <p className="text-[#222222] font-medium italic line-clamp-2 leading-snug">
-              &ldquo;{place.note}&rdquo;
+        {/* Place Main Info */}
+        <div className="space-y-1">
+          <h3 className="font-sans text-base font-black text-[#222222] group-hover:text-[#FA8112] transition-colors line-clamp-1">
+            {place.name}
+          </h3>
+
+          {locationText && (
+            <span className="flex items-center gap-1 text-xs font-semibold text-[#6B6862] truncate">
+              <PinIcon className="w-3 h-3 text-[#FA8112] shrink-0" />
+              <span className="truncate">{locationText}</span>
+            </span>
+          )}
+
+          {place.note ? (
+            <span className="mt-1.5 block rounded-xl bg-[#FAF3E1]/80 border border-[#E8DECA] p-2.5 text-xs space-y-0.5">
+              <span className="flex items-center gap-1 text-[11px] font-black text-[#FA8112]">
+                <span>💬</span>
+                <span>Traveler Note</span>
+              </span>
+              <p className="text-[#222222] font-medium italic line-clamp-2 leading-snug">
+                &ldquo;{place.note}&rdquo;
+              </p>
+            </span>
+          ) : place.description ? (
+            <p className="text-xs text-[#6B6862] line-clamp-2 leading-relaxed pt-0.5">
+              {place.description}
             </p>
-          </div>
-        ) : place.description ? (
-          <p className="text-xs text-[#6B6862] line-clamp-2 leading-relaxed pt-0.5">
-            {place.description}
-          </p>
-        ) : null}
+          ) : null}
+        </div>
       </Link>
 
       {/* Card Footer: Upvotes Count + See on Map + View CTA */}

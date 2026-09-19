@@ -74,6 +74,7 @@ CREATE TABLE IF NOT EXISTS public.places (
   lat NUMERIC(10,7),
   lng NUMERIC(10,7),
   maps_url TEXT CHECK (maps_url IS NULL OR maps_url ~* '^https?://'),
+  google_place_id TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
@@ -81,6 +82,7 @@ CREATE TABLE IF NOT EXISTS public.places (
 CREATE INDEX IF NOT EXISTS idx_places_tags ON public.places USING GIN (tags);
 CREATE INDEX IF NOT EXISTS idx_places_city ON public.places(city);
 CREATE INDEX IF NOT EXISTS idx_places_slug ON public.places(slug);
+CREATE INDEX IF NOT EXISTS idx_places_google_place_id ON public.places(google_place_id);
 
 -- 5. LIST_PLACES
 CREATE TABLE IF NOT EXISTS public.list_places (

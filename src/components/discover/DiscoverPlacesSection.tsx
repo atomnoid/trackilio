@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Place } from '@/types/database';
-import { PlaceDiscoveryCard } from '@/components/places/PlaceDiscoveryCard';
+import { PlaceCard } from '@/components/places/PlaceCard';
 
 interface DiscoverPlacesSectionProps {
   places: Place[];
@@ -25,7 +25,7 @@ export function DiscoverPlacesSection({ places, currentUserId }: DiscoverPlacesS
     <div className="space-y-8">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {displayedPlaces.map((place) => (
-          <PlaceDiscoveryCard
+          <PlaceCard
             key={place.id}
             place={place}
             currentUserId={currentUserId}

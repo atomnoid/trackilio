@@ -55,9 +55,9 @@ export function WanderListCard({ list, showCollabBadge = false }: WanderListCard
       <div className="p-5 space-y-2">
         <Link href={`/l/${list.slug}`} className="block space-y-1.5">
           {list.destination && (
-            <div className="text-[11px] font-extrabold uppercase tracking-wider text-[#FA8112]">
+            <span className="block text-[11px] font-extrabold uppercase tracking-wider text-[#FA8112]">
               {list.destination}
-            </div>
+            </span>
           )}
 
           <h3 className="font-sans text-base font-black text-[#222222] group-hover:text-[#FA8112] transition-colors line-clamp-1">
@@ -79,14 +79,14 @@ export function WanderListCard({ list, showCollabBadge = false }: WanderListCard
               className="flex items-center gap-2 group/author hover:opacity-80 transition-opacity"
               title={`View ${list.owner?.display_name || 'Traveler'}'s profile`}
             >
-              <div className="h-6 w-6 rounded-lg bg-[#222222] text-white font-bold text-[10px] flex items-center justify-center">
+              <span className="h-6 w-6 rounded-lg bg-[#222222] text-white font-bold text-[10px] flex items-center justify-center">
                 {list.owner?.display_name?.charAt(0).toUpperCase() || 'T'}
-              </div>
-              <div className="flex flex-col">
+              </span>
+              <span className="flex flex-col">
                 <span className="font-bold text-[#222222] truncate max-w-[120px]">
                   {list.owner?.display_name || 'Traveler'}
                 </span>
-              </div>
+              </span>
             </Link>
           ) : (
             <div className="flex items-center gap-2">

@@ -49,14 +49,20 @@ export async function PATCH(request: Request) {
     .eq('id', listPlaceId);
 
   // Update canonical place name/location/category/tags if provided
-  if (name || location || country || category || tags || mapsUrl !== undefined) {
+  if (name || location || country || category || tags || mapsUrl !== undefined || body.googlePlaceId !== undefined) {
     const placePayload: Record<string, any> = { updated_at: new Date().toISOString() };
     if (name) placePayload.name = name.trim();
     if (location !== undefined) placePayload.location = location ? location.trim() : null;
     if (country !== undefined) placePayload.country = country ? country.trim() : null;
     if (category) placePayload.category = category;
     if (tags !== undefined) placePayload.tags = Array.isArray(tags) ? tags.slice(0, 3) : [];
-    if (mapsUrl !== undefined) placePayload.maps_url = mapsUrl ? mapsUrl.trim() : null;
+    if (mapsUrl !== undefined) {
+      placePayload.maps_url = mapsUrl ? mapsUrl.trim() : null;
+    }
+    if (body.googlePlaceId !== undefined || mapsUrl !== undefined) {
+      const gId = body.googlePlaceId ? body.googlePlaceId.trim() : (mapsUrl ? (mapsUrl.match(/place_id=([A-Za-z0-9_-]+)/)?.[1] || mapsUrl.match(/(ChIJ[A-Za-z0-9_-]{20,})/)?.[1] || null) : null);
+      if (gId) placePayload.google_place_id = gId;
+    }
 
     await (supabase as any)
       .from('places')

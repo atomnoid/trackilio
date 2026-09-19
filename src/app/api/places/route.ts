@@ -11,7 +11,7 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json();
-  const { listId, name, location, country, category, tags, mapsUrl, note, priority, status } = body;
+  const { listId, name, location, country, category, tags, mapsUrl, googlePlaceId, note, priority, status } = body;
 
   if (!listId || !name?.trim()) {
     return NextResponse.json({ error: 'listId and name are required' }, { status: 400 });
@@ -28,6 +28,7 @@ export async function POST(request: Request) {
     category: category || 'Sight',
     tags: validTags,
     mapsUrl: mapsUrl?.trim(),
+    googlePlaceId: googlePlaceId?.trim(),
     note: note?.trim(),
     priority,
     status,

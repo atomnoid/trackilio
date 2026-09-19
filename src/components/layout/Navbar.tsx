@@ -102,19 +102,20 @@ export function Navbar() {
   return (
     <>
       <header
+        suppressHydrationWarning
         className={`sticky top-0 z-40 h-16 sm:h-18 flex items-center transition-all duration-200 will-change-auto ${
           scrolled
             ? 'bg-[#FAF3E1]/95 backdrop-blur-md border-b border-[#E8DECA] shadow-2xs'
             : 'bg-[#FAF3E1] border-b border-transparent'
         }`}
       >
-        <div className="w-full mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between gap-2 sm:gap-6">
+        <div suppressHydrationWarning className="w-full mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div suppressHydrationWarning className="flex items-center justify-between gap-2 sm:gap-6">
             {/* Brand Logo */}
             <TrackilioLogo />
 
             {/* Desktop Navigation Links */}
-            <nav className="hidden md:flex items-center gap-6 text-sm font-semibold">
+            <nav suppressHydrationWarning className="hidden md:flex items-center gap-6 text-sm font-semibold">
             {navLinks.map((link) => {
                 const isActive = pathname === link.href;
                 return (
@@ -134,7 +135,7 @@ export function Navbar() {
             </nav>
 
             {/* Actions & Dynamic Auth Button */}
-            <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+            <div suppressHydrationWarning className="flex items-center gap-1.5 sm:gap-3 shrink-0">
               <button
                 type="button"
                 onClick={() => setSearchOpen(true)}
@@ -161,9 +162,9 @@ export function Navbar() {
                             className="h-5 w-5 rounded-lg object-cover"
                           />
                         ) : (
-                          <div className="h-5 w-5 rounded-lg bg-[#FA8112] text-white font-bold text-[10px] flex items-center justify-center">
+                          <span className="h-5 w-5 rounded-lg bg-[#FA8112] text-white font-bold text-[10px] flex items-center justify-center">
                             {initialChar}
-                          </div>
+                          </span>
                         )}
                         <span className="hidden sm:inline text-xs font-bold text-[#222222] max-w-[100px] truncate">
                           {nameToShow}

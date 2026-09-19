@@ -82,6 +82,7 @@ export interface Place {
   lat?: number | null;
   lng?: number | null;
   maps_url: string | null;
+  google_place_id?: string | null;
   created_at: string;
   updated_at: string;
   // Computed / Joined fields

@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     'Discover great places, cafes, restaurants, hidden gems, and curated itineraries across Kolkata, Goa, Tokyo, Paris, and worldwide on Trackilio.',
 };
 
-export const revalidate = 30;
+export const dynamic = 'force-dynamic'; // Force dynamic server rendering on every request
 
 interface DiscoverPageProps {
   searchParams: Promise<{

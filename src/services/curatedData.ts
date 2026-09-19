@@ -17,6 +17,7 @@ export const CURATED_PLACES: Place[] = [
     lat: 35.0037,
     lng: 135.7772,
     maps_url: 'https://maps.google.com/?q=Higashiyama+Ward+Kyoto+Japan',
+    google_place_id: 'ChIJN1t_tDeuEmsRUsoyG83frY4',
     created_at: '2026-01-10T10:00:00.000Z',
     updated_at: '2026-01-10T10:00:00.000Z',
     upvotes_count: 184,

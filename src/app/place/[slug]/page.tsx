@@ -8,6 +8,9 @@ import { PlaceJsonLd } from '@/components/seo/PlaceJsonLd';
 import { SavePlaceButton } from '@/components/places/SavePlaceButton';
 import { AddToListModal } from '@/components/places/AddToListModal';
 import { PlaceDiscoveryCard } from '@/components/places/PlaceDiscoveryCard';
+import { GooglePlacePhotos } from '@/components/places/GooglePlacePhotos';
+import { PlaceHeroPhoto } from '@/components/places/PlaceHeroPhoto';
+import { getGooglePlacePhotosMeta } from '@/services/googlePlaces';
 import { getSiteUrl } from '@/lib/utils';
 import {
   PinIcon,
@@ -87,6 +90,14 @@ export default async function PlaceDetailPage({ params }: PlaceDetailPageProps) 
     .join(', ');
   const upvotes = place.upvotes_count ?? 0;
 
+  let googlePhotos = null;
+  if (place.google_place_id) {
+    const photosRes = await getGooglePlacePhotosMeta(place.google_place_id);
+    if (photosRes.success && photosRes.photos.length > 0) {
+      googlePhotos = photosRes.photos;
+    }
+  }
+
   return (
     <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-10 bg-[#FAF3E1]">
       {/* Auto Scroll to Top on Mount */}
@@ -112,6 +123,14 @@ export default async function PlaceDetailPage({ params }: PlaceDetailPageProps) 
 
       {/* Place Hero Card */}
       <section className="rounded-3xl bg-white border border-[#E8DECA] p-6 sm:p-10 shadow-xs space-y-6">
+        {/* Google Place Photo Hero Banner */}
+        {place.google_place_id && (
+          <PlaceHeroPhoto
+            googlePlaceId={place.google_place_id}
+            placeName={place.name}
+          />
+        )}
+
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E8DECA]">
           {/* Category & Tags & Upvotes Badge */}
           <div className="flex flex-wrap items-center gap-2">
@@ -223,6 +242,15 @@ export default async function PlaceDetailPage({ params }: PlaceDetailPageProps) 
           </div>
         )}
       </section>
+
+      {/* Google Place Photos */}
+      {place.google_place_id && googlePhotos && (
+        <GooglePlacePhotos
+          googlePlaceId={place.google_place_id}
+          photos={googlePhotos}
+          placeName={place.name}
+        />
+      )}
 
       {/* Traveler & Community Notes Section */}
       {place.notes && place.notes.length > 0 && (
