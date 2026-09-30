@@ -65,6 +65,24 @@ export interface SavedList {
   list?: WanderList;
 }
 
+export interface PlacePhoto {
+  id: string;
+  place_id: string;
+  user_id?: string | null;
+  url_thumb: string;
+  url_card: string;
+  url_medium: string;
+  width?: number | null;
+  height?: number | null;
+  aspect_ratio?: number | null;
+  caption?: string | null;
+  attribution_name?: string | null;
+  rights_confirmed?: boolean;
+  flagged_for_review?: boolean;
+  flag_reason?: string | null;
+  created_at: string;
+}
+
 export interface Place {
   id: string;
   name: string;
@@ -82,10 +100,12 @@ export interface Place {
   lat?: number | null;
   lng?: number | null;
   maps_url: string | null;
-  google_place_id?: string | null;
+  osm_id?: string | null;
+  osm_type?: string | null;
   created_at: string;
   updated_at: string;
   // Computed / Joined fields
+  photos?: PlacePhoto[] | null;
   community_score?: number;
   upvotes_count?: number;
   downvotes_count?: number;

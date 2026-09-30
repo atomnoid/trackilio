@@ -13,7 +13,7 @@ import { ListHeaderActions } from '@/components/lists/ListHeaderActions';
 import { PinIcon, GlobeIcon, LockIcon, CalendarIcon, UsersIcon, SparklesIcon } from '@/components/icons/Icons';
 import { formatDate, getSiteUrl } from '@/lib/utils';
 
-export const revalidate = 60;
+export const revalidate = 3600;
 
 interface WanderListPageProps {
   params: Promise<{ slug: string }>;
@@ -189,16 +189,18 @@ export default async function PublicWanderListPage({ params }: WanderListPagePro
               </h2>
             </div>
 
-            {places.length > 0 ? (
+            {places.filter((lp) => Boolean(lp && lp.place)).length > 0 ? (
               <div className="space-y-4">
-                {places.map((lp) => (
-                  <PlaceCard
-                    key={lp.id}
-                    listPlace={lp}
-                    currentUserId={user?.id}
-                    canEdit={isOwner}
-                  />
-                ))}
+                {places
+                  .filter((lp) => Boolean(lp && lp.place))
+                  .map((lp) => (
+                    <PlaceCard
+                      key={lp.id}
+                      listPlace={lp}
+                      currentUserId={user?.id}
+                      canEdit={isOwner}
+                    />
+                  ))}
               </div>
             ) : (
               <div className="rounded-3xl bg-white border border-[#EFE9EC] p-10 text-center space-y-3 shadow-2xs">

@@ -8,9 +8,8 @@ import { PlaceJsonLd } from '@/components/seo/PlaceJsonLd';
 import { SavePlaceButton } from '@/components/places/SavePlaceButton';
 import { AddToListModal } from '@/components/places/AddToListModal';
 import { PlaceDiscoveryCard } from '@/components/places/PlaceDiscoveryCard';
-import { GooglePlacePhotos } from '@/components/places/GooglePlacePhotos';
+import { CommunityPlacePhotos } from '@/components/places/CommunityPlacePhotos';
 import { PlaceHeroPhoto } from '@/components/places/PlaceHeroPhoto';
-import { getGooglePlacePhotosMeta } from '@/services/googlePlaces';
 import { getSiteUrl } from '@/lib/utils';
 import {
   PinIcon,
@@ -23,7 +22,7 @@ import {
   CompassIcon,
 } from '@/components/icons/Icons';
 
-export const revalidate = 60;
+export const revalidate = 3600;
 
 interface PlaceDetailPageProps {
   params: Promise<{ slug: string }>;
@@ -38,31 +37,29 @@ export async function generateMetadata({
   if (!result) {
     return {
       title: 'Place Not Found | Trackilio',
-      robots: { index: false, follow: false },
+      description: 'The requested place could not be found on Trackilio.',
     };
   }
 
   const { place } = result;
-  const siteUrl = getSiteUrl();
-  const canonicalUrl = `${siteUrl}/place/${place.slug || slug}`;
-  const loc = place.city || place.location || place.country || '';
-  const title = `${place.name}${loc ? ` in ${loc}` : ''} — Recommendations | Trackilio`;
+  const locationStr = [place.city || place.location, place.country].filter(Boolean).join(', ');
+  const title = `${place.name}${locationStr ? ` — ${locationStr}` : ''} | Trackilio`;
   const description =
-    place.description ||
-    `Discover ${place.name}${loc ? ` in ${loc}` : ''} on Trackilio. Explore community recommendations, curate your travel lists, and save hidden gems.`;
+    place.description?.slice(0, 160) ||
+    `Explore ${place.name} on Trackilio. Curated tips, community votes, and list saves for travelers.`;
 
   return {
     title,
     description,
-    alternates: { canonical: canonicalUrl },
     openGraph: {
       title,
       description,
-      url: canonicalUrl,
-      type: 'article',
+      url: `${getSiteUrl()}/place/${place.slug || slug}`,
+      siteName: 'Trackilio',
+      type: 'website',
     },
     twitter: {
-      card: 'summary',
+      card: 'summary_large_image',
       title,
       description,
     },
@@ -77,6 +74,7 @@ export default async function PlaceDetailPage({ params }: PlaceDetailPageProps) 
   } = await supabase.auth.getUser();
 
   const data = await getPlaceBySlugOrId(slug, user?.id);
+
   if (!data) notFound();
 
   const { place, relatedLists, relatedPlaces } = data;
@@ -89,14 +87,6 @@ export default async function PlaceDetailPage({ params }: PlaceDetailPageProps) 
     .filter(Boolean)
     .join(', ');
   const upvotes = place.upvotes_count ?? 0;
-
-  let googlePhotos = null;
-  if (place.google_place_id) {
-    const photosRes = await getGooglePlacePhotosMeta(place.google_place_id);
-    if (photosRes.success && photosRes.photos.length > 0) {
-      googlePhotos = photosRes.photos;
-    }
-  }
 
   return (
     <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-10 bg-[#FAF3E1]">
@@ -123,10 +113,10 @@ export default async function PlaceDetailPage({ params }: PlaceDetailPageProps) 
 
       {/* Place Hero Card */}
       <section className="rounded-3xl bg-white border border-[#E8DECA] p-6 sm:p-10 shadow-xs space-y-6">
-        {/* Google Place Photo Hero Banner */}
-        {place.google_place_id && (
+        {/* Place Hero Banner */}
+        {place.image_url && (
           <PlaceHeroPhoto
-            googlePlaceId={place.google_place_id}
+            imageUrl={place.image_url}
             placeName={place.name}
           />
         )}
@@ -243,14 +233,13 @@ export default async function PlaceDetailPage({ params }: PlaceDetailPageProps) 
         )}
       </section>
 
-      {/* Google Place Photos */}
-      {place.google_place_id && googlePhotos && (
-        <GooglePlacePhotos
-          googlePlaceId={place.google_place_id}
-          photos={googlePhotos}
-          placeName={place.name}
-        />
-      )}
+      {/* Community Photos Section */}
+      <CommunityPlacePhotos
+        placeId={place.id}
+        placeName={place.name}
+        initialPhotos={place.photos || []}
+        currentUserId={user?.id}
+      />
 
       {/* Traveler & Community Notes Section */}
       {place.notes && place.notes.length > 0 && (

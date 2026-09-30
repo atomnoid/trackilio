@@ -14,8 +14,9 @@ export function DiscoverPlacesSection({ places, currentUserId }: DiscoverPlacesS
   const [visibleCount, setVisibleCount] = useState<number>(15);
 
   // Empty state is handled at the server level (page.tsx) via NoPlacesEmptyState
-  const displayedPlaces = places.slice(0, visibleCount);
-  const hasMore = visibleCount < places.length;
+  const validPlaces = (places || []).filter(Boolean);
+  const displayedPlaces = validPlaces.slice(0, visibleCount);
+  const hasMore = visibleCount < validPlaces.length;
 
   const handleLoadMore = () => {
     setVisibleCount((prev) => prev + 15);

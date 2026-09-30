@@ -73,10 +73,11 @@ export function PlaceCard({ place: inputPlace, listPlace, currentUserId, initial
     setMounted(true);
   }, []);
 
-  const place = inputPlace || listPlace?.place;
-  if (!place) return null;
+  const rawPlace = inputPlace || listPlace?.place;
+  const place = Array.isArray(rawPlace) ? rawPlace[0] : rawPlace;
+  if (!place || typeof place !== 'object') return null;
 
-  const category = place.category || 'Place';
+  const category = (place as any).category || 'Place';
   const emoji = CATEGORY_EMOJIS[category] || '📍';
   const slug = place.slug || place.id;
   const locationText = place.city || place.location || place.country || '';
@@ -121,14 +122,15 @@ export function PlaceCard({ place: inputPlace, listPlace, currentUserId, initial
 
       {/* Main Place Content (Google Photo + Place Details) */}
       <Link href={`/place/${slug}`} className="block space-y-3 flex-1">
-        {/* Google Place Photo Banner */}
-        {mounted && place.google_place_id && !photoError && (
+        {/* Place Photo Banner */}
+        {mounted && (place.image_url || (place.photos && place.photos.length > 0)) && !photoError && (
           <div className="relative aspect-[2/1] sm:aspect-[16/9] w-full overflow-hidden rounded-xl bg-[#FAF3E1] border border-[#E8DECA] transition-all">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={`/api/places/google/photos?placeId=${encodeURIComponent(place.google_place_id)}&index=0`}
+              src={(place.photos && place.photos.length > 0 ? place.photos[0].url_card : place.image_url) || ''}
               alt={place.name}
               loading="lazy"
+              decoding="async"
               onError={() => setPhotoError(true)}
               className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
             />

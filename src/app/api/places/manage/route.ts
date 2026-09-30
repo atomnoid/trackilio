@@ -59,9 +59,11 @@ export async function PATCH(request: Request) {
     if (mapsUrl !== undefined) {
       placePayload.maps_url = mapsUrl ? mapsUrl.trim() : null;
     }
-    if (body.googlePlaceId !== undefined || mapsUrl !== undefined) {
-      const gId = body.googlePlaceId ? body.googlePlaceId.trim() : (mapsUrl ? (mapsUrl.match(/place_id=([A-Za-z0-9_-]+)/)?.[1] || mapsUrl.match(/(ChIJ[A-Za-z0-9_-]{20,})/)?.[1] || null) : null);
-      if (gId) placePayload.google_place_id = gId;
+    if (body.osmId !== undefined) {
+      placePayload.osm_id = body.osmId ? body.osmId.trim() : null;
+    }
+    if (body.osmType !== undefined) {
+      placePayload.osm_type = body.osmType ? body.osmType.trim() : null;
     }
 
     await (supabase as any)

@@ -66,7 +66,7 @@ const CATEGORY_EMOJIS: Record<string, string> = {
 };
 
 
-export function PlaceDiscoveryCard({ place, currentUserId, initialSaved }: PlaceDiscoveryCardProps) {
+export function PlaceDiscoveryCard({ place: placeInput, currentUserId, initialSaved }: PlaceDiscoveryCardProps) {
   // Client mount state guarantees 100% hydration matching between SSR and initial client DOM
   const [mounted, setMounted] = useState(false);
   const [photoError, setPhotoError] = useState(false);
@@ -75,7 +75,11 @@ export function PlaceDiscoveryCard({ place, currentUserId, initialSaved }: Place
     setMounted(true);
   }, []);
 
-  const category = place.category || 'Place';
+  const resolvedPlace = Array.isArray(placeInput) ? placeInput[0] : placeInput;
+  if (!resolvedPlace || typeof resolvedPlace !== 'object') return null;
+  const place = resolvedPlace as Place;
+
+  const category = (resolvedPlace as any).category || 'Place';
   const emoji = CATEGORY_EMOJIS[category] || '📍';
   const slug = place.slug || place.id;
   const locationText = place.city || place.location || place.country || '';
@@ -120,14 +124,15 @@ export function PlaceDiscoveryCard({ place, currentUserId, initialSaved }: Place
 
       {/* Main Place Content (Google Photo + Place Details) */}
       <Link href={`/place/${slug}`} className="block space-y-3 flex-1">
-        {/* Google Place Photo Banner */}
-        {mounted && place.google_place_id && !photoError && (
+        {/* Place Photo Banner */}
+        {mounted && (place.image_url || (place.photos && place.photos.length > 0)) && !photoError && (
           <div className="relative aspect-[2/1] sm:aspect-[16/9] w-full overflow-hidden rounded-xl bg-[#FAF3E1] border border-[#E8DECA] transition-all">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={`/api/places/google/photos?placeId=${encodeURIComponent(place.google_place_id)}&index=0`}
+              src={(place.photos && place.photos.length > 0 ? place.photos[0].url_card : place.image_url) || ''}
               alt={place.name}
               loading="lazy"
+              decoding="async"
               onError={() => setPhotoError(true)}
               className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
             />

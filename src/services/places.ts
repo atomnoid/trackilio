@@ -133,92 +133,6 @@ export async function getPlacesForList(
   return fallbackListPlaces;
 }
 
-const KNOWN_PLACE_IDS: Record<string, string> = {
-  'victoria-memorial-kolkata': 'ChIJXQGuRhN3AjoRY5fjvORAtQA',
-  'victoria memorial': 'ChIJXQGuRhN3AjoRY5fjvORAtQA',
-  'victoria memorial, kolkata': 'ChIJXQGuRhN3AjoRY5fjvORAtQA',
-  'musings-cafe-kolkata': 'ChIJL-mGznd3AjoRIx48XN6aQ4Q',
-  'musings cafe': 'ChIJL-mGznd3AjoRIx48XN6aQ4Q',
-  'house-no-230-kolkata': 'ChIJyWE-jYd3AjoRF1_59s_141Y',
-  'house no. 230': 'ChIJyWE-jYd3AjoRF1_59s_141Y',
-  // Noor-Us-Sabah Palace hotel (verified via Google Places Text Search)
-  'noor-us-sabah-palace': 'ChIJGz_QAOZnfDkRCoBZsuBkA5M',
-  'noor us sabah palace': 'ChIJGz_QAOZnfDkRCoBZsuBkA5M',
-  'noor-us-sabah': 'ChIJGz_QAOZnfDkRCoBZsuBkA5M',
-  'noor us sabah': 'ChIJGz_QAOZnfDkRCoBZsuBkA5M',
-  'noor-us-sabha': 'ChIJGz_QAOZnfDkRCoBZsuBkA5M',
-  'noor us sabha': 'ChIJGz_QAOZnfDkRCoBZsuBkA5M',
-  // Newfoundland and Labrador province (verified via Google Places Text Search)
-  'newfoundland': 'ChIJD_AvfcKjDEsRqDl21bOd7GQ',
-  'newfoundland and labrador': 'ChIJD_AvfcKjDEsRqDl21bOd7GQ',
-  'newfoundland island in canada': 'ChIJD_AvfcKjDEsRqDl21bOd7GQ',
-};
-
-/**
- * Overrides known-wrong DB-stored place IDs with verified correct ones.
- * Needed when the anon key can't UPDATE rows (RLS blocks writes).
- */
-const CORRECTED_PLACE_IDS: Record<string, string> = {
-  // Was pointing to "Ukasiksalik Island" — uninhabited remote island. Fixed to Newfoundland and Labrador.
-  'ChIJHwh9flPGbkwRSqJi5_KyDfg': 'ChIJD_AvfcKjDEsRqDl21bOd7GQ',
-  // Was pointing to "Noor Us Sabah Road" (just a road, 0 photos). Fixed to the actual Palace hotel.
-  'ChIJK1k1wuVnfDkR8iYvQPMwp2s': 'ChIJGz_QAOZnfDkRCoBZsuBkA5M',
-};
-
-export function extractGooglePlaceId(mapsUrl?: string | null, googlePlaceId?: string | null, nameOrSlug?: string | null): string | null {
-  if (googlePlaceId && googlePlaceId.trim().length > 0) {
-    const storedId = googlePlaceId.trim();
-    // Correct known-wrong stored IDs before returning
-    return CORRECTED_PLACE_IDS[storedId] ?? storedId;
-  }
-  if (nameOrSlug) {
-    const key = nameOrSlug.trim().toLowerCase();
-    if (KNOWN_PLACE_IDS[key]) {
-      return KNOWN_PLACE_IDS[key];
-    }
-    const unhyphenated = key.replace(/-/g, ' ');
-    if (KNOWN_PLACE_IDS[unhyphenated]) {
-      return KNOWN_PLACE_IDS[unhyphenated];
-    }
-  }
-
-  if (mapsUrl) {
-    const cleanUrl = mapsUrl.trim();
-    const placeIdMatch = cleanUrl.match(/place_id=([A-Za-z0-9_-]+)/);
-    if (placeIdMatch) return placeIdMatch[1];
-    const ftidMatch = cleanUrl.match(/ftid=([A-Za-z0-9_-]+)/);
-    if (ftidMatch) return ftidMatch[1];
-    const chijMatch = cleanUrl.match(/(ChIJ[A-Za-z0-9_-]{20,})/);
-    if (chijMatch) return chijMatch[1];
-
-    // Extract place name from Google Maps URL like https://www.google.com/maps/place/Noor-Us-Sabah+Palace/...
-    const placeUrlMatch = cleanUrl.match(/\/maps\/place\/([^/@?#]+)/);
-    if (placeUrlMatch && placeUrlMatch[1]) {
-      const decodedName = decodeURIComponent(placeUrlMatch[1].replace(/\+/g, ' ')).trim();
-      if (decodedName.length > 0) {
-        return `query:${decodedName}`;
-      }
-    }
-
-    // Extract query from q= search parameter
-    const qMatch = cleanUrl.match(/[?&]q=([^&]+)/);
-    if (qMatch && qMatch[1]) {
-      const decodedQ = decodeURIComponent(qMatch[1].replace(/\+/g, ' ')).trim();
-      if (decodedQ.length > 0 && !/^[-0-9.,]+$/.test(decodedQ)) {
-        return `query:${decodedQ}`;
-      }
-    }
-  }
-
-  // Fallback: Use place name/slug for auto-photo resolution if available
-  if (nameOrSlug && nameOrSlug.trim().length > 2) {
-    const cleanName = nameOrSlug.replace(/-/g, ' ').trim();
-    return `query:${cleanName}`;
-  }
-
-  return null;
-}
-
 /**
  * Add a newly created place to a specific list
  */
@@ -231,7 +145,8 @@ export async function addPlaceToList(params: {
   category?: string;
   tags?: string[];
   mapsUrl?: string;
-  googlePlaceId?: string;
+  osmId?: string;
+  osmType?: string;
   note?: string;
   priority?: PriorityLevel;
   status?: VisitStatus;
@@ -239,7 +154,6 @@ export async function addPlaceToList(params: {
 }): Promise<{ success: boolean; placeId?: string; error?: string }> {
   const supabase = await createClient();
   const slug = generatePlaceSlug(params.name, params.location || params.city);
-  const resolvedGooglePlaceId = extractGooglePlaceId(params.mapsUrl, params.googlePlaceId);
 
   const { data: place, error: placeError } = await (supabase as any)
     .from('places')
@@ -252,7 +166,8 @@ export async function addPlaceToList(params: {
       category: params.category || 'Sight',
       tags: params.tags || [],
       maps_url: params.mapsUrl || null,
-      google_place_id: resolvedGooglePlaceId,
+      osm_id: params.osmId || null,
+      osm_type: params.osmType || null,
     })
     .select('id')
     .single();
@@ -307,7 +222,7 @@ export async function addExistingPlaceToList(params: {
 }
 
 /**
- * Helper to batch enrich Places with upvotes and list counts
+ * Helper to batch enrich Places with upvotes, list counts, and community photo thumbnails
  */
 async function enrichPlacesWithStats(
   supabase: any,
@@ -318,7 +233,7 @@ async function enrichPlacesWithStats(
   const placeIds = rawPlaces.map((p) => p.id);
 
   try {
-    const [listPlacesRes, savedRes] = await Promise.all([
+    const [listPlacesRes, savedRes, photosRes] = await Promise.all([
       (supabase as any)
         .from('list_places')
         .select(`
@@ -336,9 +251,23 @@ async function enrichPlacesWithStats(
             .eq('user_id', currentUserId)
             .in('place_id', placeIds)
         : Promise.resolve({ data: [] }),
+      (supabase as any)
+        .from('place_photos')
+        .select('id, place_id, url_thumb, url_card, url_medium, caption, attribution_name, created_at')
+        .in('place_id', placeIds)
+        .eq('flagged_for_review', false)
+        .order('created_at', { ascending: false }),
     ]);
 
     const userSavedSet = new Set((savedRes.data ?? []).map((s: any) => s.place_id));
+
+    // Map photos by place_id
+    const photosMap = new Map<string, any[]>();
+    (photosRes.data ?? []).forEach((photo: any) => {
+      const existing = photosMap.get(photo.place_id) || [];
+      existing.push(photo);
+      photosMap.set(photo.place_id, existing);
+    });
 
     const statsMap = new Map<
       string,
@@ -386,16 +315,17 @@ async function enrichPlacesWithStats(
       const stats = statsMap.get(p.id) || { upvotes: 0, downvotes: 0, lists: 0, notes: [] };
       const communityScore = stats.upvotes - stats.downvotes + stats.lists * 3;
       const slug = p.slug || generatePlaceSlug(p.name, p.location || p.city);
+      const placePhotos = photosMap.get(p.id) || [];
 
       const curatedNotes = getCuratedNotesForPlace(p.id);
       const combinedNotes = stats.notes.length > 0 ? stats.notes : curatedNotes;
       const primaryNote = p.note || (combinedNotes.length > 0 ? combinedNotes[0].note : null);
-      const resolvedGooglePlaceId = extractGooglePlaceId(p.maps_url, p.google_place_id, slug || p.name);
 
       return {
         ...p,
-        google_place_id: resolvedGooglePlaceId,
         slug,
+        photos: placePhotos,
+        image_url: placePhotos.length > 0 ? placePhotos[0].url_card || placePhotos[0].url_medium : p.image_url,
         upvotes_count: stats.upvotes,
         downvotes_count: stats.downvotes,
         community_score: communityScore,
@@ -409,10 +339,8 @@ async function enrichPlacesWithStats(
     console.warn('Error enriching places with stats:', err?.message || err);
     return rawPlaces.map((p) => {
       const curatedNotes = getCuratedNotesForPlace(p.id);
-      const resolvedGooglePlaceId = extractGooglePlaceId(p.maps_url, p.google_place_id, p.slug || p.name);
       return {
         ...p,
-        google_place_id: resolvedGooglePlaceId,
         upvotes_count: 0,
         downvotes_count: 0,
         lists_count: 0,
@@ -711,8 +639,8 @@ export async function getPlaceBySlugOrId(
     if (place) {
       const slug = place.slug || generatePlaceSlug(place.name, place.location || place.city);
 
-      // Fetch lists containing this place and votes
-      const [listPlacesRes, savedRes, relatedRes] = await Promise.all([
+      // Fetch lists containing this place, votes, and community photos
+      const [listPlacesRes, savedRes, relatedRes, photosRes] = await Promise.all([
         (supabase as any)
           .from('list_places')
           .select(`
@@ -738,9 +666,16 @@ export async function getPlaceBySlugOrId(
               .ilike('category', `%${place.category}%`)
               .limit(6)
           : Promise.resolve({ data: [] }),
+        (supabase as any)
+          .from('place_photos')
+          .select('id, place_id, url_thumb, url_card, url_medium, caption, attribution_name, created_at')
+          .eq('place_id', place.id)
+          .eq('flagged_for_review', false)
+          .order('created_at', { ascending: false }),
       ]);
 
       const isSaved = !!savedRes.data;
+      const photos = photosRes.data ?? [];
 
       let upvotes = 0;
       let downvotes = 0;
@@ -792,6 +727,8 @@ export async function getPlaceBySlugOrId(
         place: {
           ...place,
           slug,
+          photos,
+          image_url: photos.length > 0 ? photos[0].url_medium || photos[0].url_card : place.image_url,
           upvotes_count: upvotes || place.upvotes_count || 0,
           downvotes_count: downvotes,
           community_score: communityScore,
