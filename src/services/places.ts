@@ -147,6 +147,7 @@ export async function addPlaceToList(params: {
   mapsUrl?: string;
   osmId?: string;
   osmType?: string;
+  googlePlaceId?: string;
   note?: string;
   priority?: PriorityLevel;
   status?: VisitStatus;

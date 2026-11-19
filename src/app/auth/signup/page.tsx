@@ -10,11 +10,16 @@ export const metadata: Metadata = {
 };
 
 interface SignupPageProps {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; redirect?: string }>;
 }
 
 export default async function SignupPage({ searchParams }: SignupPageProps) {
   const resolvedParams = await searchParams;
+  const rawRedirect = resolvedParams.redirect || '/dashboard';
+  const redirectUrl =
+    rawRedirect.startsWith('/') && !rawRedirect.startsWith('//') && !rawRedirect.includes(':')
+      ? rawRedirect
+      : '/dashboard';
 
   return (
     <div className="mx-auto max-w-md px-4 py-12 sm:py-16 space-y-6">
@@ -34,11 +39,14 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
         </div>
       )}
 
-      <SignupForm />
+      <SignupForm redirectUrl={redirectUrl} />
 
       <p className="text-center text-xs text-[#78726D] font-medium">
         Already have an account?{' '}
-        <Link href="/auth/login" className="font-extrabold text-[#4A6B5D] hover:underline">
+        <Link
+          href={`/auth/login${redirectUrl !== '/dashboard' ? `?redirect=${encodeURIComponent(redirectUrl)}` : ''}`}
+          className="font-extrabold text-[#4A6B5D] hover:underline"
+        >
           Log in
         </Link>
       </p>

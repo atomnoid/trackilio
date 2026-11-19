@@ -16,8 +16,13 @@ import {
   EyeOffIcon,
 } from '@/components/icons/Icons';
 import { validateUsernameFormat } from '@/lib/username';
+import { GoogleAuthButton } from './GoogleAuthButton';
 
-export function SignupForm() {
+interface SignupFormProps {
+  redirectUrl?: string;
+}
+
+export function SignupForm({ redirectUrl = '/dashboard' }: SignupFormProps) {
   const router = useRouter();
   const [username, setUsername] = useState('');
   const [displayName, setDisplayName] = useState('');
@@ -130,188 +135,212 @@ export function SignupForm() {
   const inputError = `${inputBase} border-rose-300 bg-rose-50/40 focus:ring-2 focus:ring-rose-400`;
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white border border-gray-100 rounded-3xl p-6 sm:p-8 shadow-sm space-y-5">
-      {serverError && !emailTaken && (
-        <div className="rounded-2xl bg-rose-50 border border-rose-200 p-3 text-xs font-semibold text-rose-700 text-center">
-          {serverError}
-        </div>
-      )}
+    <div className="bg-white border border-gray-100 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+      {/* 1-Click Google Sign Up */}
+      <div className="space-y-2">
+        <GoogleAuthButton
+          text="Sign up with Google"
+          redirectUrl={redirectUrl}
+        />
+        <p className="text-[11px] text-center text-gray-400 font-medium">
+          Instant setup with verified email & profile details
+        </p>
+      </div>
 
-      {/* Display Name */}
-      <div className="space-y-1.5">
-        <label className="block text-xs font-bold text-gray-800">
-          Display Name <span className="text-rose-400">*</span>
-        </label>
-        <div className="relative">
-          <UserIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <input
-            type="text"
-            name="displayName"
-            required
-            value={displayName}
-            onChange={(e) => setDisplayName(e.target.value)}
-            placeholder="e.g. Elena Rostova"
-            className={inputNormal}
-          />
+      {/* Modern Divider */}
+      <div className="relative flex items-center justify-center">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-gray-200" />
+        </div>
+        <div className="relative bg-white px-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">
+          or sign up with email
         </div>
       </div>
 
-      {/* Unique Username */}
-      <div className="space-y-1.5">
-        <div className="flex items-center justify-between">
+      {/* Manual Form */}
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {serverError && !emailTaken && (
+          <div className="rounded-2xl bg-rose-50 border border-rose-200 p-3 text-xs font-semibold text-rose-700 text-center">
+            {serverError}
+          </div>
+        )}
+
+        {/* Display Name */}
+        <div className="space-y-1.5">
           <label className="block text-xs font-bold text-gray-800">
-            Choose Handle <span className="text-rose-400">*</span>
+            Display Name <span className="text-rose-400">*</span>
           </label>
-          <span className="text-[11px] font-semibold text-gray-400">Unique @username</span>
-        </div>
-        <div className="relative">
-          <AtSignIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#FF5841]" />
-          <input
-            type="text"
-            name="username"
-            required
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="e.g. elena_travels"
-            autoComplete="username"
-            spellCheck={false}
-            className={`w-full rounded-2xl border pl-10 pr-10 py-3 text-sm font-medium text-gray-900 focus:outline-none focus:bg-white transition-all ${
-              usernameStatus === 'available'
-                ? 'border-emerald-400 bg-emerald-50/40 focus:ring-2 focus:ring-emerald-500'
-                : usernameStatus === 'taken' || usernameStatus === 'invalid'
-                ? 'border-rose-300 bg-rose-50/40 focus:ring-2 focus:ring-rose-400'
-                : 'border-gray-200 bg-gray-50 focus:ring-2 focus:ring-[#FF5841]/40 focus:border-[#FF5841]/50'
-            }`}
-          />
-          <div className="absolute right-3.5 top-1/2 -translate-y-1/2">
-            {usernameStatus === 'checking' && <SpinnerIcon className="h-4 w-4 animate-spin text-gray-400" />}
-            {usernameStatus === 'available' && <CheckCircleIcon className="h-4 w-4 text-emerald-600" />}
-            {(usernameStatus === 'taken' || usernameStatus === 'invalid') && (
-              <button
-                type="button"
-                aria-label="Clear username"
-                onClick={() => setUsername('')}
-                className="flex items-center justify-center rounded-full p-0.5 hover:bg-rose-100 transition-colors"
-              >
-                <XCircleIcon className="h-4 w-4 text-rose-500" />
-              </button>
-            )}
+          <div className="relative">
+            <UserIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <input
+              type="text"
+              name="displayName"
+              required
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              placeholder="e.g. Elena Rostova"
+              className={inputNormal}
+            />
           </div>
         </div>
 
-        {/* Username helper / status message */}
-        {usernameMessage ? (
-          <p
-            className={`text-xs font-semibold ${
-              usernameStatus === 'available'
-                ? 'text-emerald-600'
-                : usernameStatus === 'checking'
-                ? 'text-gray-400'
-                : 'text-rose-500'
-            }`}
-          >
-            {usernameMessage}
-          </p>
-        ) : (
-          <p className="text-[11px] text-gray-400 font-medium">
-            Letters, numbers, periods (.), and underscores (_). Used for your public link, Blend matches, and list invites.
-          </p>
-        )}
-      </div>
-
-      {/* Email Address */}
-      <div className="space-y-1.5">
-        <label className="block text-xs font-bold text-gray-800">
-          Email Address <span className="text-rose-400">*</span>
-        </label>
-        <div className="relative">
-          <MailIcon
-            className={`absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 transition-colors ${
-              emailTaken ? 'text-rose-400' : 'text-gray-400'
-            }`}
-          />
-          <input
-            type="email"
-            name="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
-            autoComplete="email"
-            className={emailTaken ? inputError : inputNormal}
-          />
-          {emailTaken && (
+        {/* Unique Username */}
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between">
+            <label className="block text-xs font-bold text-gray-800">
+              Choose Handle <span className="text-rose-400">*</span>
+            </label>
+            <span className="text-[11px] font-semibold text-gray-400">Unique @username</span>
+          </div>
+          <div className="relative">
+            <AtSignIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#FF5841]" />
+            <input
+              type="text"
+              name="username"
+              required
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="e.g. elena_travels"
+              autoComplete="username"
+              spellCheck={false}
+              className={`w-full rounded-2xl border pl-10 pr-10 py-3 text-sm font-medium text-gray-900 focus:outline-none focus:bg-white transition-all ${
+                usernameStatus === 'available'
+                  ? 'border-emerald-400 bg-emerald-50/40 focus:ring-2 focus:ring-emerald-500'
+                  : usernameStatus === 'taken' || usernameStatus === 'invalid'
+                  ? 'border-rose-300 bg-rose-50/40 focus:ring-2 focus:ring-rose-400'
+                  : 'border-gray-200 bg-gray-50 focus:ring-2 focus:ring-[#FF5841]/40 focus:border-[#FF5841]/50'
+              }`}
+            />
             <div className="absolute right-3.5 top-1/2 -translate-y-1/2">
-              <XCircleIcon className="h-4 w-4 text-rose-500" />
+              {usernameStatus === 'checking' && <SpinnerIcon className="h-4 w-4 animate-spin text-gray-400" />}
+              {usernameStatus === 'available' && <CheckCircleIcon className="h-4 w-4 text-emerald-600" />}
+              {(usernameStatus === 'taken' || usernameStatus === 'invalid') && (
+                <button
+                  type="button"
+                  aria-label="Clear username"
+                  onClick={() => setUsername('')}
+                  className="flex items-center justify-center rounded-full p-0.5 hover:bg-rose-100 transition-colors cursor-pointer"
+                >
+                  <XCircleIcon className="h-4 w-4 text-rose-500" />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Username helper / status message */}
+          {usernameMessage ? (
+            <p
+              className={`text-xs font-semibold ${
+                usernameStatus === 'available'
+                  ? 'text-emerald-600'
+                  : usernameStatus === 'checking'
+                  ? 'text-gray-400'
+                  : 'text-rose-500'
+              }`}
+            >
+              {usernameMessage}
+            </p>
+          ) : (
+            <p className="text-[11px] text-gray-400 font-medium">
+              Letters, numbers, periods (.), and underscores (_). Used for your public link and Blend invites.
+            </p>
+          )}
+        </div>
+
+        {/* Email Address */}
+        <div className="space-y-1.5">
+          <label className="block text-xs font-bold text-gray-800">
+            Email Address <span className="text-rose-400">*</span>
+          </label>
+          <div className="relative">
+            <MailIcon
+              className={`absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 transition-colors ${
+                emailTaken ? 'text-rose-400' : 'text-gray-400'
+              }`}
+            />
+            <input
+              type="email"
+              name="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              autoComplete="email"
+              className={emailTaken ? inputError : inputNormal}
+            />
+            {emailTaken && (
+              <div className="absolute right-3.5 top-1/2 -translate-y-1/2">
+                <XCircleIcon className="h-4 w-4 text-rose-500" />
+              </div>
+            )}
+          </div>
+
+          {/* Email-taken inline error with login link */}
+          {emailTaken && (
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-rose-600">
+              <span>This email is already registered.</span>
+              <Link
+                href="/auth/login"
+                className="underline underline-offset-2 font-extrabold text-[#C53678] hover:text-[#FF5841] transition-colors"
+              >
+                Log in instead →
+              </Link>
             </div>
           )}
         </div>
 
-        {/* Email-taken inline error with login link */}
-        {emailTaken && (
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-rose-600">
-            <span>This email is already registered.</span>
-            <Link
-              href="/auth/login"
-              className="underline underline-offset-2 font-extrabold text-[#C53678] hover:text-[#FF5841] transition-colors"
+        {/* Password */}
+        <div className="space-y-1.5">
+          <label className="block text-xs font-bold text-gray-800">
+            Password <span className="text-rose-400">*</span>
+          </label>
+          <div className="relative">
+            <LockIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <input
+              type={showPassword ? 'text' : 'password'}
+              name="password"
+              required
+              minLength={6}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Minimum 6 characters"
+              autoComplete="new-password"
+              className="w-full rounded-2xl border border-gray-200 bg-gray-50 pl-10 pr-11 py-3 text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#FF5841]/40 focus:border-[#FF5841]/50 focus:bg-white transition-all"
+            />
+            <button
+              type="button"
+              aria-label="Toggle password visibility"
+              onClick={() => setShowPassword((v) => !v)}
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 p-0.5 rounded-md text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
             >
-              Log in instead →
-            </Link>
+              {showPassword ? (
+                <EyeOffIcon className="h-4 w-4" />
+              ) : (
+                <EyeIcon className="h-4 w-4" />
+              )}
+            </button>
           </div>
-        )}
-      </div>
-
-      {/* Password */}
-      <div className="space-y-1.5">
-        <label className="block text-xs font-bold text-gray-800">
-          Password <span className="text-rose-400">*</span>
-        </label>
-        <div className="relative">
-          <LockIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <input
-            type={showPassword ? 'text' : 'password'}
-            name="password"
-            required
-            minLength={6}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Minimum 6 characters"
-            autoComplete="new-password"
-            className="w-full rounded-2xl border border-gray-200 bg-gray-50 pl-10 pr-11 py-3 text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#FF5841]/40 focus:border-[#FF5841]/50 focus:bg-white transition-all"
-          />
-          <button
-            type="button"
-            aria-label="Toggle password visibility"
-            onClick={() => setShowPassword((v) => !v)}
-            className="absolute right-3.5 top-1/2 -translate-y-1/2 p-0.5 rounded-md text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
-          >
-            {showPassword ? (
-              <EyeOffIcon className="h-4 w-4" />
-            ) : (
-              <EyeIcon className="h-4 w-4" />
-            )}
-          </button>
         </div>
-      </div>
 
-      {/* Submit Button */}
-      <button
-        type="submit"
-        disabled={!isFormValid || isSubmitting}
-        className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-[#FF5841] hover:bg-[#E84430] disabled:opacity-50 disabled:cursor-not-allowed text-white font-black py-3.5 text-sm shadow-sm active-press transition-all mt-2"
-      >
-        {isSubmitting ? (
-          <>
-            <SpinnerIcon className="h-4 w-4 animate-spin" />
-            <span>Creating Account…</span>
-          </>
-        ) : (
-          <>
-            <span>Create Account</span>
-            <ArrowRightIcon className="h-4 w-4" />
-          </>
-        )}
-      </button>
-    </form>
+        {/* Submit Button */}
+        <button
+          type="submit"
+          disabled={!isFormValid || isSubmitting}
+          className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-[#FF5841] hover:bg-[#E84430] disabled:opacity-50 disabled:cursor-not-allowed text-white font-black py-3.5 text-sm shadow-sm active:scale-[0.99] transition-all mt-2 cursor-pointer"
+        >
+          {isSubmitting ? (
+            <>
+              <SpinnerIcon className="h-4 w-4 animate-spin" />
+              <span>Creating Account…</span>
+            </>
+          ) : (
+            <>
+              <span>Create Account</span>
+              <ArrowRightIcon className="h-4 w-4" />
+            </>
+          )}
+        </button>
+      </form>
+    </div>
   );
 }

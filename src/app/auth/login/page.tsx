@@ -53,7 +53,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
       <p className="text-center text-xs text-gray-500 font-medium">
         Don&apos;t have an account?{' '}
-        <Link href="/auth/signup" className="font-extrabold text-[#FF5841] hover:text-[#E84430] transition-colors">
+        <Link
+          href={`/auth/signup${redirectUrl !== '/dashboard' ? `?redirect=${encodeURIComponent(redirectUrl)}` : ''}`}
+          className="font-extrabold text-[#FF5841] hover:text-[#E84430] transition-colors"
+        >
           create one
         </Link>
       </p>
