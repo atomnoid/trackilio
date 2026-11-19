@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Place } from '@/types/database';
 import { SavePlaceButton } from './SavePlaceButton';
+import { UpvoteButton } from './UpvoteButton';
 import { PinIcon, ArrowRightIcon, ExternalLinkIcon } from '@/components/icons/Icons';
 
 interface PlaceDiscoveryCardProps {
@@ -173,10 +174,12 @@ export function PlaceDiscoveryCard({ place: placeInput, currentUserId, initialSa
       {/* Card Footer: Upvotes Count + See on Map + View CTA */}
       <div className="pt-3 border-t border-[#E8DECA]/60 flex items-center justify-between gap-2 text-xs text-[#6B6862]">
         <div className="flex items-center gap-2.5">
-          <span className="inline-flex items-center gap-1 font-bold text-[#222222]">
-            <span className="text-[#FA8112]">▲</span>
-            <span className="font-mono font-black">{upvotes}</span>
-          </span>
+          <UpvoteButton
+            placeId={place.id}
+            slug={place.slug}
+            initialUpvotes={upvotes}
+            initialUpvoted={(place as any).user_vote_type === 'up'}
+          />
 
           {hasMapUrl && (
             <a

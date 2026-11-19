@@ -6,6 +6,7 @@ import { getPlaceBySlugOrId } from '@/services/places';
 import { ScrollToTop } from '@/components/common/ScrollToTop';
 import { PlaceJsonLd } from '@/components/seo/PlaceJsonLd';
 import { SavePlaceButton } from '@/components/places/SavePlaceButton';
+import { UpvoteButton } from '@/components/places/UpvoteButton';
 import { AddToListModal } from '@/components/places/AddToListModal';
 import { PlaceDiscoveryCard } from '@/components/places/PlaceDiscoveryCard';
 import { CommunityPlacePhotos } from '@/components/places/CommunityPlacePhotos';
@@ -151,8 +152,15 @@ export default async function PlaceDetailPage({ params }: PlaceDetailPageProps) 
             )}
           </div>
 
-          {/* Action Buttons: Save, Add to List */}
+          {/* Action Buttons: Upvote, Save, Add to List */}
           <div className="flex items-center gap-2">
+            <UpvoteButton
+              placeId={place.id}
+              slug={place.slug}
+              initialUpvotes={upvotes}
+              initialUpvoted={place.user_vote_type === 'up'}
+              showText={true}
+            />
             <SavePlaceButton
               placeId={place.id}
               initialSaved={place.is_saved}
